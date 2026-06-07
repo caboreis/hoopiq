@@ -914,49 +914,80 @@ function App({ user, onLogout }) {
         {tab === "matches" && (
           <div className="fade-in">
             <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 46, letterSpacing: 2, marginBottom: 24 }}>ANALYSE <span style={{ color: C.orange }}>MATCHS</span></h1>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: 20 }}>
-              {MATCHES.map(m => (
-                <Card key={m.id}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
-                    <div>
-                      <div style={{ fontWeight: 700, fontSize: 15 }}>{m.home}</div>
-                      <div style={{ fontSize: 12, color: C.muted }}>vs {m.away}</div>
-                      <div style={{ fontSize: 11, color: C.muted, marginTop: 2 }}>📅 {m.date}</div>
-                    </div>
-                    <div style={{ textAlign: "right" }}>
-                      {m.done ? (
-                        <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 30, color: C.orange }}>{m.hs}–{m.as}</div>
-                      ) : (
-                        <Badge color={C.gold}>À venir</Badge>
+            {nbaLoading ? (
+              <div style={{ color: C.muted, fontSize: 14 }}>⏳ Chargement des matchs NBA...</div>
+            ) : nbaError ? (
+              <div style={{ color: C.red, fontSize: 14 }}>❌ {nbaError}</div>
+            ) : liveScores.length === 0 ? (
+              <div style={{ color: C.muted, fontSize: 14 }}>Aucun match disponible pour le moment.</div>
+            ) : (
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: 20 }}>
+                {liveScores.map(game => {
+                  const isBullsInvolved = game.home.abbreviation === "CHI" || game.away.abbreviation === "CHI";
+                  const isFinished = game.status === "Final" || game.status?.includes("Final");
+                  
+                  return (
+                    <Card key={game.id}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
+                        <div>
+                          <div style={{ fontWeight: 700, fontSize: 15 }}>{game.home.name}</div>
+                          <div style={{ fontSize: 12, color: C.muted }}>vs {game.away.name}</div>
+                          <div style={{ fontSize: 11, color: C.muted, marginTop: 2 }}>📅 {game.status}</div>
+                        </div>
+                        <div style={{ textAlign: "right" }}>
+                          {isFinished ? (
+                            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 30, color: C.orange }}>{game.home.score}–{game.away.score}</div>
+                          ) : (
+                            <div>
+                              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 28, color: C.blue }}>{game.home.score}–{game.away.score}</div>
+                              <div style={{ fontSize: 10, color: C.orange, marginTop: 2 }}>{game.clock}</div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Status badge */}
+                      <div style={{ marginBottom: 14, display: "flex", gap: 8 }}>
+                        {isBullsInvolved && (
+                          <Badge color={C.orange}>🏀 CHICAGO BULLS</Badge>
+                        )}
+                        {isFinished ? (
+                          <Badge color={C.green}>✓ TERMINÉ</Badge>
+                        ) : (
+                          <Badge color={C.blue}>⏱ EN DIRECT</Badge>
+                        )}
+                      </div>
+
+                      {/* Score display */}
+                      <div style={{ padding: 12, background: "rgba(255,255,255,0.03)", borderRadius: 8, marginBottom: 12 }}>
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 50px 1fr", gap: 8, alignItems: "center", textAlign: "center" }}>
+                          <div>
+                            <div style={{ fontSize: 12, color: C.muted, marginBottom: 4 }}>{game.home.abbreviation}</div>
+                            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 22, fontWeight: 700 }}>{game.home.score}</div>
+                          </div>
+                          <div style={{ fontSize: 11, color: C.muted }}>vs</div>
+                          <div>
+                            <div style={{ fontSize: 12, color: C.muted, marginBottom: 4 }}>{game.away.abbreviation}</div>
+                            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 22, fontWeight: 700 }}>{game.away.score}</div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {!isFinished && (
+                        <div style={{ fontSize: 12, padding: "8px 12px", background: "rgba(100,150,255,0.1)", borderRadius: 8, borderLeft: `3px solid ${C.blue}` }}>
+                          ⏱ Match en cours · {game.clock}
+                        </div>
                       )}
-                    </div>
-                  </div>
-
-                  {/* Prediction bar */}
-                  <div style={{ marginBottom: 14 }}>
-                    <div style={{ fontSize: 11, color: C.muted, marginBottom: 6 }}>Prédiction IA · {m.home}</div>
-                    <div style={{ background: "rgba(255,255,255,0.06)", borderRadius: 6, height: 8, overflow: "hidden", display: "flex" }}>
-                      <div style={{ width: `${m.pred}%`, background: G.orange, borderRadius: "6px 0 0 6px", transition: "width 1s ease" }} />
-                    </div>
-                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginTop: 4 }}>
-                      <span style={{ color: C.orange, fontWeight: 700 }}>{m.pred}%</span>
-                      <span style={{ color: C.muted }}>{100 - m.pred}%</span>
-                    </div>
-                  </div>
-
-                  {m.mvp && (
-                    <div style={{ fontSize: 12, padding: "8px 12px", background: "rgba(255,200,66,0.07)", borderRadius: 8, borderLeft: `3px solid ${C.gold}` }}>
-                      🏆 MVP : <strong style={{ color: C.gold }}>{m.mvp}</strong>
-                    </div>
-                  )}
-                  {!m.done && (
-                    <div style={{ fontSize: 12, padding: "8px 12px", background: "rgba(255,92,0,0.07)", borderRadius: 8, borderLeft: `3px solid ${C.orange}` }}>
-                      🤖 L'IA prédit <strong style={{ color: C.orange }}>{m.home}</strong> avec {m.pred}% de confiance
-                    </div>
-                  )}
-                </Card>
-              ))}
-            </div>
+                      {isFinished && (
+                        <div style={{ fontSize: 12, padding: "8px 12px", background: "rgba(100,200,100,0.1)", borderRadius: 8, borderLeft: `3px solid ${C.green}` }}>
+                          ✓ Match terminé
+                        </div>
+                      )}
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
 
