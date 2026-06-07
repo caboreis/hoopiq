@@ -463,8 +463,7 @@ function App({ user, onLogout }) {
   const [aiAnalysis, setAiAnalysis] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
   const [aiDone, setAiDone] = useState(false);
-  const [chatHistory, setChatHistory] = useState([
-    { role: "assistant", text: `Bonjour ${user.name} ! 🏀 Je suis HoopIQ, ton analyste basket IA. Demande-moi une analyse de joueur, une prédiction de match, ou toute question basket.` }
+  const [chatHistory, setChatHistory] = useState([]);${user.name} ! 🏀 Je suis HoopIQ, ton analyste basket IA. Demande-moi une analyse de joueur, une prédiction de match, ou toute question basket.` }
   ]);
   const [chatInput, setChatInput] = useState("");
   const [chatLoading, setChatLoading] = useState(false);
