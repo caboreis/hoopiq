@@ -474,9 +474,20 @@ function App({ user, onLogout }) {
   const [nbaError, setNbaError] = useState(null);
   const anthopicProxy = (import.meta.env.DEV ? 'http://localhost:3001' : '') + '/api/anthropic'
   const chatEndRef = useRef(null);
+  const streamIntervalRef = useRef(null);
   const plan = PLANS.find(p => p.id === user.plan) || PLANS[1];
 
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [chatHistory]);
+
+  useEffect(() => {
+    // Cleanup intervalle de streaming quand le composant se démonte
+    return () => {
+      if (streamIntervalRef.current) {
+        clearInterval(streamIntervalRef.current);
+        streamIntervalRef.current = null;
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const loadNbaData = async () => {
@@ -512,21 +523,54 @@ function App({ user, onLogout }) {
 
   const analyzePlayer = async (player) => {
     setSelectedPlayer(player);
-    setAiAnalysis(""); setAiDone(false); setAiLoading(true);
+    setAiAnalysis("");
+    setAiDone(false);
+    setAiLoading(true);
+    
+    // Nettoyer l'intervalle précédent s'il existe
+    if (streamIntervalRef.current) {
+      clearInterval(streamIntervalRef.current);
+      streamIntervalRef.current = null;
+    }
+    
     try {
       const res = await fetch(anthopicProxy, {
-        method: "POST", headers: { "Content-Type": "application/json" },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-            model: "claude-haiku-4-5-20251001", max_tokens: 1000,
-          messages: [{ role: "user", content: `Tu es un scout NBA de classe mondiale. Analyse ce joueur en 4 points percutants (format bullet •), en français, style analytique premium. Données:\nNom: ${player.name}\nPoste: ${player.pos} | Équipe: ${player.team}\n${player.pts} pts | ${player.ast} ast | ${player.reb} reb | ${player.fg}% tir\nScore IA HoopIQ: ${player.score}/100 | Tendance: ${player.trend > 0 ? "+" : ""}${player.trend}\nSois précis, factuel, inspirant. Maximum 5 lignes au total.` }]
+          model: "claude-haiku-4-5-20251001",
+          max_tokens: 1000,
+          messages: [{
+            role: "user",
+            content: `Tu es un scout NBA de classe mondiale. Analyse ce joueur en 4 points percutants (format bullet •), en français, style analytique premium. Données:\nNom: ${player.name}\nPoste: ${player.pos} | Équipe: ${player.team}\n${player.pts} pts | ${player.ast} ast | ${player.reb} reb | ${player.fg}% tir\nScore IA HoopIQ: ${player.score}/100 | Tendance: ${player.trend > 0 ? "+" : ""}${player.trend}\nSois précis, factuel, inspirant. Maximum 5 lignes au total.`
+          }]
         })
       });
+      
       const data = await res.json();
       const text = data?.completion?.[0]?.data?.text || data?.content?.map(b => b.text || "").join("") || JSON.stringify(data).slice(0, 800) || "Analyse non disponible.";
+      
       let i = 0;
-      const iv = setInterval(() => { setAiAnalysis(text.slice(0, i)); i += 4; if (i > text.length) { setAiAnalysis(text); clearInterval(iv); setAiDone(true); } }, 16);
-    } catch { setAiAnalysis("❌ Erreur IA. Vérifie la connexion."); setAiDone(true); }
-    setAiLoading(false);
+      const chunkSize = 12; // Augmenté de 4 à 12 pour moins de re-renders
+      
+      streamIntervalRef.current = setInterval(() => {
+        if (i >= text.length) {
+          setAiAnalysis(text);
+          setAiDone(true);
+          setAiLoading(false);
+          clearInterval(streamIntervalRef.current);
+          streamIntervalRef.current = null;
+        } else {
+          setAiAnalysis(text.slice(0, i));
+          i += chunkSize;
+        }
+      }, 16);
+    } catch (err) {
+      console.error("Analyse error:", err);
+      setAiAnalysis("❌ Erreur IA. Vérifie la connexion.");
+      setAiDone(true);
+      setAiLoading(false);
+    }
   };
 
   const sendChat = async () => {
@@ -833,9 +877,11 @@ function App({ user, onLogout }) {
                   {!aiAnalysis && !aiLoading && <p style={{ color: C.muted, fontSize: 13 }}>👆 Sélectionne un joueur pour lancer l'analyse IA.</p>}
                   {aiLoading && <div style={{ color: C.orange, fontSize: 13 }}>🔍 Analyse en cours...</div>}
                   {aiAnalysis && (
-                    <p style={{ fontSize: 14, lineHeight: 1.85, whiteSpace: "pre-wrap", color: "#dde" }}>
-                      {aiAnalysis}{!aiDone && <span style={{ animation: "blink 1s infinite", color: C.orange }}>▋</span>}
-                    </p>
+                    <div style={{ maxHeight: "400px", overflowY: "auto", paddingRight: 8 }}>
+                      <p style={{ fontSize: 14, lineHeight: 1.85, whiteSpace: "pre-wrap", color: "#dde", margin: 0 }}>
+                        {aiAnalysis}{!aiDone && <span style={{ animation: "blink 1s infinite", color: C.orange }}>▋</span>}
+                      </p>
+                    </div>
                   )}
                   {aiDone && <div style={{ marginTop: 12, padding: "8px 12px", background: "rgba(255,92,0,0.08)", borderRadius: 8, fontSize: 11, color: C.muted }}>✅ Généré par Claude · Score HoopIQ : <strong style={{ color: C.orange }}>{selectedPlayer?.score}/100</strong></div>}
                 </Card>
