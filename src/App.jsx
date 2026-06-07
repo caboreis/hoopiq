@@ -585,7 +585,7 @@ function App({ user, onLogout }) {
         body: JSON.stringify({
           model: "claude-haiku-4-5-20251001", max_tokens: 1000,
           system: "Tu es HoopIQ IA, analyste basket expert. Reponds en francais, de facon concise et passionnee.",
-          messages: chatHistory.slice(1).concat({ role: "user", content: msg }).map(m => ({ role: m.role, content: m.text })).filter(m => m.content && m.content.trim())
+          messages: chatHistory.slice(-4).concat({ role: "user", content: msg }).filter(m => m.text || m.content).map(m => ({ role: m.role, content: m.text || m.content })),
         })
       });
       const data = await res.json();
