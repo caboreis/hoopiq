@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import Agent from "./Agent.jsx";
 import Marketing from "./Marketing.jsx";
-
 /* ─────────────────────────────────────────
    DESIGN SYSTEM
 ───────────────────────────────────────── */
@@ -602,7 +601,7 @@ function App({ user, onLogout }) {
     { id: "chat", label: "IA Chat", icon: "🤖" },
     { id: "account", label: "Compte", icon: "👤" },
     { id: "agent", label: "Agent IA", icon: "🤖" },
-    { id: "marketing", label: "Marketing", icon: "🚀" },
+  { id: "marketing", label: "Marketing", icon: "🚀" },
   ];
 
   return (
@@ -1069,10 +1068,12 @@ function App({ user, onLogout }) {
             <Agent />
           </div>
         )}
-
-        {/* ── MARKETING ── */}
-        {tab === "marketing" && <Marketing />}
-
+{/* ── MARKETING ── */}
+{tab === "marketing" && (
+  <div className="fade-in" style={{ height: "calc(100vh - 120px)", marginTop: -28, marginLeft: -24, marginRight: -24 }}>
+    <Marketing />
+  </div>
+)}
         {/* ── ACCOUNT ── */}
         {tab === "account" && (
           <div className="fade-in">
