@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import Agent from "./Agent.jsx";
 import Marketing from "./Marketing.jsx";
-
+import Cards from "./Cards.jsx";
 /* ─────────────────────────────────────────
    DESIGN SYSTEM
 ───────────────────────────────────────── */
@@ -603,8 +603,8 @@ function App({ user, onLogout }) {
     { id: "account", label: "Compte", icon: "👤" },
     { id: "agent", label: "Agent IA", icon: "🤖" },
     { id: "marketing", label: "Marketing", icon: "🚀" },
-  ];
-
+     { id: "cards", label: "Cartes", icon: "🎴" },
+];
   return (
     <div style={{ minHeight: "100vh", background: C.bg, color: C.text, fontFamily: "'DM Sans', sans-serif" }}>
       <style>{`
@@ -1072,7 +1072,11 @@ function App({ user, onLogout }) {
 
         {/* ── MARKETING ── */}
         {tab === "marketing" && <Marketing />}
-
+{tab === "cards" && (
+  <div className="fade-in" style={{ height: "calc(100vh - 62px)", marginTop: -28, marginLeft: -24, marginRight: -24 }}>
+    <Cards />
+  </div>
+)}
         {/* ── ACCOUNT ── */}
         {tab === "account" && (
           <div className="fade-in">
