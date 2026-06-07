@@ -639,27 +639,29 @@ function App({ user, onLogout }) {
                 ) : nbaError ? (
                   <div style={{ color: C.red, fontSize: 13 }}>{nbaError}</div>
                 ) : (
-                  const res = await fetch(anthopicProxy, {
+                  <div>
                     {liveScores.length === 0 ? (
                       <div style={{ color: C.muted, fontSize: 13 }}>Aucun match disponible pour le moment.</div>
-                    ) : liveScores.map(game => (
-                      <div key={game.id} style={{ padding: 14, borderRadius: 14, background: 'rgba(255,255,255,0.03)', border: `1px solid ${C.border}` }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                          <div style={{ fontSize: 13, color: C.muted }}>{game.status}</div>
-                          <div style={{ fontSize: 11, color: C.orange }}>{game.clock}</div>
-                  const text = data?.completion?.[0]?.data?.text || data?.content?.map(b => b.text || "").join("") || JSON.stringify(data).slice(0,400) || "Réponse IA non disponible.";
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
-                          <div style={{ flex: 1 }}>
-                            <div style={{ fontWeight: 700 }}>{game.home.name}</div>
-                            <div style={{ fontSize: 12, color: C.muted }}>{game.away.name}</div>
+                    ) : (
+                      liveScores.map(game => (
+                        <div key={game.id} style={{ padding: 14, borderRadius: 14, background: 'rgba(255,255,255,0.03)', border: `1px solid ${C.border}` }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                            <div style={{ fontSize: 13, color: C.muted }}>{game.status}</div>
+                            <div style={{ fontSize: 11, color: C.orange }}>{game.clock}</div>
                           </div>
-                          <div style={{ textAlign: 'right' }}>
-                            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 24, color: C.orange }}>{game.home.score} — {game.away.score}</div>
-                            <div style={{ fontSize: 11, color: C.muted }}>{game.home.abbreviation} vs {game.away.abbreviation}</div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+                            <div style={{ flex: 1 }}>
+                              <div style={{ fontWeight: 700 }}>{game.home.name}</div>
+                              <div style={{ fontSize: 12, color: C.muted }}>{game.away.name}</div>
+                            </div>
+                            <div style={{ textAlign: 'right' }}>
+                              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 24, color: C.orange }}>{game.home.score} — {game.away.score}</div>
+                              <div style={{ fontSize: 11, color: C.muted }}>{game.home.abbreviation} vs {game.away.abbreviation}</div>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      ))
+                    )}
                   </div>
                 )}
               </Card>
