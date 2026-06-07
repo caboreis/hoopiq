@@ -463,7 +463,7 @@ function App({ user, onLogout }) {
   const [aiAnalysis, setAiAnalysis] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
   const [aiDone, setAiDone] = useState(false);
-  const const [chatHistory, setChatHistory] = useState([
+  const [chatHistory, setChatHistory] = useState([
   { role: "assistant", text: "Bonjour ! Je suis HoopIQ IA, ton analyste basket. Pose-moi une question !" }
 ]);
   const [chatInput, setChatInput] = useState("");
