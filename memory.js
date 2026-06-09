@@ -25,7 +25,7 @@ export async function getMemories(userEmail, agent = null, limit = 10) {
     if (agent) query = query.eq("agent", agent);
     const { data } = await query;
     return data || [];
-  } catch (e) {
+  } catch {
     return [];
   }
 }
@@ -64,7 +64,7 @@ export async function getUserPreferences(userEmail) {
       .eq("user_email", userEmail)
       .single();
     return data || null;
-  } catch (e) {
+  } catch {
     return null;
   }
 }
@@ -95,7 +95,7 @@ export async function buildMemoryContext(userEmail, agent) {
     }
 
     return context;
-  } catch (e) {
+  } catch {
     return "";
   }
 }

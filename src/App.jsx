@@ -3,6 +3,7 @@ import Agent from "./Agent.jsx";
 import Marketing from "./Marketing.jsx";
 import Cards from "./Cards.jsx";
 import LiveCenter from "./LiveCenter.jsx";
+import Oracle from "./Oracle.jsx";
 /* ─────────────────────────────────────────
    DESIGN SYSTEM
 ───────────────────────────────────────── */
@@ -86,7 +87,6 @@ const MATCHES = [
 /* ─────────────────────────────────────────
    UTILS / ATOMS
 ───────────────────────────────────────── */
-const px = (obj) => Object.entries(obj).map(([k, v]) => `${k}:${v}`).join(";");
 
 function Avatar({ name, size = 44, glow }) {
   const initials = name.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
@@ -169,7 +169,6 @@ function SectionTitle({ children }) {
    LANDING PAGE
 ───────────────────────────────────────── */
 function Landing({ onAuth }) {
-  const [hovered, setHovered] = useState(null);
 
   return (
     <div style={{ minHeight: "100vh", background: C.bg, color: C.text, overflowX: "hidden" }}>
@@ -474,7 +473,6 @@ function App({ user, onLogout }) {
 ]);
   const [chatInput, setChatInput] = useState("");
   const [chatLoading, setChatLoading] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
   const [bullsPlayers, setBullsPlayers] = useState([]);
   const [liveScores, setLiveScores] = useState([]);
   const [nbaLoading, setNbaLoading] = useState(true);
@@ -510,7 +508,9 @@ function App({ user, onLogout }) {
         if (!scoresRes.ok) throw new Error('Impossible de charger les scores live')
         const playersData = await playersRes.json()
         const scoresData = await scoresRes.json()
-        setBullsPlayers(playersData.players || [])
+        const loadedPlayers = playersData.players || []
+        setBullsPlayers(loadedPlayers)
+        setSelectedPlayer(prev => (prev && prev.team === 'Chicago Bulls' ? prev : (loadedPlayers[0] || prev)))
         setLiveScores(scoresData.games || [])
       } catch (err) {
         console.error('NBA fetch error:', err)
@@ -521,12 +521,6 @@ function App({ user, onLogout }) {
     }
     loadNbaData()
   }, [])
-
-  useEffect(() => {
-    if (bullsPlayers.length && (!selectedPlayer || selectedPlayer.team !== 'Chicago Bulls')) {
-      setSelectedPlayer(bullsPlayers[0])
-    }
-  }, [bullsPlayers])
 
   const analyzePlayer = async (player) => {
     setSelectedPlayer(player);
@@ -611,6 +605,7 @@ function App({ user, onLogout }) {
     { id: "marketing", label: "Marketing", icon: "🚀" },
      { id: "cards", label: "Cartes", icon: "🎴" },
      { id: "live", label: "Live", icon: "🔴" },
+     { id: "oracle", label: "Oracle", icon: "🔮" },
 ];
   return (
     <div style={{ minHeight: "100vh", background: C.bg, color: C.text, fontFamily: "'DM Sans', sans-serif" }}>
@@ -1090,6 +1085,7 @@ function App({ user, onLogout }) {
     <LiveCenter />
   </div>
 )}
+{tab === "oracle" && <Oracle />}
         {/* ── ACCOUNT ── */}
         {tab === "account" && (
           <div className="fade-in">
