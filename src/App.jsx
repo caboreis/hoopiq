@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import Agent from "./Agent.jsx";
 import Marketing from "./Marketing.jsx";
+import Jarvis from "./Jarvis.jsx";
 import Cards from "./Cards.jsx";
 import LiveCenter from "./LiveCenter.jsx";
 import Oracle from "./Oracle.jsx";
@@ -169,18 +170,20 @@ function SectionTitle({ children }) {
 /* ─────────────────────────────────────────
    LANDING PAGE
 ───────────────────────────────────────── */
+// Mix extérieurs + intérieurs (parquet/tribunes) d'arénas NBA — Wikimedia
 const HERO_ARENAS = [
   "https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/United_Center_1.jpg/1280px-United_Center_1.jpg",
-  "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/Crypto.com_Arena_exterior_2023.jpg/1280px-Crypto.com_Arena_exterior_2023.jpg",
+  "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/United_Center_Interior.jpg/1280px-United_Center_Interior.jpg",
+  "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/Crypto.com_Arena_interior_-_Lakers_2022.jpg/1280px-Crypto.com_Arena_interior_-_Lakers_2022.jpg",
+  "https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Madison_Square_Garden_court.jpg/1280px-Madison_Square_Garden_court.jpg",
+  "https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Celtics_game_versus_the_Timberwolves%2C_February%2C_1_2009.jpg/1280px-Celtics_game_versus_the_Timberwolves%2C_February%2C_1_2009.jpg",
   "https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/Chase_Center.jpg/1280px-Chase_Center.jpg",
-  "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c6/TD_Garden_%2854960947755%29.jpg/1280px-TD_Garden_%2854960947755%29.jpg",
-  "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/American_Airlines_Center_August_2015.jpg/1280px-American_Airlines_Center_August_2015.jpg",
 ];
 
 function Landing({ onAuth }) {
   const [arenaIdx, setArenaIdx] = useState(0);
   useEffect(() => {
-    const id = setInterval(() => setArenaIdx(i => (i + 1) % HERO_ARENAS.length), 5000);
+    const id = setInterval(() => setArenaIdx(i => (i + 1) % HERO_ARENAS.length), 8000);
     return () => clearInterval(id);
   }, []);
 
@@ -218,7 +221,7 @@ function Landing({ onAuth }) {
             <div key={i} style={{
               position: "absolute", inset: 0,
               backgroundImage: `url(${src})`, backgroundSize: "cover", backgroundPosition: "center",
-              opacity: i === arenaIdx ? 1 : 0, transition: "opacity 1.5s ease-in-out",
+              opacity: i === arenaIdx ? 1 : 0, transition: "opacity 2s ease-in-out",
             }} />
           ))}
         </div>
