@@ -4,6 +4,7 @@ import Marketing from "./Marketing.jsx";
 import Cards from "./Cards.jsx";
 import LiveCenter from "./LiveCenter.jsx";
 import Oracle from "./Oracle.jsx";
+import Vestiaire from "./Vestiaire.jsx";
 /* ─────────────────────────────────────────
    DESIGN SYSTEM
 ───────────────────────────────────────── */
@@ -606,6 +607,7 @@ function App({ user, onLogout }) {
      { id: "cards", label: "Cartes", icon: "🎴" },
      { id: "live", label: "Live", icon: "🔴" },
      { id: "oracle", label: "Oracle", icon: "🔮" },
+     { id: "vestiaire", label: "Vestiaire", icon: "💬" },
 ];
   return (
     <div style={{ minHeight: "100vh", background: C.bg, color: C.text, fontFamily: "'DM Sans', sans-serif" }}>
@@ -1086,6 +1088,11 @@ function App({ user, onLogout }) {
   </div>
 )}
 {tab === "oracle" && <Oracle />}
+{tab === "vestiaire" && (
+  <div className="fade-in" style={{ height: "calc(100vh - 62px)", marginTop: -28, marginLeft: -24, marginRight: -24 }}>
+    <Vestiaire user={user} />
+  </div>
+)}
         {/* ── ACCOUNT ── */}
         {tab === "account" && (
           <div className="fade-in">
@@ -1169,14 +1176,31 @@ function App({ user, onLogout }) {
 /* ─────────────────────────────────────────
    ROOT
 ───────────────────────────────────────── */
+const USER_STORAGE_KEY = "hoopiq_user";
+
+function loadStoredUser() {
+  try {
+    const raw = localStorage.getItem(USER_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
 export default function Root() {
-  const [screen, setScreen] = useState("landing"); // landing | app
+  const [user, setUser] = useState(loadStoredUser);
+  const [screen, setScreen] = useState(user ? "app" : "landing"); // landing | app
   const [authMode, setAuthMode] = useState(null);  // login | signup | null
-  const [user, setUser] = useState(null);
 
   const handleAuth = (mode) => setAuthMode(mode);
-  const handleSuccess = (u) => { setUser(u); setAuthMode(null); setScreen("app"); };
-  const handleLogout = () => { setUser(null); setScreen("landing"); };
+  const handleSuccess = (u) => {
+    try { localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(u)); } catch { /* storage unavailable */ }
+    setUser(u); setAuthMode(null); setScreen("app");
+  };
+  const handleLogout = () => {
+    try { localStorage.removeItem(USER_STORAGE_KEY); } catch { /* storage unavailable */ }
+    setUser(null); setScreen("landing");
+  };
 
   return (
     <>
