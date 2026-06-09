@@ -1,7 +1,9 @@
 import { createClient } from "@supabase/supabase-js";
 
-const url = import.meta.env.VITE_SUPABASE_URL;
-const key = import.meta.env.VITE_SUPABASE_KEY;
+// Trim whitespace and strip accidental surrounding quotes (common copy-paste issue).
+const clean = (v) => (v || "").trim().replace(/^["']|["']$/g, "");
+const url = clean(import.meta.env.VITE_SUPABASE_URL);
+const key = clean(import.meta.env.VITE_SUPABASE_KEY);
 
 // VITE_SUPABASE_URL must be a real project URL (https://xxxx.supabase.co).
 // We validate it so a misconfigured .env never crashes the whole app —
