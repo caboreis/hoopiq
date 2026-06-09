@@ -169,7 +169,20 @@ function SectionTitle({ children }) {
 /* ─────────────────────────────────────────
    LANDING PAGE
 ───────────────────────────────────────── */
+const HERO_ARENAS = [
+  "https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/United_Center_1.jpg/1280px-United_Center_1.jpg",
+  "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/Crypto.com_Arena_exterior_2023.jpg/1280px-Crypto.com_Arena_exterior_2023.jpg",
+  "https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/Chase_Center.jpg/1280px-Chase_Center.jpg",
+  "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c6/TD_Garden_%2854960947755%29.jpg/1280px-TD_Garden_%2854960947755%29.jpg",
+  "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/American_Airlines_Center_August_2015.jpg/1280px-American_Airlines_Center_August_2015.jpg",
+];
+
 function Landing({ onAuth }) {
+  const [arenaIdx, setArenaIdx] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setArenaIdx(i => (i + 1) % HERO_ARENAS.length), 5000);
+    return () => clearInterval(id);
+  }, []);
 
   return (
     <div style={{ minHeight: "100vh", background: C.bg, color: C.text, overflowX: "hidden" }}>
@@ -198,13 +211,26 @@ function Landing({ onAuth }) {
       </nav>
 
       {/* HERO */}
-      <section style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", padding: "120px 24px 80px", position: "relative" }}>
+      <section style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", padding: "120px 24px 80px", position: "relative", overflow: "hidden" }}>
+        {/* Arena slideshow background */}
+        <div style={{ position: "absolute", inset: 0, zIndex: 0 }}>
+          {HERO_ARENAS.map((src, i) => (
+            <div key={i} style={{
+              position: "absolute", inset: 0,
+              backgroundImage: `url(${src})`, backgroundSize: "cover", backgroundPosition: "center",
+              opacity: i === arenaIdx ? 1 : 0, transition: "opacity 1.5s ease-in-out",
+            }} />
+          ))}
+        </div>
+        {/* Dark overlay for text readability */}
+        <div style={{ position: "absolute", inset: 0, zIndex: 1, background: "rgba(6,6,15,0.75)" }} />
         {/* Background glow */}
         <div style={{ position: "absolute", inset: 0, background: G.glow, pointerEvents: "none" }} />
         {/* Orbs */}
         <div style={{ position: "absolute", width: 500, height: 500, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,92,0,0.06) 0%, transparent 70%)", top: "10%", left: "10%", animation: "float 8s ease-in-out infinite" }} />
         <div style={{ position: "absolute", width: 300, height: 300, borderRadius: "50%", background: "radial-gradient(circle, rgba(79,163,255,0.05) 0%, transparent 70%)", bottom: "20%", right: "15%", animation: "float 11s ease-in-out infinite reverse" }} />
 
+        <div style={{ position: "relative", zIndex: 2, width: "100%", display: "flex", flexDirection: "column", alignItems: "center" }}>
         <div className="fade-in" style={{ animationDelay: "0s" }}>
           <Badge color={C.orange}>🏀 IA Basket · Saison 2025-26</Badge>
         </div>
@@ -237,6 +263,7 @@ function Landing({ onAuth }) {
               <div style={{ fontSize: 12, color: C.muted, fontFamily: "'DM Sans', sans-serif" }}>{l}</div>
             </div>
           ))}
+        </div>
         </div>
       </section>
 
