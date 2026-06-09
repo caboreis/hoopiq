@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import Agent from "./Agent.jsx";
 import Marketing from "./Marketing.jsx";
 import Cards from "./Cards.jsx";
+import LiveCenter from "./LiveCenter.jsx";
 /* ─────────────────────────────────────────
    DESIGN SYSTEM
 ───────────────────────────────────────── */
@@ -609,6 +610,7 @@ function App({ user, onLogout }) {
     { id: "agent", label: "Agent IA", icon: "🤖" },
     { id: "marketing", label: "Marketing", icon: "🚀" },
      { id: "cards", label: "Cartes", icon: "🎴" },
+     { id: "live", label: "Live", icon: "🔴" },
 ];
   return (
     <div style={{ minHeight: "100vh", background: C.bg, color: C.text, fontFamily: "'DM Sans', sans-serif" }}>
@@ -1080,6 +1082,11 @@ function App({ user, onLogout }) {
 {tab === "cards" && (
   <div className="fade-in" style={{ height: "calc(100vh - 62px)", marginTop: -28, marginLeft: -24, marginRight: -24 }}>
     <Cards />
+  </div>
+)}
+{tab === "live" && (
+  <div className="fade-in" style={{ height: "calc(100vh - 62px)", marginTop: -28, marginLeft: -24, marginRight: -24 }}>
+    <LiveCenter />
   </div>
 )}
         {/* ── ACCOUNT ── */}
