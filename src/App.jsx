@@ -631,6 +631,7 @@ function App({ user, onLogout }) {
     { id: "players", label: "Joueurs", icon: "🏀" },
     { id: "matches", label: "Matchs", icon: "📊" },
     { id: "chat", label: "IA Chat", icon: "🤖" },
+    { id: "jarvis", label: "JARVIS", icon: "🦾" },
     { id: "account", label: "Compte", icon: "👤" },
     { id: "agent", label: "Agent IA", icon: "🤖" },
     { id: "marketing", label: "Marketing", icon: "🚀" },
