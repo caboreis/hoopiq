@@ -1,7 +1,10 @@
 -- HoopIQ — Vestiaire (chat communautaire temps réel)
--- À exécuter dans Supabase → SQL Editor
+-- À exécuter dans Supabase → SQL Editor.
+-- ⚠️ Recrée la table proprement (supprime l'ancienne structure incompatible).
 
-create table if not exists public.messages (
+drop table if exists public.messages cascade;
+
+create table public.messages (
   id           bigint generated always as identity primary key,
   room         text not null,
   author       text not null,
@@ -12,21 +15,15 @@ create table if not exists public.messages (
   created_at   timestamptz not null default now()
 );
 
--- If the table already existed without client_id, add it:
-alter table public.messages add column if not exists client_id text;
-
 -- Index pour charger vite l'historique d'un salon
-create index if not exists messages_room_created_idx
-  on public.messages (room, created_at);
+create index messages_room_created_idx on public.messages (room, created_at);
 
 -- Row Level Security : lecture + écriture ouvertes (chat public)
 alter table public.messages enable row level security;
 
-drop policy if exists "messages_select_all" on public.messages;
 create policy "messages_select_all" on public.messages
   for select using (true);
 
-drop policy if exists "messages_insert_all" on public.messages;
 create policy "messages_insert_all" on public.messages
   for insert with check (true);
 
