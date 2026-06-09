@@ -11,76 +11,76 @@ const RARITY = {
 const NBA_TEAMS = [
   // ATLANTIC
   { id: "BOS", name: "Boston Celtics", city: "Boston", conf: "Est", color: "#007A33", players: [
-    { id: 201, espnId: 3995, name: "Jayson Tatum", pos: "SF", pts: 26.9, ast: 4.9, reb: 8.1, fg: 47, score: 96, rarity: "legendary", trait: "MVP CANDIDAT" },
-    { id: 202, espnId: 3992, name: "Jaylen Brown", pos: "SG", pts: 23.0, ast: 3.6, reb: 5.5, fg: 47, score: 89, rarity: "epic", trait: "CLUTCH" },
+    { id: 201, espnId: 4065648, name: "Jayson Tatum", pos: "SF", pts: 26.9, ast: 4.9, reb: 8.1, fg: 47, score: 96, rarity: "legendary", trait: "MVP CANDIDAT" },
+    { id: 202, espnId: 3917376, name: "Jaylen Brown", pos: "SG", pts: 23.0, ast: 3.6, reb: 5.5, fg: 47, score: 89, rarity: "epic", trait: "CLUTCH" },
   ]},
   { id: "BKN", name: "Brooklyn Nets", city: "Brooklyn", conf: "Est", color: "#000000", players: [
-    { id: 211, espnId: 6442, name: "Cam Thomas", pos: "SG", pts: 22.1, ast: 3.4, reb: 3.6, fg: 45, score: 82, rarity: "rare", trait: "SCOREUR" },
+    { id: 211, espnId: 4432174, name: "Cam Thomas", pos: "SG", pts: 22.1, ast: 3.4, reb: 3.6, fg: 45, score: 82, rarity: "rare", trait: "SCOREUR" },
   ]},
   { id: "NYK", name: "New York Knicks", city: "New York", conf: "Est", color: "#F58426", players: [
-    { id: 221, espnId: 3136193, name: "Jalen Brunson", pos: "PG", pts: 28.7, ast: 6.7, reb: 3.6, fg: 48, score: 93, rarity: "legendary", trait: "NYC KING" },
-    { id: 222, espnId: 4066261, name: "Karl-Anthony Towns", pos: "C", pts: 24.0, ast: 3.1, reb: 13.9, fg: 52, score: 90, rarity: "legendary", trait: "BIG MAN" },
+    { id: 221, espnId: 3934672, name: "Jalen Brunson", pos: "PG", pts: 28.7, ast: 6.7, reb: 3.6, fg: 48, score: 93, rarity: "legendary", trait: "NYC KING" },
+    { id: 222, espnId: 3136195, name: "Karl-Anthony Towns", pos: "C", pts: 24.0, ast: 3.1, reb: 13.9, fg: 52, score: 90, rarity: "legendary", trait: "BIG MAN" },
   ]},
   { id: "PHI", name: "Philadelphia 76ers", city: "Philadelphia", conf: "Est", color: "#006BB6", players: [
     { id: 231, espnId: 3059318, name: "Joel Embiid", pos: "C", pts: 34.7, ast: 5.6, reb: 11.0, fg: 53, score: 97, rarity: "legendary", trait: "MVP" },
-    { id: 232, espnId: 4277905, name: "Tyrese Maxey", pos: "PG", pts: 25.9, ast: 6.2, reb: 3.9, fg: 47, score: 91, rarity: "legendary", trait: "EXPLOSIF" },
+    { id: 232, espnId: 4431678, name: "Tyrese Maxey", pos: "PG", pts: 25.9, ast: 6.2, reb: 3.9, fg: 47, score: 91, rarity: "legendary", trait: "EXPLOSIF" },
   ]},
   { id: "TOR", name: "Toronto Raptors", city: "Toronto", conf: "Est", color: "#CE1141", players: [
-    { id: 241, espnId: 4432807, name: "Scottie Barnes", pos: "SF", pts: 19.9, ast: 6.1, reb: 8.2, fg: 47, score: 85, rarity: "epic", trait: "POLYVALENT" },
+    { id: 241, espnId: 4433134, name: "Scottie Barnes", pos: "SF", pts: 19.9, ast: 6.1, reb: 8.2, fg: 47, score: 85, rarity: "epic", trait: "POLYVALENT" },
   ]},
   // CENTRAL
   { id: "CHI", name: "Chicago Bulls", city: "Chicago", conf: "Est", color: "#CE1141", players: [
-    { id: 251, espnId: 2566769, name: "Zach LaVine", pos: "SG", pts: 24.8, ast: 4.2, reb: 4.5, fg: 47, score: 94, rarity: "legendary", trait: "ÉLECTRIQUE" },
-    { id: 252, espnId: 4278133, name: "Coby White", pos: "PG", pts: 19.1, ast: 5.1, reb: 3.8, fg: 44, score: 88, rarity: "epic", trait: "EN FEU" },
+    { id: 251, espnId: 3064440, name: "Zach LaVine", pos: "SG", pts: 24.8, ast: 4.2, reb: 4.5, fg: 47, score: 94, rarity: "legendary", trait: "ÉLECTRIQUE" },
+    { id: 252, espnId: 4395651, name: "Coby White", pos: "PG", pts: 19.1, ast: 5.1, reb: 3.8, fg: 44, score: 88, rarity: "epic", trait: "EN FEU" },
   ]},
   { id: "CLE", name: "Cleveland Cavaliers", city: "Cleveland", conf: "Est", color: "#860038", players: [
-    { id: 261, espnId: 4278129, name: "Donovan Mitchell", pos: "SG", pts: 26.6, ast: 6.1, reb: 5.1, fg: 47, score: 93, rarity: "legendary", trait: "SPIDA" },
-    { id: 262, espnId: 3907387, name: "Darius Garland", pos: "PG", pts: 20.6, ast: 6.9, reb: 2.7, fg: 45, score: 87, rarity: "epic", trait: "CRÉATEUR" },
+    { id: 261, espnId: 3908809, name: "Donovan Mitchell", pos: "SG", pts: 26.6, ast: 6.1, reb: 5.1, fg: 47, score: 93, rarity: "legendary", trait: "SPIDA" },
+    { id: 262, espnId: 4396907, name: "Darius Garland", pos: "PG", pts: 20.6, ast: 6.9, reb: 2.7, fg: 45, score: 87, rarity: "epic", trait: "CRÉATEUR" },
   ]},
   { id: "DET", name: "Detroit Pistons", city: "Detroit", conf: "Est", color: "#C8102E", players: [
-    { id: 271, espnId: 4431765, name: "Cade Cunningham", pos: "PG", pts: 22.7, ast: 9.0, reb: 4.4, fg: 43, score: 88, rarity: "epic", trait: "FRANCHISE" },
+    { id: 271, espnId: 4432166, name: "Cade Cunningham", pos: "PG", pts: 22.7, ast: 9.0, reb: 4.4, fg: 43, score: 88, rarity: "epic", trait: "FRANCHISE" },
   ]},
   { id: "IND", name: "Indiana Pacers", city: "Indiana", conf: "Est", color: "#002D62", players: [
-    { id: 281, espnId: 4431679, name: "Tyrese Haliburton", pos: "PG", pts: 20.1, ast: 10.9, reb: 3.9, fg: 47, score: 91, rarity: "legendary", trait: "VISION" },
+    { id: 281, espnId: 4396993, name: "Tyrese Haliburton", pos: "PG", pts: 20.1, ast: 10.9, reb: 3.9, fg: 47, score: 91, rarity: "legendary", trait: "VISION" },
   ]},
   { id: "MIL", name: "Milwaukee Bucks", city: "Milwaukee", conf: "Est", color: "#00471B", players: [
     { id: 291, espnId: 3032977, name: "Giannis Antetokounmpo", pos: "PF", pts: 30.4, ast: 6.5, reb: 11.5, fg: 61, score: 98, rarity: "legendary", trait: "GREEK FREAK" },
-    { id: 292, espnId: 2490149, name: "Damian Lillard", pos: "PG", pts: 24.3, ast: 7.1, reb: 4.4, fg: 43, score: 91, rarity: "legendary", trait: "CLUTCH TIME" },
+    { id: 292, espnId: 6606, name: "Damian Lillard", pos: "PG", pts: 24.3, ast: 7.1, reb: 4.4, fg: 43, score: 91, rarity: "legendary", trait: "CLUTCH TIME" },
   ]},
   // SOUTHEAST
   { id: "ATL", name: "Atlanta Hawks", city: "Atlanta", conf: "Est", color: "#C1D32F", players: [
-    { id: 301, espnId: 3936299, name: "Trae Young", pos: "PG", pts: 25.7, ast: 10.8, reb: 3.3, fg: 43, score: 90, rarity: "legendary", trait: "ICE TRAE" },
+    { id: 301, espnId: 4277905, name: "Trae Young", pos: "PG", pts: 25.7, ast: 10.8, reb: 3.3, fg: 43, score: 90, rarity: "legendary", trait: "ICE TRAE" },
   ]},
   { id: "CHA", name: "Charlotte Hornets", city: "Charlotte", conf: "Est", color: "#1D1160", players: [
-    { id: 311, espnId: 4432174, name: "LaMelo Ball", pos: "PG", pts: 23.9, ast: 8.0, reb: 5.8, fg: 43, score: 89, rarity: "epic", trait: "MELO" },
+    { id: 311, espnId: 4432816, name: "LaMelo Ball", pos: "PG", pts: 23.9, ast: 8.0, reb: 5.8, fg: 43, score: 89, rarity: "epic", trait: "MELO" },
   ]},
   { id: "MIA", name: "Miami Heat", city: "Miami", conf: "Est", color: "#98002E", players: [
-    { id: 321, espnId: 6583, name: "Jimmy Butler", pos: "SF", pts: 20.8, ast: 5.3, reb: 5.3, fg: 48, score: 91, rarity: "legendary", trait: "PLAYOFF JIMMY" },
-    { id: 322, espnId: 4432174, name: "Bam Adebayo", pos: "C", pts: 19.3, ast: 3.9, reb: 10.4, fg: 55, score: 87, rarity: "epic", trait: "ANCHOR" },
+    { id: 321, espnId: 6430, name: "Jimmy Butler", pos: "SF", pts: 20.8, ast: 5.3, reb: 5.3, fg: 48, score: 91, rarity: "legendary", trait: "PLAYOFF JIMMY" },
+    { id: 322, espnId: 4066261, name: "Bam Adebayo", pos: "C", pts: 19.3, ast: 3.9, reb: 10.4, fg: 55, score: 87, rarity: "epic", trait: "ANCHOR" },
   ]},
   { id: "ORL", name: "Orlando Magic", city: "Orlando", conf: "Est", color: "#0077C0", players: [
-    { id: 331, espnId: 4432807, name: "Paolo Banchero", pos: "PF", pts: 22.6, ast: 5.4, reb: 6.9, fg: 46, score: 88, rarity: "epic", trait: "PRIMO" },
+    { id: 331, espnId: 4432573, name: "Paolo Banchero", pos: "PF", pts: 22.6, ast: 5.4, reb: 6.9, fg: 46, score: 88, rarity: "epic", trait: "PRIMO" },
   ]},
   { id: "WAS", name: "Washington Wizards", city: "Washington", conf: "Est", color: "#002B5C", players: [
-    { id: 341, espnId: 4066648, name: "Kyle Kuzma", pos: "PF", pts: 22.2, ast: 4.5, reb: 7.2, fg: 44, score: 79, rarity: "rare", trait: "KUZMA" },
+    { id: 341, espnId: 3134907, name: "Kyle Kuzma", pos: "PF", pts: 22.2, ast: 4.5, reb: 7.2, fg: 44, score: 79, rarity: "rare", trait: "KUZMA" },
   ]},
   // NORTHWEST
   { id: "DEN", name: "Denver Nuggets", city: "Denver", conf: "Ouest", color: "#0E2240", players: [
     { id: 351, espnId: 3112335, name: "Nikola Jokić", pos: "C", pts: 26.4, ast: 9.0, reb: 12.4, fg: 58, score: 99, rarity: "legendary", trait: "JOKER" },
-    { id: 352, espnId: 3062679, name: "Jamal Murray", pos: "PG", pts: 21.2, ast: 6.5, reb: 4.4, fg: 46, score: 88, rarity: "epic", trait: "MAP GOD" },
+    { id: 352, espnId: 3936299, name: "Jamal Murray", pos: "PG", pts: 21.2, ast: 6.5, reb: 4.4, fg: 46, score: 88, rarity: "epic", trait: "MAP GOD" },
   ]},
   { id: "MIN", name: "Minnesota Timberwolves", city: "Minnesota", conf: "Ouest", color: "#0C2340", players: [
-    { id: 361, espnId: 4065663, name: "Anthony Edwards", pos: "SG", pts: 25.9, ast: 5.1, reb: 5.4, fg: 46, score: 94, rarity: "legendary", trait: "ANT MAN" },
-    { id: 362, espnId: 4066648, name: "Karl-Anthony Towns", pos: "C", pts: 21.4, ast: 3.0, reb: 8.3, fg: 50, score: 87, rarity: "epic", trait: "KAT" },
+    { id: 361, espnId: 4594268, name: "Anthony Edwards", pos: "SG", pts: 25.9, ast: 5.1, reb: 5.4, fg: 46, score: 94, rarity: "legendary", trait: "ANT MAN" },
+    { id: 362, espnId: 3136195, name: "Karl-Anthony Towns", pos: "C", pts: 21.4, ast: 3.0, reb: 8.3, fg: 50, score: 87, rarity: "epic", trait: "KAT" },
   ]},
   { id: "OKC", name: "Oklahoma City Thunder", city: "Oklahoma City", conf: "Ouest", color: "#007AC1", players: [
-    { id: 371, espnId: 4277905, name: "Shai Gilgeous-Alexander", pos: "PG", pts: 30.1, ast: 6.2, reb: 5.5, fg: 53, score: 97, rarity: "legendary", trait: "SGA" },
+    { id: 371, espnId: 4278073, name: "Shai Gilgeous-Alexander", pos: "PG", pts: 30.1, ast: 6.2, reb: 5.5, fg: 53, score: 97, rarity: "legendary", trait: "SGA" },
   ]},
   { id: "POR", name: "Portland Trail Blazers", city: "Portland", conf: "Ouest", color: "#E03A3E", players: [
-    { id: 381, espnId: 4432761, name: "Scoot Henderson", pos: "PG", pts: 14.9, ast: 5.8, reb: 3.8, fg: 41, score: 75, rarity: "rare", trait: "FUTUR" },
+    { id: 381, espnId: 4683678, name: "Scoot Henderson", pos: "PG", pts: 14.9, ast: 5.8, reb: 3.8, fg: 41, score: 75, rarity: "rare", trait: "FUTUR" },
   ]},
   { id: "UTA", name: "Utah Jazz", city: "Utah", conf: "Ouest", color: "#002B5C", players: [
-    { id: 391, espnId: 4432761, name: "Lauri Markkanen", pos: "PF", pts: 23.2, ast: 2.0, reb: 8.2, fg: 50, score: 84, rarity: "epic", trait: "FINNISHER" },
+    { id: 391, espnId: 4066336, name: "Lauri Markkanen", pos: "PF", pts: 23.2, ast: 2.0, reb: 8.2, fg: 50, score: 84, rarity: "epic", trait: "FINNISHER" },
   ]},
   // PACIFIC
   { id: "GSW", name: "Golden State Warriors", city: "San Francisco", conf: "Ouest", color: "#1D428A", players: [
@@ -88,47 +88,47 @@ const NBA_TEAMS = [
     { id: 402, espnId: 6589, name: "Draymond Green", pos: "PF", pts: 9.0, ast: 6.7, reb: 7.2, fg: 48, score: 83, rarity: "epic", trait: "IQ DÉFENSE" },
   ]},
   { id: "LAC", name: "LA Clippers", city: "Los Angeles", conf: "Ouest", color: "#C8102E", players: [
-    { id: 411, espnId: 4065697, name: "Kawhi Leonard", pos: "SF", pts: 23.7, ast: 3.6, reb: 6.1, fg: 52, score: 93, rarity: "legendary", trait: "THE CLAW" },
-    { id: 412, espnId: 3032977, name: "Paul George", pos: "SF", pts: 22.6, ast: 3.5, reb: 5.2, fg: 45, score: 88, rarity: "epic", trait: "PG13" },
+    { id: 411, espnId: 6450, name: "Kawhi Leonard", pos: "SF", pts: 23.7, ast: 3.6, reb: 6.1, fg: 52, score: 93, rarity: "legendary", trait: "THE CLAW" },
+    { id: 412, espnId: 4251, name: "Paul George", pos: "SF", pts: 22.6, ast: 3.5, reb: 5.2, fg: 45, score: 88, rarity: "epic", trait: "PG13" },
   ]},
   { id: "LAL", name: "Los Angeles Lakers", city: "Los Angeles", conf: "Ouest", color: "#552583", players: [
     { id: 421, espnId: 1966, name: "LeBron James", pos: "SF", pts: 25.7, ast: 8.3, reb: 7.3, fg: 54, score: 98, rarity: "legendary", trait: "KING JAMES" },
-    { id: 422, espnId: 3202, name: "Anthony Davis", pos: "C", pts: 24.7, ast: 3.5, reb: 12.6, fg: 56, score: 95, rarity: "legendary", trait: "THE BROW" },
+    { id: 422, espnId: 6583, name: "Anthony Davis", pos: "C", pts: 24.7, ast: 3.5, reb: 12.6, fg: 56, score: 95, rarity: "legendary", trait: "THE BROW" },
   ]},
   { id: "PHX", name: "Phoenix Suns", city: "Phoenix", conf: "Ouest", color: "#1D1160", players: [
-    { id: 431, espnId: 3136195, name: "Kevin Durant", pos: "SF", pts: 27.1, ast: 5.0, reb: 6.6, fg: 52, score: 96, rarity: "legendary", trait: "SLIM REAPER" },
-    { id: 432, espnId: 3059318, name: "Devin Booker", pos: "SG", pts: 27.1, ast: 6.9, reb: 4.5, fg: 47, score: 93, rarity: "legendary", trait: "BOOK" },
+    { id: 431, espnId: 3202, name: "Kevin Durant", pos: "SF", pts: 27.1, ast: 5.0, reb: 6.6, fg: 52, score: 96, rarity: "legendary", trait: "SLIM REAPER" },
+    { id: 432, espnId: 3136193, name: "Devin Booker", pos: "SG", pts: 27.1, ast: 6.9, reb: 4.5, fg: 47, score: 93, rarity: "legendary", trait: "BOOK" },
   ]},
   { id: "SAC", name: "Sacramento Kings", city: "Sacramento", conf: "Ouest", color: "#5A2D81", players: [
-    { id: 441, espnId: 4066648, name: "De'Aaron Fox", pos: "PG", pts: 26.6, ast: 5.9, reb: 4.4, fg: 50, score: 90, rarity: "legendary", trait: "SWIPA" },
+    { id: 441, espnId: 4066259, name: "De'Aaron Fox", pos: "PG", pts: 26.6, ast: 5.9, reb: 4.4, fg: 50, score: 90, rarity: "legendary", trait: "SWIPA" },
   ]},
   // SOUTHWEST
   { id: "DAL", name: "Dallas Mavericks", city: "Dallas", conf: "Ouest", color: "#00538C", players: [
     { id: 451, espnId: 3945274, name: "Luka Dončić", pos: "PG", pts: 33.9, ast: 9.8, reb: 9.2, fg: 48, score: 99, rarity: "legendary", trait: "LUKA MAGIC" },
-    { id: 452, espnId: 4066261, name: "Kyrie Irving", pos: "PG", pts: 25.6, ast: 5.2, reb: 5.0, fg: 49, score: 93, rarity: "legendary", trait: "UNCLE DREW" },
+    { id: 452, espnId: 6442, name: "Kyrie Irving", pos: "PG", pts: 25.6, ast: 5.2, reb: 5.0, fg: 49, score: 93, rarity: "legendary", trait: "UNCLE DREW" },
   ]},
   { id: "HOU", name: "Houston Rockets", city: "Houston", conf: "Ouest", color: "#CE1141", players: [
-    { id: 461, espnId: 4432807, name: "Alperen Şengün", pos: "C", pts: 21.1, ast: 5.0, reb: 9.3, fg: 53, score: 86, rarity: "epic", trait: "TURK" },
-    { id: 462, espnId: 4431765, name: "Jalen Green", pos: "SG", pts: 22.9, ast: 4.3, reb: 4.2, fg: 43, score: 84, rarity: "epic", trait: "BABY FACE" },
+    { id: 461, espnId: 4871144, name: "Alperen Şengün", pos: "C", pts: 21.1, ast: 5.0, reb: 9.3, fg: 53, score: 86, rarity: "epic", trait: "TURK" },
+    { id: 462, espnId: 4437244, name: "Jalen Green", pos: "SG", pts: 22.9, ast: 4.3, reb: 4.2, fg: 43, score: 84, rarity: "epic", trait: "BABY FACE" },
   ]},
   { id: "MEM", name: "Memphis Grizzlies", city: "Memphis", conf: "Ouest", color: "#5D76A9", players: [
-    { id: 471, espnId: 4278129, name: "Ja Morant", pos: "PG", pts: 25.1, ast: 8.1, reb: 5.6, fg: 47, score: 92, rarity: "legendary", trait: "JA TIME" },
+    { id: 471, espnId: 4279888, name: "Ja Morant", pos: "PG", pts: 25.1, ast: 8.1, reb: 5.6, fg: 47, score: 92, rarity: "legendary", trait: "JA TIME" },
   ]},
   { id: "NOP", name: "New Orleans Pelicans", city: "New Orleans", conf: "Ouest", color: "#0C2340", players: [
-    { id: 481, espnId: 4432174, name: "Zion Williamson", pos: "PF", pts: 22.9, ast: 5.0, reb: 5.8, fg: 57, score: 88, rarity: "epic", trait: "ZANOS" },
+    { id: 481, espnId: 4395628, name: "Zion Williamson", pos: "PF", pts: 22.9, ast: 5.0, reb: 5.8, fg: 57, score: 88, rarity: "epic", trait: "ZANOS" },
   ]},
   { id: "SAS", name: "San Antonio Spurs", city: "San Antonio", conf: "Ouest", color: "#C4CED4", players: [
-    { id: 491, espnId: 4432761, name: "Victor Wembanyama", pos: "C", pts: 21.4, ast: 3.9, reb: 10.6, fg: 46, score: 95, rarity: "legendary", trait: "WEMBY" },
+    { id: 491, espnId: 5104157, name: "Victor Wembanyama", pos: "C", pts: 21.4, ast: 3.9, reb: 10.6, fg: 46, score: 95, rarity: "legendary", trait: "WEMBY" },
   ]},
 ];
 
 const LEGEND_CARDS = [
-  { id: 101, espnId: 1439, name: "Michael Jordan", pos: "SG", team: "Chicago Bulls", era: "1984-1998", pts: 30.1, ast: 5.3, reb: 6.2, fg: 49.7, score: 100, rarity: "gold", trait: "LE PLUS GRAND", titles: 6 },
-  { id: 102, espnId: 1487, name: "Magic Johnson", pos: "PG", team: "L.A. Lakers", era: "1979-1996", pts: 19.5, ast: 11.2, reb: 7.2, fg: 52, score: 99, rarity: "gold", trait: "SHOWTIME", titles: 5 },
-  { id: 103, espnId: 1752, name: "Larry Bird", pos: "SF", team: "Boston Celtics", era: "1979-1992", pts: 24.3, ast: 6.3, reb: 10.0, fg: 49.6, score: 98, rarity: "gold", trait: "THE HICK", titles: 3 },
-  { id: 104, espnId: 2440, name: "Kobe Bryant", pos: "SG", team: "L.A. Lakers", era: "1996-2016", pts: 25.0, ast: 4.7, reb: 5.2, fg: 44.7, score: 98, rarity: "gold", trait: "MAMBA", titles: 5 },
+  { id: 101, espnId: 1035, photo: "https://cdn.nba.com/headshots/nba/latest/1040x760/893.png", name: "Michael Jordan", pos: "SG", team: "Chicago Bulls", era: "1984-1998", pts: 30.1, ast: 5.3, reb: 6.2, fg: 49.7, score: 100, rarity: "gold", trait: "LE PLUS GRAND", titles: 6 },
+  { id: 102, espnId: 2334, photo: "https://cdn.nba.com/headshots/nba/latest/1040x760/77142.png", name: "Magic Johnson", pos: "PG", team: "L.A. Lakers", era: "1979-1996", pts: 19.5, ast: 11.2, reb: 7.2, fg: 52, score: 99, rarity: "gold", trait: "SHOWTIME", titles: 5 },
+  { id: 103, espnId: 2335, photo: "https://cdn.nba.com/headshots/nba/latest/1040x760/1449.png", name: "Larry Bird", pos: "SF", team: "Boston Celtics", era: "1979-1992", pts: 24.3, ast: 6.3, reb: 10.0, fg: 49.6, score: 98, rarity: "gold", trait: "THE HICK", titles: 3 },
+  { id: 104, espnId: 110, name: "Kobe Bryant", pos: "SG", team: "L.A. Lakers", era: "1996-2016", pts: 25.0, ast: 4.7, reb: 5.2, fg: 44.7, score: 98, rarity: "gold", trait: "MAMBA", titles: 5 },
   { id: 105, espnId: 614, name: "Shaquille O'Neal", pos: "C", team: "L.A. Lakers", era: "1992-2011", pts: 23.7, ast: 2.5, reb: 10.9, fg: 58.2, score: 97, rarity: "gold", trait: "SUPERMAN", titles: 4 },
-  { id: 106, espnId: 1505, name: "Kareem Abdul-Jabbar", pos: "C", team: "L.A. Lakers", era: "1969-1989", pts: 24.6, ast: 3.6, reb: 11.2, fg: 55.9, score: 99, rarity: "gold", trait: "SKYHOOK", titles: 6 },
+  { id: 106, espnId: 4145, photo: "https://cdn.nba.com/headshots/nba/latest/1040x760/76003.png", name: "Kareem Abdul-Jabbar", pos: "C", team: "L.A. Lakers", era: "1969-1989", pts: 24.6, ast: 3.6, reb: 11.2, fg: 55.9, score: 99, rarity: "gold", trait: "SKYHOOK", titles: 6 },
 ];
 
 const PACKS = [
@@ -140,11 +140,12 @@ const PACKS = [
 
 const ALL_PLAYERS = NBA_TEAMS.flatMap(t => t.players.map(p => ({ ...p, team: t.name, teamId: t.id, teamColor: t.color })));
 
-function PlayerPhoto({ espnId, name, size }) {
+function PlayerPhoto({ espnId, photo, name, size }) {
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
   const initials = name.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
-  const url = `https://a.espncdn.com/combiner/i?img=/i/headshots/nba/players/full/${espnId}.png&w=350&h=254`;
+  // photo override (ex: légendes via NBA.com), sinon headshot ESPN
+  const url = photo || `https://a.espncdn.com/combiner/i?img=/i/headshots/nba/players/full/${espnId}.png&w=350&h=254`;
   return (
     <div style={{ width: size, height: size * 0.85, position: "relative", overflow: "hidden" }}>
       {!loaded && !error && <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: size * 0.28, fontWeight: 900, color: "rgba(255,255,255,0.2)" }}>{initials}</div>}
@@ -192,7 +193,7 @@ function HoloCard({ card, size = "normal", onClick }) {
             <div style={{ position: "absolute", inset: 0, background: `radial-gradient(ellipse at 50% 110%,${r.color}15 0%,transparent 60%)` }} />
             <div style={{ position: "absolute", top: 5, right: 5, width: size === "small" ? 20 : 28, height: size === "small" ? 20 : 28, borderRadius: "50%", background: isGold ? "linear-gradient(135deg,#ffd700,#ff8c00)" : r.color, display: "flex", alignItems: "center", justifyContent: "center", fontSize: size === "small" ? 7 : 10, fontWeight: 900, color: isGold ? "#1a0800" : "#fff", fontFamily: "monospace" }}>{card.score}</div>
             {card.titles > 0 && <div style={{ position: "absolute", bottom: 4, left: 4, fontSize: size === "small" ? 5 : 8, color: "#ffd700", fontWeight: 800, background: "rgba(0,0,0,0.8)", padding: "1px 5px", borderRadius: 3 }}>🏆×{card.titles}</div>}
-            <PlayerPhoto espnId={card.espnId} name={card.name} size={w - (size === "small" ? 14 : 22)} />
+            <PlayerPhoto espnId={card.espnId} photo={card.photo} name={card.name} size={w - (size === "small" ? 14 : 22)} />
           </div>
           <div style={{ textAlign: "center", marginBottom: size === "small" ? 3 : 5 }}>
             <div style={{ fontSize: size === "small" ? 8 : 11, fontWeight: 900, color: "#fff", lineHeight: 1.2, textShadow: isGold ? "0 0 20px #ffd700" : `0 0 15px ${r.color}` }}>{card.name}</div>
