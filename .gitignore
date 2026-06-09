@@ -23,3 +23,8 @@ dist-ssr
 *.sln
 *.sw?
 .vercel
+
+# secrets — ne jamais committer
+.env
+.env.local
+.env.*.local
