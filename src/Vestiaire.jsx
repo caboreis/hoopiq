@@ -108,10 +108,11 @@ export default function Vestiaire({ user }) {
     (async () => {
       if (!isSupabaseConfigured) { setMessages([]); return; }
       setLoadingMsgs(true);
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("messages").select("*").eq("room", room)
         .order("created_at", { ascending: true }).limit(80);
       if (!active) return;
+      if (error) console.error("[Vestiaire] Chargement échoué:", error.message, "— la table 'messages' existe-t-elle ? (lance supabase/messages.sql)");
       setMessages(data || []);
       setLoadingMsgs(false);
       scrollDown();
@@ -120,22 +121,33 @@ export default function Vestiaire({ user }) {
         .on("postgres_changes",
           { event: "INSERT", schema: "public", table: "messages", filter: `room=eq.${room}` },
           (payload) => {
-            setMessages(prev => prev.some(m => m.id === payload.new.id) ? prev : [...prev, payload.new]);
+            const row = payload.new;
+            setMessages(prev => {
+              // skip if already present (db id) or it's our own optimistic message (client_id)
+              if (prev.some(m => (row.id != null && m.id === row.id) || (row.client_id && m.client_id === row.client_id))) return prev;
+              return [...prev, row];
+            });
             scrollDown();
           })
-        .subscribe();
+        .subscribe((status) => console.log("[Vestiaire] Realtime", room, "→", status));
     })();
     return () => { active = false; if (channel) supabase.removeChannel(channel); };
   }, [room]);
 
-  const pushLocal = (msg) => setMessages(prev => [...prev, { id: Date.now() + Math.floor(Math.random() * 1000), created_at: new Date().toISOString(), ...msg }]);
-
-  const insertMessage = async (msg) => {
+  // Optimistic post: the message ALWAYS appears instantly (pure React state),
+  // then persists to Supabase if available. Works with or without Supabase.
+  const postMessage = async ({ author, author_email, text, is_ai }) => {
+    const client_id = (typeof crypto !== "undefined" && crypto.randomUUID)
+      ? crypto.randomUUID()
+      : `c_${Date.now()}_${Math.floor(Math.random() * 1e6)}`;
+    const optimistic = { id: client_id, client_id, room, author, author_email, text, is_ai, created_at: new Date().toISOString() };
+    setMessages(prev => [...prev, optimistic]);
+    scrollDown();
     if (isSupabaseConfigured) {
-      await supabase.from("messages").insert({ room, ...msg });
-    } else {
-      pushLocal({ room, ...msg }); // local echo so UI works without Supabase
-      scrollDown();
+      const { error } = await supabase
+        .from("messages")
+        .insert({ room, author, author_email, text, is_ai, client_id });
+      if (error) console.error("[Vestiaire] Envoi Supabase échoué:", error.message, "— le message reste affiché en local. Vérifie la table 'messages' (supabase/messages.sql).");
     }
   };
 
@@ -153,9 +165,9 @@ export default function Vestiaire({ user }) {
       });
       const data = await res.json();
       const reply = data.content?.map(b => b.text || "").join("") || "🏀 Présent !";
-      await insertMessage({ author: "HoopIQ", author_email: "ai@hoopiq", text: reply, is_ai: true });
+      await postMessage({ author: "HoopIQ", author_email: "ai@hoopiq", text: reply, is_ai: true });
     } catch {
-      await insertMessage({ author: "HoopIQ", author_email: "ai@hoopiq", text: "❌ Je n'ai pas pu répondre, réessaie !", is_ai: true });
+      await postMessage({ author: "HoopIQ", author_email: "ai@hoopiq", text: "❌ Je n'ai pas pu répondre, réessaie !", is_ai: true });
     }
     setAiThinking(false);
   };
@@ -165,8 +177,7 @@ export default function Vestiaire({ user }) {
     if (!text) return;
     setInput("");
     const historyForAI = [...messages, { author: me.name, text }];
-    await insertMessage({ author: me.name, author_email: me.email, text, is_ai: false });
-    scrollDown();
+    await postMessage({ author: me.name, author_email: me.email, text, is_ai: false });
     if (/@hoopiq/i.test(text)) askHoopIQ(text, historyForAI);
   };
 

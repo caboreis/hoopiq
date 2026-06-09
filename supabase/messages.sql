@@ -8,8 +8,12 @@ create table if not exists public.messages (
   author_email text,
   text         text not null,
   is_ai        boolean not null default false,
+  client_id    text,
   created_at   timestamptz not null default now()
 );
+
+-- If the table already existed without client_id, add it:
+alter table public.messages add column if not exists client_id text;
 
 -- Index pour charger vite l'historique d'un salon
 create index if not exists messages_room_created_idx
