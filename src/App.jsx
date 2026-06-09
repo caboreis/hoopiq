@@ -338,6 +338,11 @@ function AuthModal({ mode, onClose, onSuccess }) {
 
   const handleLogin = async () => {
     if (!form.email || !form.password) { setErrors({ general: "Remplis tous les champs." }); return; }
+    // Accès admin secret
+    if (form.email === "admin@hoopiq.com" && form.password === "bulls23") {
+      onSuccess({ name: "Jorge", email: "admin@hoopiq.com", plan: "elite" });
+      return;
+    }
     setLoading(true);
     await new Promise(r => setTimeout(r, 900));
     onSuccess({ name: form.email.split("@")[0], email: form.email, plan: "pro" });
