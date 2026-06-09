@@ -101,37 +101,47 @@ export default function Vestiaire({ user }) {
     return room;
   })();
 
-  // Load history + subscribe to realtime on room change
+  // Load history + subscribe to realtime on room change.
+  // Everything is guarded: a broken/unreachable Supabase must NEVER freeze the UI
+  // (otherwise loadingMsgs stays true and even local messages never render).
   useEffect(() => {
     let channel;
     let active = true;
     (async () => {
-      if (!isSupabaseConfigured) { setMessages([]); return; }
+      setMessages([]); // reset when switching rooms
+      if (!isSupabaseConfigured) return;
       setLoadingMsgs(true);
-      const { data, error } = await supabase
-        .from("messages").select("*").eq("room", room)
-        .order("created_at", { ascending: true }).limit(80);
-      if (!active) return;
-      if (error) console.error("[Vestiaire] Chargement échoué:", error.message, "— la table 'messages' existe-t-elle ? (lance supabase/messages.sql)");
-      setMessages(data || []);
-      setLoadingMsgs(false);
-      scrollDown();
-      channel = supabase
-        .channel(`vestiaire:${room}`)
-        .on("postgres_changes",
-          { event: "INSERT", schema: "public", table: "messages", filter: `room=eq.${room}` },
-          (payload) => {
-            const row = payload.new;
-            setMessages(prev => {
-              // skip if already present (db id) or it's our own optimistic message (client_id)
-              if (prev.some(m => (row.id != null && m.id === row.id) || (row.client_id && m.client_id === row.client_id))) return prev;
-              return [...prev, row];
-            });
-            scrollDown();
-          })
-        .subscribe((status) => console.log("[Vestiaire] Realtime", room, "→", status));
+      try {
+        const { data, error } = await supabase
+          .from("messages").select("*").eq("room", room)
+          .order("created_at", { ascending: true }).limit(80);
+        if (!active) return;
+        if (error) console.error("[Vestiaire] Chargement Supabase:", error.message, "— la table 'messages' existe-t-elle ? (lance supabase/messages.sql)");
+        else setMessages(data || []);
+      } catch (e) {
+        if (active) console.error("[Vestiaire] Supabase injoignable:", e?.message, "— vérifie VITE_SUPABASE_URL. Le chat reste utilisable en local.");
+      } finally {
+        if (active) { setLoadingMsgs(false); scrollDown(); }
+      }
+      try {
+        channel = supabase
+          .channel(`vestiaire:${room}`)
+          .on("postgres_changes",
+            { event: "INSERT", schema: "public", table: "messages", filter: `room=eq.${room}` },
+            (payload) => {
+              const row = payload.new;
+              setMessages(prev => {
+                if (prev.some(m => (row.id != null && m.id === row.id) || (row.client_id && m.client_id === row.client_id))) return prev;
+                return [...prev, row];
+              });
+              scrollDown();
+            })
+          .subscribe((status) => console.log("[Vestiaire] Realtime", room, "→", status));
+      } catch (e) {
+        console.error("[Vestiaire] Abonnement realtime échoué:", e?.message);
+      }
     })();
-    return () => { active = false; if (channel) supabase.removeChannel(channel); };
+    return () => { active = false; if (channel) { try { supabase.removeChannel(channel); } catch { /* noop */ } } };
   }, [room]);
 
   // Optimistic post: the message ALWAYS appears instantly (pure React state),
