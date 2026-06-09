@@ -621,6 +621,7 @@ function App({ user, onLogout }) {
         @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
         @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
         .nav-tab:hover { color: ${C.orange} !important; }
+        .nav-tabs::-webkit-scrollbar { height: 0; display: none; }
         .player-row:hover { background: rgba(255,92,0,0.06) !important; cursor:pointer; }
         .stat-card:hover { border-color: rgba(255,92,0,0.3) !important; transform:translateY(-2px); }
         .fade-in { animation: fadeUp .5s ease both; }
@@ -631,13 +632,13 @@ function App({ user, onLogout }) {
         <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 24, background: G.orange, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", letterSpacing: 3 }}>HOOP IQ</div>
 
         {/* Tabs */}
-        <div style={{ display: "flex", gap: 2 }}>
+        <div className="nav-tabs" style={{ display: "flex", gap: 1, flex: 1, minWidth: 0, overflowX: "auto", justifyContent: "center", margin: "0 8px" }}>
           {TABS.map(t => (
             <button key={t.id} className="nav-tab" onClick={() => setTab(t.id)} style={{
-              padding: "8px 14px", borderRadius: 8, border: "none", cursor: "pointer",
+              padding: "7px 9px", borderRadius: 8, border: "none", cursor: "pointer",
               background: tab === t.id ? "rgba(255,92,0,0.12)" : "transparent",
               color: tab === t.id ? C.orange : C.muted, fontWeight: tab === t.id ? 700 : 500,
-              fontSize: 13, transition: "all .2s", fontFamily: "'DM Sans', sans-serif",
+              fontSize: 12.5, transition: "all .2s", fontFamily: "'DM Sans', sans-serif", flexShrink: 0, whiteSpace: "nowrap",
               borderBottom: tab === t.id ? `2px solid ${C.orange}` : "2px solid transparent",
             }}>{t.icon} {t.label}</button>
           ))}
