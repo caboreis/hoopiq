@@ -25,9 +25,10 @@ function extractYouTubeId(url) {
 }
 
 const watchMeta = (status) => {
+  // Label always "Watch Live" for clarity; the search query still adapts to status.
   if (status === "live") return { label: "📺 Watch Live", kind: "live stream", live: true };
-  if (status === "final") return { label: "📺 Replay & Highlights", kind: "NBA highlights", live: false };
-  return { label: "📺 Aperçu / Preview", kind: "NBA preview", live: false };
+  if (status === "final") return { label: "📺 Watch Live", kind: "NBA highlights", live: false };
+  return { label: "📺 Watch Live", kind: "NBA preview", live: false };
 };
 
 function WatchLiveModal({ game, onClose }) {
@@ -53,7 +54,7 @@ function WatchLiveModal({ game, onClose }) {
       } catch { if (active) setStatus("none"); }
     })();
     return () => { active = false; };
-  }, [query]);
+  }, [query, meta.live]);
 
   const playManual = () => {
     const id = extractYouTubeId(manualUrl);
