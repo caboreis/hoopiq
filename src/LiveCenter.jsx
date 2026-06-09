@@ -24,6 +24,12 @@ function extractYouTubeId(url) {
   return /^[A-Za-z0-9_-]{11}$/.test(t) ? t : null;
 }
 
+const watchMeta = (status) => {
+  if (status === "live") return { label: "📺 Watch Live", kind: "live stream", live: true };
+  if (status === "final") return { label: "📺 Replay & Highlights", kind: "NBA highlights", live: false };
+  return { label: "📺 Aperçu / Preview", kind: "NBA preview", live: false };
+};
+
 function WatchLiveModal({ game, onClose }) {
   const [videoId, setVideoId] = useState(null);
   const [title, setTitle] = useState("");
@@ -31,14 +37,15 @@ function WatchLiveModal({ game, onClose }) {
   const [manualUrl, setManualUrl] = useState("");
   const [manualErr, setManualErr] = useState(false);
 
-  const query = `${game.home.name} vs ${game.away.name} live stream NBA`;
+  const meta = watchMeta(game.status);
+  const query = `${game.home.name} vs ${game.away.name} ${meta.kind} NBA`;
   const ytSearchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
 
   useEffect(() => {
     let active = true;
     (async () => {
       try {
-        const res = await fetch(`${API}/api/youtube/live?q=${encodeURIComponent(query)}`);
+        const res = await fetch(`${API}/api/youtube/live?q=${encodeURIComponent(query)}&live=${meta.live}`);
         const data = await res.json().catch(() => ({}));
         if (!active) return;
         if (res.ok && data.videoId) { setVideoId(data.videoId); setTitle(data.title || ""); setStatus("found"); }
@@ -60,10 +67,14 @@ function WatchLiveModal({ game, onClose }) {
         {/* Header */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 20px", borderBottom: `1px solid ${C.border}` }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <span style={{ display: "flex", alignItems: "center", gap: 6, padding: "3px 10px", background: "rgba(255,77,109,0.15)", borderRadius: 6, border: "1px solid rgba(255,77,109,0.3)" }}>
-              <span style={{ width: 6, height: 6, borderRadius: "50%", background: C.red, animation: "pulse 1s infinite" }} />
-              <span style={{ fontSize: 10, color: C.red, fontWeight: 800 }}>LIVE</span>
-            </span>
+            {game.status === "live" ? (
+              <span style={{ display: "flex", alignItems: "center", gap: 6, padding: "3px 10px", background: "rgba(255,77,109,0.15)", borderRadius: 6, border: "1px solid rgba(255,77,109,0.3)" }}>
+                <span style={{ width: 6, height: 6, borderRadius: "50%", background: C.red, animation: "pulse 1s infinite" }} />
+                <span style={{ fontSize: 10, color: C.red, fontWeight: 800 }}>LIVE</span>
+              </span>
+            ) : (
+              <span style={{ padding: "3px 10px", background: "rgba(255,255,255,0.06)", borderRadius: 6, fontSize: 10, color: C.muted, fontWeight: 800 }}>{game.status === "final" ? "REPLAY" : "PREVIEW"}</span>
+            )}
             <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 20, letterSpacing: 1 }}>
               <span style={{ color: game.home.color }}>{game.home.abbr}</span> <span style={{ color: C.muted }}>vs</span> <span style={{ color: game.away.color }}>{game.away.abbr}</span>
             </span>
@@ -465,13 +476,13 @@ export default function LiveCenter() {
                   </div>
                 </div>
                 <PredBar pct={game.prediction} home={game.home} away={game.away} />
-                {game.status === "live" && (
-                  <button onClick={(e) => { e.stopPropagation(); setWatchGame(game); }} style={{
-                    width: "100%", marginTop: 4, padding: "8px 0", borderRadius: 9, border: "1px solid rgba(255,77,109,0.35)",
-                    background: "rgba(255,77,109,0.1)", color: C.red, fontWeight: 800, fontSize: 12, cursor: "pointer", fontFamily: "inherit",
-                    display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
-                  }}>📺 Watch Live</button>
-                )}
+                <button onClick={(e) => { e.stopPropagation(); setWatchGame(game); }} style={{
+                  width: "100%", marginTop: 4, padding: "8px 0", borderRadius: 9,
+                  border: `1px solid ${game.status === "live" ? "rgba(255,77,109,0.35)" : C.border}`,
+                  background: game.status === "live" ? "rgba(255,77,109,0.1)" : "rgba(255,255,255,0.04)",
+                  color: game.status === "live" ? C.red : C.muted, fontWeight: 800, fontSize: 12, cursor: "pointer", fontFamily: "inherit",
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                }}>{watchMeta(game.status).label}</button>
               </div>
             );
           })}
@@ -498,13 +509,13 @@ export default function LiveCenter() {
                 <div style={{ marginTop: 16 }}>
                   <PredBar pct={winPct} home={selectedGame.home} away={selectedGame.away} label={winLabel} />
                 </div>
-                {selectedGame.status === "live" && (
-                  <button onClick={() => setWatchGame(selectedGame)} style={{
-                    width: "100%", marginTop: 14, padding: "11px 0", borderRadius: 11, border: "1px solid rgba(255,77,109,0.4)",
-                    background: "linear-gradient(135deg, rgba(255,77,109,0.18), rgba(255,92,0,0.12))", color: "#fff", fontWeight: 800, fontSize: 14,
-                    cursor: "pointer", fontFamily: "inherit", display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                  }}>📺 Watch Live — {selectedGame.home.abbr} vs {selectedGame.away.abbr}</button>
-                )}
+                <button onClick={() => setWatchGame(selectedGame)} style={{
+                  width: "100%", marginTop: 14, padding: "11px 0", borderRadius: 11,
+                  border: `1px solid ${selectedGame.status === "live" ? "rgba(255,77,109,0.4)" : "rgba(255,255,255,0.12)"}`,
+                  background: selectedGame.status === "live" ? "linear-gradient(135deg, rgba(255,77,109,0.18), rgba(255,92,0,0.12))" : "rgba(255,255,255,0.05)",
+                  color: "#fff", fontWeight: 800, fontSize: 14,
+                  cursor: "pointer", fontFamily: "inherit", display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                }}>{watchMeta(selectedGame.status).label} — {selectedGame.home.abbr} vs {selectedGame.away.abbr}</button>
               </div>
 
               {/* AI Comment */}
