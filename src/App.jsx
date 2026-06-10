@@ -1053,38 +1053,78 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
 
             <div style={{ display: "grid", gridTemplateColumns: "1.3fr 0.7fr", gap: 20, marginBottom: 20 }}>
               <Card>
-                <SectionTitle>🏀 NBA Live</SectionTitle>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+                  <SectionTitle style={{ margin: 0 }}>🏀 NBA · WNBA Live</SectionTitle>
+                  {[...liveScores, ...wnbaScores].filter(g => g.status === "live" || g.status?.toLowerCase().includes("live")).length > 0 && (
+                    <span style={{ fontSize: 10, fontWeight: 800, color: C.red, letterSpacing: 1, display: "flex", alignItems: "center", gap: 5 }}>
+                      <span style={{ width: 6, height: 6, borderRadius: "50%", background: C.red, animation: "pulse 1.2s infinite", display: "inline-block" }} />
+                      {[...liveScores, ...wnbaScores].filter(g => g.status === "live" || g.status?.toLowerCase().includes("live")).length} EN DIRECT
+                    </span>
+                  )}
+                </div>
                 {nbaLoading ? (
-                  <div style={{ color: C.muted, fontSize: 13 }}>Chargement des scores en direct...</div>
+                  <div style={{ color: C.muted, fontSize: 13 }}>Chargement des scores...</div>
                 ) : nbaError ? (
                   <div style={{ color: C.red, fontSize: 13 }}>{nbaError}</div>
+                ) : [...liveScores, ...wnbaScores].length === 0 ? (
+                  <div style={{ color: C.muted, fontSize: 13, textAlign: "center", padding: "20px 0" }}>
+                    <div style={{ fontSize: 28, marginBottom: 8 }}>🏀</div>
+                    Aucun match aujourd'hui
+                  </div>
                 ) : (
-                  <div>
-                    {liveScores.length === 0 ? (
-                      <div style={{ color: C.muted, fontSize: 13 }}>Aucun match disponible pour le moment.</div>
-                    ) : (
-                      liveScores.map(game => (
-                        <div key={game.id} style={{ padding: "12px 14px", borderRadius: 12, background: 'rgba(255,255,255,0.03)', border: `1px solid ${C.border}`, marginBottom: 10, borderLeft: `3px solid ${game.status?.toLowerCase().includes("live") ? C.red : C.border}`, transition: "all .2s" }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                    {[...liveScores, ...wnbaScores].map(game => {
+                      const isLive = game.status === "live" || game.status?.toLowerCase().includes("live");
+                      const isFinal = game.status === "Final" || game.status?.includes("Final");
+                      const isWnba = game.league === "wnba";
+                      const homeWin = isFinal && Number(game.home.score) > Number(game.away.score);
+                      const awayWin = isFinal && Number(game.away.score) > Number(game.home.score);
+                      return (
+                        <div key={game.id} onClick={() => setTab("live")} style={{
+                          padding: "14px 16px", borderRadius: 14, cursor: "pointer", transition: "all .2s",
+                          background: isLive ? "rgba(255,77,109,0.06)" : "rgba(255,255,255,0.03)",
+                          border: `1px solid ${isLive ? "rgba(255,77,109,0.3)" : C.border}`,
+                          borderLeft: `3px solid ${isLive ? C.red : isFinal ? C.green : C.muted}`,
+                        }}
+                          onMouseEnter={e => e.currentTarget.style.background = "rgba(255,92,0,0.07)"}
+                          onMouseLeave={e => e.currentTarget.style.background = isLive ? "rgba(255,77,109,0.06)" : "rgba(255,255,255,0.03)"}
+                        >
+                          {/* Status + horloge */}
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
                             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                              {game.status?.toLowerCase().includes("live") && <span style={{ width: 6, height: 6, borderRadius: "50%", background: C.red, animation: "pulse 1.2s infinite", display: "inline-block" }} />}
-                              <span style={{ fontSize: 11, color: game.status?.toLowerCase().includes("live") ? C.red : C.muted, fontWeight: game.status?.toLowerCase().includes("live") ? 700 : 400, textTransform: "uppercase", letterSpacing: 0.5 }}>{game.status}</span>
+                              {isWnba && <span style={{ fontSize: 9, fontWeight: 800, color: "#c084fc", background: "rgba(192,132,252,0.12)", padding: "1px 6px", borderRadius: 4, border: "1px solid rgba(192,132,252,0.25)" }}>🌸 WNBA</span>}
+                              {isLive && <span style={{ width: 6, height: 6, borderRadius: "50%", background: C.red, animation: "pulse 1.2s infinite", display: "inline-block" }} />}
+                              <span style={{ fontSize: 10, fontWeight: 700, color: isLive ? C.red : isFinal ? C.green : C.muted, textTransform: "uppercase", letterSpacing: 1 }}>
+                                {isLive ? "EN DIRECT" : isFinal ? "TERMINÉ" : game.status}
+                              </span>
                             </div>
-                            <div style={{ fontSize: 11, color: C.orange, fontFamily: "monospace" }}>{game.clock}</div>
+                            <span style={{ fontSize: 11, color: C.orange, fontFamily: "monospace", fontWeight: 700 }}>{game.clock}</span>
                           </div>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
-                            <div style={{ flex: 1 }}>
-                              <div style={{ fontWeight: 700, fontSize: 13 }}>{game.home.name}</div>
-                              <div style={{ fontSize: 12, color: C.muted }}>{game.away.name}</div>
+
+                          {/* Équipes + score */}
+                          <div style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", alignItems: "center", gap: 8 }}>
+                            <div>
+                              <div style={{ fontWeight: homeWin ? 800 : 600, fontSize: 13, color: homeWin ? C.text : C.muted }}>{game.home.name || game.home.abbreviation}</div>
+                              <div style={{ fontSize: 10, color: C.muted, marginTop: 2 }}>{game.home.abbreviation} · Domicile</div>
                             </div>
-                            <div style={{ textAlign: 'right' }}>
-                              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 26, color: C.text, letterSpacing: 1 }}>{game.home.score} <span style={{ color: C.muted, fontSize: 18 }}>—</span> {game.away.score}</div>
-                              <div style={{ fontSize: 10, color: C.muted, letterSpacing: 1 }}>{game.home.abbreviation} vs {game.away.abbreviation}</div>
+                            <div style={{ textAlign: "center", padding: "4px 12px", background: "rgba(255,255,255,0.04)", borderRadius: 10, minWidth: 90 }}>
+                              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 28, letterSpacing: 2, lineHeight: 1 }}>
+                                <span style={{ color: homeWin ? C.orange : C.text }}>{game.home.score}</span>
+                                <span style={{ color: C.muted, fontSize: 18, margin: "0 4px" }}>–</span>
+                                <span style={{ color: awayWin ? C.orange : C.text }}>{game.away.score}</span>
+                              </div>
+                              {isLive && <div style={{ fontSize: 9, color: C.red, letterSpacing: 1, marginTop: 2 }}>● LIVE</div>}
+                            </div>
+                            <div style={{ textAlign: "right" }}>
+                              <div style={{ fontWeight: awayWin ? 800 : 600, fontSize: 13, color: awayWin ? C.text : C.muted }}>{game.away.name || game.away.abbreviation}</div>
+                              <div style={{ fontSize: 10, color: C.muted, marginTop: 2 }}>{game.away.abbreviation} · Extérieur</div>
                             </div>
                           </div>
+
+                          <div style={{ marginTop: 10, fontSize: 10, color: C.muted, textAlign: "right" }}>Voir le box score complet →</div>
                         </div>
-                      ))
-                    )}
+                      );
+                    })}
                   </div>
                 )}
               </Card>
