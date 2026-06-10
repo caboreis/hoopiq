@@ -171,8 +171,9 @@ function SectionTitle({ children }) {
    HOOPIQ RADIO
 ───────────────────────────────────────── */
 const RADIO_STREAMS = [
-  { url: "https://streaming.live365.com/a05222",      name: "Hip Hop Old School", emoji: "🎤" },
-  { url: "https://ice2.somafm.com/hiphop-128-mp3",    name: "SomaFM Hip Hop",     emoji: "🏀" },
+  { url: "https://ice9.somafm.com/groovesalad-128-mp3",      name: "Groove Salad",  emoji: "🎧" },
+  { url: "https://ice9.somafm.com/u80s-128-mp3",             name: "Underground 80s", emoji: "🔥" },
+  { url: "https://streams.radiomast.io/breakbeat-fm",        name: "Breakbeat FM",  emoji: "🏀" },
 ];
 
 function HoopiqRadio() {
