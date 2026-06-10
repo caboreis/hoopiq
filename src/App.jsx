@@ -708,6 +708,7 @@ function App({ user, onLogout }) {
   const [chatLoading, setChatLoading] = useState(false);
   const [bullsPlayers, setBullsPlayers] = useState([]);
   const [liveScores, setLiveScores] = useState([]);
+  const [wnbaLiveCount, setWnbaLiveCount] = useState(0);
   const [nbaLoading, setNbaLoading] = useState(true);
   const [nbaError, setNbaError] = useState(null);
   const anthopicProxy = (import.meta.env.DEV ? 'http://localhost:3001' : '') + '/api/anthropic'
@@ -745,6 +746,11 @@ function App({ user, onLogout }) {
         setBullsPlayers(loadedPlayers)
         setSelectedPlayer(prev => (prev && prev.team === 'Chicago Bulls' ? prev : (loadedPlayers[0] || prev)))
         setLiveScores(scoresData.games || [])
+        // Fetch WNBA live count en parallèle
+        fetch("https://site.api.espn.com/apis/site/v2/sports/basketball/wnba/scoreboard")
+          .then(r => r.json())
+          .then(d => setWnbaLiveCount((d.events || []).filter(e => e.status?.type?.id === "2").length))
+          .catch(() => {});
       } catch (err) {
         console.error('NBA fetch error:', err)
         setNbaError(err.message)
@@ -830,7 +836,7 @@ function App({ user, onLogout }) {
 
   const TABS = [
     { id: "dashboard", label: "Dashboard", icon: "⚡" },
-    { id: "live",      label: "Live",      icon: "🔴", badge: liveScores.filter(g => g.status === "live" || g.status?.toLowerCase().includes("live")).length || null },
+    { id: "live",      label: "Live",      icon: "🔴", badge: (liveScores.filter(g => g.status === "live" || g.status?.toLowerCase().includes("live")).length + wnbaLiveCount) || null },
     { id: "oracle",    label: "Oracle",    icon: "🔮" },
     { id: "prematch",  label: "Pronostics", icon: "⚡" },
     { sep: true },

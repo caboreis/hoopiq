@@ -373,7 +373,7 @@ export default function Cards() {
           <div style={{ textAlign: "center" }}>
             <div style={{ fontFamily: "'Bebas Neue',cursive", fontSize: 32, color: RARITY[selectedCard.rarity].color, letterSpacing: 2 }}>{selectedCard.name}</div>
             <div style={{ fontSize: 13, color: "#888" }}>{RARITY[selectedCard.rarity].label} · Score {selectedCard.score}/100</div>
-            {selectedCard.titles > 0 && <div style={{ fontSize: 14, color: "#ffd700", marginTop: 4 }}>🏆 {selectedCard.titles} titres NBA</div>}
+            {selectedCard.titles > 0 && <div style={{ fontSize: 14, color: "#ffd700", marginTop: 4 }}>🏆 {selectedCard.titles} titre{selectedCard.titles > 1 ? "s" : ""} {selectedCard.league === "wnba" ? "WNBA" : "NBA"}</div>}
           </div>
           <button onClick={() => setSelectedCard(null)} style={{ padding: "10px 26px", borderRadius: 10, border: "1px solid #333", background: "transparent", color: "#666", cursor: "pointer" }}>Fermer</button>
         </div>
@@ -476,7 +476,7 @@ export default function Cards() {
                 ["New York Liberty", "🩵 Liberty"],
                 ["Chicago Sky", "🔵 Sky"],
                 ["Minnesota Lynx", "🐾 Lynx"],
-                ["Connecticut Sun", "🌞 Sun"],
+                ["Phoenix Mercury", "🌞 Mercury"],
                 ["Atlanta Dream", "🌸 Dream"],
                 ["Seattle Storm", "⚡ Storm"],
                 ["Los Angeles Sparks", "💜 Sparks"],
@@ -597,7 +597,7 @@ export default function Cards() {
           <div>
             <h1 style={{ fontFamily: "'Bebas Neue',cursive", fontSize: 40, letterSpacing: 2, marginBottom: 8 }}>OUVRIR DES <span style={{ color: "#ff5c00" }}>PACKS</span></h1>
             <p style={{ color: "#6b7280", fontSize: 13, marginBottom: 32 }}>Obtiens les stars NBA · les joueuses WNBA · et les légendes OR 🏆</p>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 20, marginBottom: 36 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(260px,1fr))", gap: 20, marginBottom: 36 }}>
               {PACKS.map(pack => (
                 <div key={pack.id} className="pack-h" onClick={() => setOpenPack(pack)} style={{ background: pack.id === "legend" ? "linear-gradient(160deg,#1a1000,#3d2800)" : `linear-gradient(160deg,rgba(0,0,0,0.9),${pack.color}20)`, border: `2px solid ${pack.color}${pack.id === "legend" ? "cc" : "50"}`, borderRadius: 20, padding: 28, textAlign: "center", cursor: "pointer", transition: "all .3s", animation: pack.id === "legend" ? "gp 3s ease-in-out infinite" : "none" }}>
                   {pack.id === "legend" && <div style={{ fontSize: 11, color: "#ffd700", fontWeight: 800, letterSpacing: 2, marginBottom: 8 }}>✦ ÉDITION LIMITÉE ✦</div>}

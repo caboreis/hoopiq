@@ -504,6 +504,11 @@ export default function LiveCenter() {
     return () => { active = false; clearInterval(interval); };
   }, []);
 
+  // Sync selectedLeague quand le jeu sélectionné change (ex: WNBA charge avant NBA)
+  useEffect(() => {
+    if (selectedGame) setSelectedLeague(selectedGame.league || "nba");
+  }, [selectedGame?.id]);
+
   // ---- Fetch WNBA games + poll ----
   useEffect(() => {
     let active = true;
