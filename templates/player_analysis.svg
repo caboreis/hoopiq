@@ -1,0 +1,91 @@
+<svg width="1080" height="1080" viewBox="0 0 1080 1080" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <radialGradient id="bgGlow" cx="50%" cy="0%" r="70%">
+    <stop offset="0%"   stop-color="#1a0800"/>
+    <stop offset="100%" stop-color="#06060f"/>
+  </radialGradient>
+  <linearGradient id="orangeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+    <stop offset="0%"   stop-color="#ff5c00"/>
+    <stop offset="100%" stop-color="#ff8c42"/>
+  </linearGradient>
+  <clipPath id="avatarClip">
+    <circle cx="540" cy="270" r="130"/>
+  </clipPath>
+</defs>
+
+<!-- Fond -->
+<rect width="1080" height="1080" fill="url(#bgGlow)"/>
+
+<!-- Bande top -->
+<rect x="0" y="0" width="1080" height="10" fill="url(#orangeGrad)"/>
+<!-- Bande bottom -->
+<rect x="0" y="1070" width="1080" height="10" fill="url(#orangeGrad)"/>
+
+<!-- Cercle avatar fond -->
+<circle cx="540" cy="270" r="138" fill="#1a1a2e" stroke="#ff5c00" stroke-width="4"/>
+
+<!-- Initiales joueur -->
+<text x="540" y="295" font-family="Arial Black,Impact,sans-serif" font-size="90" font-weight="900"
+  text-anchor="middle" fill="#ff5c00">{{INITIALS}}</text>
+
+<!-- Badge ANALYSE IA -->
+<rect x="430" y="418" width="220" height="38" rx="19" fill="#ff5c00"/>
+<text x="540" y="443" font-family="Arial,sans-serif" font-size="17" font-weight="800"
+  text-anchor="middle" fill="#ffffff" letter-spacing="3">🤖 ANALYSE IA</text>
+
+<!-- Nom joueur -->
+<text x="540" y="522" font-family="Arial Black,Impact,sans-serif" font-size="72" font-weight="900"
+  text-anchor="middle" fill="#f0f0ff" letter-spacing="2">{{PLAYER_NAME}}</text>
+
+<!-- Équipe · Poste -->
+<text x="540" y="568" font-family="Arial,sans-serif" font-size="28" font-weight="600"
+  text-anchor="middle" fill="#6b6b88">{{TEAM}}  ·  {{POSITION}}</text>
+
+<!-- Ligne séparatrice -->
+<line x1="100" y1="600" x2="980" y2="600" stroke="#ff5c00" stroke-width="1.5" opacity="0.4"/>
+
+<!-- Stats — 4 colonnes -->
+<g font-family="Arial Black,Impact,sans-serif" text-anchor="middle">
+  <!-- PTS -->
+  <text x="188" y="680" font-size="72" font-weight="900" fill="#ff5c00">{{PTS}}</text>
+  <text x="188" y="716" font-size="22" fill="#6b6b88" font-family="Arial,sans-serif" font-weight="600">PTS</text>
+  <!-- AST -->
+  <text x="404" y="680" font-size="72" font-weight="900" fill="#4fa3ff">{{AST}}</text>
+  <text x="404" y="716" font-size="22" fill="#6b6b88" font-family="Arial,sans-serif" font-weight="600">AST</text>
+  <!-- REB -->
+  <text x="676" y="680" font-size="72" font-weight="900" fill="#22d37a">{{REB}}</text>
+  <text x="676" y="716" font-size="22" fill="#6b6b88" font-family="Arial,sans-serif" font-weight="600">REB</text>
+  <!-- FG% -->
+  <text x="892" y="680" font-size="72" font-weight="900" fill="#f5c842">{{FG}}%</text>
+  <text x="892" y="716" font-size="22" fill="#6b6b88" font-family="Arial,sans-serif" font-weight="600">FG%</text>
+</g>
+
+<!-- Séparateurs stats -->
+<line x1="296" y1="630" x2="296" y2="720" stroke="#ffffff" stroke-width="1" opacity="0.1"/>
+<line x1="540" y1="630" x2="540" y2="720" stroke="#ffffff" stroke-width="1" opacity="0.1"/>
+<line x1="784" y1="630" x2="784" y2="720" stroke="#ffffff" stroke-width="1" opacity="0.1"/>
+
+<!-- Score HoopIQ -->
+<circle cx="540" cy="808" r="58" fill="none" stroke="#ff5c00" stroke-width="5"/>
+<text x="540" y="800" font-family="Arial Black,Impact,sans-serif" font-size="44" font-weight="900"
+  text-anchor="middle" fill="#ff5c00">{{SCORE}}</text>
+<text x="540" y="828" font-family="Arial,sans-serif" font-size="16" font-weight="700"
+  text-anchor="middle" fill="#6b6b88" letter-spacing="1">SCORE HOOPIQ</text>
+
+<!-- Analyse IA texte -->
+<foreignObject x="80" y="888" width="920" height="120">
+  <body xmlns="http://www.w3.org/1999/xhtml">
+    <p style="font-family:Arial,sans-serif;font-size:24px;color:#ccccdd;text-align:center;line-height:1.5;margin:0">{{ANALYSIS}}</p>
+  </body>
+</foreignObject>
+
+<!-- Hashtags -->
+<text x="540" y="1038" font-family="Arial,sans-serif" font-size="20" font-weight="600"
+  text-anchor="middle" fill="#ff5c00" opacity="0.8">{{HASHTAGS}}</text>
+
+<!-- Logo watermark -->
+<text x="54" y="46" font-family="Arial Black,Impact,sans-serif" font-size="28" font-weight="900"
+  fill="#ff5c00" letter-spacing="4" opacity="0.9">HOOP IQ</text>
+<text x="1026" y="46" font-family="Arial,sans-serif" font-size="18" font-weight="700"
+  text-anchor="end" fill="#6b6b88">@hoopiq_officiel</text>
+</svg>

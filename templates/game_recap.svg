@@ -1,0 +1,88 @@
+<svg width="1080" height="1080" viewBox="0 0 1080 1080" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <radialGradient id="bgGlow" cx="50%" cy="30%" r="80%">
+    <stop offset="0%"   stop-color="#140a00"/>
+    <stop offset="100%" stop-color="#06060f"/>
+  </radialGradient>
+  <linearGradient id="orangeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+    <stop offset="0%"   stop-color="#ff5c00"/>
+    <stop offset="100%" stop-color="#ff8c42"/>
+  </linearGradient>
+  <linearGradient id="winGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+    <stop offset="0%"   stop-color="#ff5c00" stop-opacity="0.25"/>
+    <stop offset="100%" stop-color="#ff5c00" stop-opacity="0"/>
+  </linearGradient>
+  <linearGradient id="loseGrad" x1="100%" y1="0%" x2="0%" y2="0%">
+    <stop offset="0%"   stop-color="#ff5c00" stop-opacity="0.25"/>
+    <stop offset="100%" stop-color="#ff5c00" stop-opacity="0"/>
+  </linearGradient>
+</defs>
+
+<rect width="1080" height="1080" fill="url(#bgGlow)"/>
+<rect x="0" y="0"    width="1080" height="10" fill="url(#orangeGrad)"/>
+<rect x="0" y="1070" width="1080" height="10" fill="url(#orangeGrad)"/>
+
+<!-- Logo -->
+<text x="54" y="68" font-family="Arial Black,Impact,sans-serif" font-size="32" font-weight="900"
+  fill="#ff5c00" letter-spacing="4">HOOP IQ</text>
+<text x="1026" y="68" font-family="Arial,sans-serif" font-size="20" font-weight="700"
+  text-anchor="end" fill="#6b6b88">@hoopiq_officiel</text>
+
+<!-- Badge statut -->
+<rect x="390" y="96" width="300" height="48" rx="24" fill="#ff5c00"/>
+<text x="540" y="128" font-family="Arial,sans-serif" font-size="22" font-weight="900"
+  text-anchor="middle" fill="#ffffff" letter-spacing="3">{{STATUS}}</text>
+
+<!-- Date -->
+<text x="540" y="196" font-family="Arial,sans-serif" font-size="24"
+  text-anchor="middle" fill="#6b6b88">{{DATE}}</text>
+
+<!-- Équipe HOME -->
+<rect x="0" y="220" width="480" height="420" fill="url(#winGrad)"/>
+<text x="240" y="380" font-family="Arial Black,Impact,sans-serif" font-size="54" font-weight="900"
+  text-anchor="middle" fill="#f0f0ff" letter-spacing="1">{{HOME_ABBR}}</text>
+<text x="240" y="440" font-family="Arial,sans-serif" font-size="22"
+  text-anchor="middle" fill="#6b6b88">{{HOME_NAME}}</text>
+<text x="240" y="554" font-family="Arial Black,Impact,sans-serif" font-size="148" font-weight="900"
+  text-anchor="middle" fill="{{HOME_COLOR}}">{{HOME_SCORE}}</text>
+
+<!-- VS central -->
+<text x="540" y="490" font-family="Arial Black,Impact,sans-serif" font-size="36" font-weight="900"
+  text-anchor="middle" fill="#ff5c00" opacity="0.6">VS</text>
+<line x1="540" y1="240" x2="540" y2="620" stroke="#ff5c00" stroke-width="1.5" opacity="0.2"/>
+
+<!-- Équipe AWAY -->
+<rect x="600" y="220" width="480" height="420" fill="url(#loseGrad)"/>
+<text x="840" y="380" font-family="Arial Black,Impact,sans-serif" font-size="54" font-weight="900"
+  text-anchor="middle" fill="#f0f0ff" letter-spacing="1">{{AWAY_ABBR}}</text>
+<text x="840" y="440" font-family="Arial,sans-serif" font-size="22"
+  text-anchor="middle" fill="#6b6b88">{{AWAY_NAME}}</text>
+<text x="840" y="554" font-family="Arial Black,Impact,sans-serif" font-size="148" font-weight="900"
+  text-anchor="middle" fill="#6b6b88">{{AWAY_SCORE}}</text>
+
+<!-- Ligne séparatrice -->
+<line x1="80" y1="650" x2="1000" y2="650" stroke="#ff5c00" stroke-width="1.5" opacity="0.3"/>
+
+<!-- Vainqueur -->
+<text x="540" y="716" font-family="Arial,sans-serif" font-size="24"
+  text-anchor="middle" fill="#6b6b88">Victoire de</text>
+<text x="540" y="772" font-family="Arial Black,Impact,sans-serif" font-size="56" font-weight="900"
+  text-anchor="middle" fill="#ff5c00" letter-spacing="2">{{WINNER}}</text>
+
+<!-- Analyse IA -->
+<rect x="80" y="810" width="920" height="120" rx="16" fill="rgba(255,92,0,0.07)" stroke="rgba(255,92,0,0.25)" stroke-width="1.5"/>
+<text x="540" y="844" font-family="Arial,sans-serif" font-size="18" font-weight="800"
+  text-anchor="middle" fill="#ff5c00" letter-spacing="2">🔮 ORACLE HOOPIQ</text>
+<foreignObject x="100" y="854" width="880" height="70">
+  <body xmlns="http://www.w3.org/1999/xhtml">
+    <p style="font-family:Arial,sans-serif;font-size:21px;color:#ccccdd;text-align:center;line-height:1.45;margin:0">{{ANALYSIS}}</p>
+  </body>
+</foreignObject>
+
+<!-- Hashtags -->
+<text x="540" y="1018" font-family="Arial,sans-serif" font-size="20" font-weight="600"
+  text-anchor="middle" fill="#ff5c00" opacity="0.8">{{HASHTAGS}}</text>
+
+<text x="540" y="1054" font-family="Arial,sans-serif" font-size="17"
+  text-anchor="middle" fill="#444466">Analyse IA · hoopiq_officiel</text>
+</svg>

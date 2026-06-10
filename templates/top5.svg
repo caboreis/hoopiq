@@ -1,0 +1,88 @@
+<svg width="1080" height="1080" viewBox="0 0 1080 1080" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <radialGradient id="bgGlow" cx="50%" cy="0%" r="70%">
+    <stop offset="0%"   stop-color="#1a0800"/>
+    <stop offset="100%" stop-color="#06060f"/>
+  </radialGradient>
+  <linearGradient id="orangeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+    <stop offset="0%"   stop-color="#ff5c00"/>
+    <stop offset="100%" stop-color="#ff8c42"/>
+  </linearGradient>
+</defs>
+
+<rect width="1080" height="1080" fill="url(#bgGlow)"/>
+<rect x="0" y="0"    width="1080" height="10" fill="url(#orangeGrad)"/>
+<rect x="0" y="1070" width="1080" height="10" fill="url(#orangeGrad)"/>
+
+<!-- Logo -->
+<text x="54" y="68" font-family="Arial Black,Impact,sans-serif" font-size="32" font-weight="900"
+  fill="#ff5c00" letter-spacing="4">HOOP IQ</text>
+<text x="1026" y="68" font-family="Arial,sans-serif" font-size="20" font-weight="700"
+  text-anchor="end" fill="#6b6b88">@hoopiq_officiel</text>
+
+<!-- Titre -->
+<text x="540" y="156" font-family="Arial Black,Impact,sans-serif" font-size="68" font-weight="900"
+  text-anchor="middle" fill="#f0f0ff" letter-spacing="3">TOP 5</text>
+<text x="540" y="208" font-family="Arial Black,Impact,sans-serif" font-size="40" font-weight="900"
+  text-anchor="middle" fill="#ff5c00" letter-spacing="4">{{CATEGORY}}</text>
+<line x1="80" y1="228" x2="1000" y2="228" stroke="#ff5c00" stroke-width="2" opacity="0.4"/>
+
+<!-- Rang 1 -->
+<rect x="60" y="248" width="960" height="128" rx="14" fill="rgba(255,92,0,0.13)" stroke="#ff5c00" stroke-width="2"/>
+<text x="114" y="330" font-family="Arial Black,Impact,sans-serif" font-size="52" font-weight="900"
+  fill="#ff5c00">#1</text>
+<text x="210" y="308" font-family="Arial Black,Impact,sans-serif" font-size="38" font-weight="900"
+  fill="#f0f0ff">{{P1_NAME}}</text>
+<text x="210" y="350" font-family="Arial,sans-serif" font-size="24" fill="#6b6b88">{{P1_TEAM}}  ·  {{P1_POS}}</text>
+<text x="960" y="330" font-family="Arial Black,Impact,sans-serif" font-size="46" font-weight="900"
+  text-anchor="end" fill="#ff5c00">{{P1_STAT}}</text>
+
+<!-- Rang 2 -->
+<rect x="60" y="392" width="960" height="116" rx="14" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+<text x="114" y="468" font-family="Arial Black,Impact,sans-serif" font-size="46" font-weight="900"
+  fill="#ccccdd">#2</text>
+<text x="210" y="448" font-family="Arial Black,Impact,sans-serif" font-size="34" font-weight="900"
+  fill="#f0f0ff">{{P2_NAME}}</text>
+<text x="210" y="486" font-family="Arial,sans-serif" font-size="22" fill="#6b6b88">{{P2_TEAM}}  ·  {{P2_POS}}</text>
+<text x="960" y="466" font-family="Arial Black,Impact,sans-serif" font-size="40" font-weight="900"
+  text-anchor="end" fill="#ccccdd">{{P2_STAT}}</text>
+
+<!-- Rang 3 -->
+<rect x="60" y="524" width="960" height="116" rx="14" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+<text x="114" y="600" font-family="Arial Black,Impact,sans-serif" font-size="46" font-weight="900"
+  fill="#ccccdd">#3</text>
+<text x="210" y="580" font-family="Arial Black,Impact,sans-serif" font-size="34" font-weight="900"
+  fill="#f0f0ff">{{P3_NAME}}</text>
+<text x="210" y="618" font-family="Arial,sans-serif" font-size="22" fill="#6b6b88">{{P3_TEAM}}  ·  {{P3_POS}}</text>
+<text x="960" y="598" font-family="Arial Black,Impact,sans-serif" font-size="40" font-weight="900"
+  text-anchor="end" fill="#ccccdd">{{P3_STAT}}</text>
+
+<!-- Rang 4 -->
+<rect x="60" y="656" width="960" height="116" rx="14" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+<text x="114" y="732" font-family="Arial Black,Impact,sans-serif" font-size="46" font-weight="900"
+  fill="#ccccdd">#4</text>
+<text x="210" y="712" font-family="Arial Black,Impact,sans-serif" font-size="34" font-weight="900"
+  fill="#f0f0ff">{{P4_NAME}}</text>
+<text x="210" y="750" font-family="Arial,sans-serif" font-size="22" fill="#6b6b88">{{P4_TEAM}}  ·  {{P4_POS}}</text>
+<text x="960" y="730" font-family="Arial Black,Impact,sans-serif" font-size="40" font-weight="900"
+  text-anchor="end" fill="#ccccdd">{{P4_STAT}}</text>
+
+<!-- Rang 5 -->
+<rect x="60" y="788" width="960" height="116" rx="14" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+<text x="114" y="864" font-family="Arial Black,Impact,sans-serif" font-size="46" font-weight="900"
+  fill="#ccccdd">#5</text>
+<text x="210" y="844" font-family="Arial Black,Impact,sans-serif" font-size="34" font-weight="900"
+  fill="#f0f0ff">{{P5_NAME}}</text>
+<text x="210" y="882" font-family="Arial,sans-serif" font-size="22" fill="#6b6b88">{{P5_TEAM}}  ·  {{P5_POS}}</text>
+<text x="960" y="862" font-family="Arial Black,Impact,sans-serif" font-size="40" font-weight="900"
+  text-anchor="end" fill="#ccccdd">{{P5_STAT}}</text>
+
+<!-- Ligne + Hashtags -->
+<line x1="80" y1="928" x2="1000" y2="928" stroke="#ff5c00" stroke-width="1.5" opacity="0.3"/>
+<text x="540" y="970" font-family="Arial,sans-serif" font-size="21" font-weight="600"
+  text-anchor="middle" fill="#ff5c00" opacity="0.85">{{HASHTAGS}}</text>
+<text x="540" y="1020" font-family="Arial,sans-serif" font-size="18"
+  text-anchor="middle" fill="#444466">Classement IA · {{DATE}} · hoopiq_officiel</text>
+<text x="540" y="1050" font-family="Arial,sans-serif" font-size="17"
+  text-anchor="middle" fill="#333355">hoopiq-zeta.vercel.app</text>
+</svg>

@@ -1,0 +1,84 @@
+<svg width="100%" viewBox="0 0 680 480" role="img" xmlns="http://www.w3.org/2000/svg">
+<title>Ballon de basket HoopIQ</title>
+<desc>Vrai ballon de basket NBA réaliste avec texture pebbled et coutures</desc>
+<defs>
+  <radialGradient id="bg3d" cx="36%" cy="30%" r="70%">
+    <stop offset="0%"   stop-color="#ffb060"/>
+    <stop offset="20%"  stop-color="#f06010"/>
+    <stop offset="55%"  stop-color="#c03800"/>
+    <stop offset="85%"  stop-color="#7a1e00"/>
+    <stop offset="100%" stop-color="#3a0800"/>
+  </radialGradient>
+  <radialGradient id="ambient" cx="50%" cy="50%" r="50%">
+    <stop offset="60%"  stop-color="rgba(0,0,0,0)"/>
+    <stop offset="100%" stop-color="rgba(0,0,0,0.55)"/>
+  </radialGradient>
+  <radialGradient id="specular" cx="36%" cy="28%" r="32%">
+    <stop offset="0%"   stop-color="rgba(255,255,255,0.7)"/>
+    <stop offset="50%"  stop-color="rgba(255,255,255,0.15)"/>
+    <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+  </radialGradient>
+  <pattern id="pebble" x="0" y="0" width="9" height="9" patternUnits="userSpaceOnUse">
+    <circle cx="4.5" cy="4.5" r="1.4" fill="rgba(0,0,0,0.13)"/>
+  </pattern>
+  <clipPath id="ballMask">
+    <circle cx="340" cy="185" r="155"/>
+  </clipPath>
+  <filter id="seamBlur">
+    <feGaussianBlur stdDeviation="0.4"/>
+  </filter>
+</defs>
+
+<ellipse cx="340" cy="362" rx="120" ry="18" fill="rgba(0,0,0,0.25)"/>
+
+<circle cx="340" cy="185" r="155" fill="url(#bg3d)"/>
+
+<circle cx="340" cy="185" r="155" fill="url(#pebble)" clip-path="url(#ballMask)"/>
+
+<circle cx="340" cy="185" r="155" fill="url(#ambient)"/>
+
+<g clip-path="url(#ballMask)" fill="none" filter="url(#seamBlur)">
+  <line x1="340" y1="30" x2="340" y2="340"
+    stroke="#1a0600" stroke-width="7" stroke-linecap="round" opacity="0.9"/>
+  <line x1="185" y1="185" x2="495" y2="185"
+    stroke="#1a0600" stroke-width="7" stroke-linecap="round" opacity="0.9"/>
+  <path d="M258 38 Q130 185 258 332"
+    stroke="#1a0600" stroke-width="7" stroke-linecap="round" opacity="0.9"/>
+  <path d="M422 38 Q550 185 422 332"
+    stroke="#1a0600" stroke-width="7" stroke-linecap="round" opacity="0.9"/>
+  <path d="M186 108 Q340 38 494 108"
+    stroke="#1a0600" stroke-width="7" stroke-linecap="round" opacity="0.9"/>
+  <path d="M186 262 Q340 332 494 262"
+    stroke="#1a0600" stroke-width="7" stroke-linecap="round" opacity="0.9"/>
+
+  <line x1="340" y1="30" x2="340" y2="340"
+    stroke="rgba(255,120,0,0.18)" stroke-width="2" stroke-linecap="round"/>
+  <line x1="185" y1="185" x2="495" y2="185"
+    stroke="rgba(255,120,0,0.18)" stroke-width="2" stroke-linecap="round"/>
+  <path d="M258 38 Q130 185 258 332"
+    stroke="rgba(255,120,0,0.18)" stroke-width="2" stroke-linecap="round"/>
+  <path d="M422 38 Q550 185 422 332"
+    stroke="rgba(255,120,0,0.18)" stroke-width="2" stroke-linecap="round"/>
+  <path d="M186 108 Q340 38 494 108"
+    stroke="rgba(255,120,0,0.18)" stroke-width="2" stroke-linecap="round"/>
+  <path d="M186 262 Q340 332 494 262"
+    stroke="rgba(255,120,0,0.18)" stroke-width="2" stroke-linecap="round"/>
+</g>
+
+<circle cx="340" cy="185" r="155" fill="url(#specular)"/>
+
+<ellipse cx="298" cy="128" rx="46" ry="24"
+  fill="rgba(255,255,255,0.22)" transform="rotate(-38 298 128)"/>
+<ellipse cx="310" cy="116" rx="16" ry="8"
+  fill="rgba(255,255,255,0.38)" transform="rotate(-38 310 116)"/>
+
+<circle cx="340" cy="185" r="155" fill="none" stroke="#1a0600" stroke-width="3"/>
+
+<text x="340" y="400"
+  font-family="'Arial Black','Impact',sans-serif"
+  font-size="58" font-weight="900" letter-spacing="5"
+  text-anchor="middle">
+  <tspan fill="#ff5c00">HOOP </tspan><tspan fill="#ffffff">IQ</tspan>
+</text>
+<line x1="215" y1="418" x2="465" y2="418" stroke="#ff5c00" stroke-width="2.5" stroke-linecap="round"/>
+</svg>

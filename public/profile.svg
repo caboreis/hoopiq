@@ -1,0 +1,59 @@
+<svg width="1080" height="1080" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <radialGradient id="bg3d" cx="36%" cy="30%" r="70%">
+    <stop offset="0%"   stop-color="#ffb060"/>
+    <stop offset="20%"  stop-color="#f06010"/>
+    <stop offset="55%"  stop-color="#c03800"/>
+    <stop offset="85%"  stop-color="#7a1e00"/>
+    <stop offset="100%" stop-color="#3a0800"/>
+  </radialGradient>
+  <radialGradient id="ambient" cx="50%" cy="50%" r="50%">
+    <stop offset="60%"  stop-color="rgba(0,0,0,0)"/>
+    <stop offset="100%" stop-color="rgba(0,0,0,0.6)"/>
+  </radialGradient>
+  <radialGradient id="specular" cx="36%" cy="28%" r="32%">
+    <stop offset="0%"   stop-color="rgba(255,255,255,0.72)"/>
+    <stop offset="50%"  stop-color="rgba(255,255,255,0.15)"/>
+    <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+  </radialGradient>
+  <pattern id="pebble" x="0" y="0" width="8" height="8" patternUnits="userSpaceOnUse">
+    <circle cx="4" cy="4" r="1.3" fill="rgba(0,0,0,0.14)"/>
+  </pattern>
+  <clipPath id="ballMask">
+    <circle cx="250" cy="230" r="190"/>
+  </clipPath>
+</defs>
+
+<rect width="500" height="500" fill="#06060f"/>
+<ellipse cx="250" cy="440" rx="145" ry="22" fill="rgba(0,0,0,0.5)"/>
+<circle cx="250" cy="230" r="190" fill="url(#bg3d)"/>
+<circle cx="250" cy="230" r="190" fill="url(#pebble)" clip-path="url(#ballMask)"/>
+<circle cx="250" cy="230" r="190" fill="url(#ambient)"/>
+
+<g clip-path="url(#ballMask)" fill="none">
+  <line x1="250" y1="40"  x2="250" y2="420" stroke="#1a0600" stroke-width="8" stroke-linecap="round" opacity="0.9"/>
+  <line x1="60"  y1="230" x2="440" y2="230" stroke="#1a0600" stroke-width="8" stroke-linecap="round" opacity="0.9"/>
+  <path d="M155 48 Q20 230 155 412"  stroke="#1a0600" stroke-width="8" stroke-linecap="round" opacity="0.9"/>
+  <path d="M345 48 Q480 230 345 412" stroke="#1a0600" stroke-width="8" stroke-linecap="round" opacity="0.9"/>
+  <path d="M62 135 Q250 40 438 135"  stroke="#1a0600" stroke-width="8" stroke-linecap="round" opacity="0.9"/>
+  <path d="M62 325 Q250 420 438 325" stroke="#1a0600" stroke-width="8" stroke-linecap="round" opacity="0.9"/>
+  <line x1="250" y1="40"  x2="250" y2="420" stroke="rgba(255,100,0,0.2)" stroke-width="2.5"/>
+  <line x1="60"  y1="230" x2="440" y2="230" stroke="rgba(255,100,0,0.2)" stroke-width="2.5"/>
+  <path d="M155 48 Q20 230 155 412"  stroke="rgba(255,100,0,0.2)" stroke-width="2.5"/>
+  <path d="M345 48 Q480 230 345 412" stroke="rgba(255,100,0,0.2)" stroke-width="2.5"/>
+  <path d="M62 135 Q250 40 438 135"  stroke="rgba(255,100,0,0.2)" stroke-width="2.5"/>
+  <path d="M62 325 Q250 420 438 325" stroke="rgba(255,100,0,0.2)" stroke-width="2.5"/>
+</g>
+
+<circle cx="250" cy="230" r="190" fill="url(#specular)"/>
+<ellipse cx="208" cy="155" rx="55" ry="28" fill="rgba(255,255,255,0.22)" transform="rotate(-38 208 155)"/>
+<ellipse cx="222" cy="140" rx="18" ry="9"  fill="rgba(255,255,255,0.40)" transform="rotate(-38 222 140)"/>
+<circle cx="250" cy="230" r="190" fill="none" stroke="#1a0600" stroke-width="4"/>
+
+<text x="250" y="476"
+  font-family="Arial Black,Impact,sans-serif"
+  font-size="44" font-weight="900" letter-spacing="6"
+  text-anchor="middle">
+  <tspan fill="#ff5c00">HOOP</tspan><tspan fill="#ffffff"> IQ</tspan>
+</text>
+</svg>
