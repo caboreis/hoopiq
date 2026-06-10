@@ -119,7 +119,7 @@ Que veux-tu faire ?`
     const newHistory = [...history, { role: "user", content: msg }];
 
     try {
-      const res = await fetch("http://localhost:3001/api/anthropic", {
+      const res = await fetch(`${import.meta.env.DEV ? "http://localhost:3001" : ""}/api/anthropic`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

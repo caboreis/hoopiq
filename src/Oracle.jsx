@@ -10,7 +10,7 @@ const C = {
   text: "#f0f0ff", muted: "#6b6b88",
 };
 
-const API = "http://localhost:3001";
+const API = import.meta.env.DEV ? "http://localhost:3001" : "";
 
 function Logo({ url, size = 30 }) {
   const [ok, setOk] = useState(true);
