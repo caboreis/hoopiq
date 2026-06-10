@@ -186,64 +186,51 @@ function SectionTitle({ children }) {
 /* ─────────────────────────────────────────
    HOOPIQ RADIO
 ───────────────────────────────────────── */
-const YT_PLAYLIST = "https://www.youtube.com/embed/videoseries?list=PLH-gkHn0OFBFuEd_JjG9MR7A7JUBxfyWF&autoplay=1&mute=0&loop=1&enablejsapi=1&rel=0&modestbranding=1";
+const SPOTIFY_SRC = "https://open.spotify.com/embed/playlist/37i9dQZF1DX0XUsuxWHRQd?utm_source=generator&theme=0";
 
 function HoopiqRadio() {
   const [expanded, setExpanded] = useState(false);
-  const [active,   setActive]   = useState(false);
-
-  const W = expanded ? 320 : 120;
-  const H = expanded ? 180 : 68;
 
   return (
     <div style={{
       position: "fixed", bottom: 20, right: 20, zIndex: 1000,
-      width: W, height: H + 28,
-      borderRadius: 12, overflow: "hidden",
-      background: "#0d0d1f",
-      border: "1px solid rgba(255,92,0,0.35)",
+      width: expanded ? 300 : 52, height: expanded ? 232 : 52,
+      borderRadius: expanded ? 16 : "50%",
+      overflow: "hidden",
+      background: expanded ? "#121212" : "#1ed760",
+      border: expanded ? "1px solid rgba(30,215,96,0.35)" : "none",
       boxShadow: "0 8px 32px rgba(0,0,0,0.8)",
-      transition: "width 0.3s ease, height 0.3s ease",
-    }}>
-      {/* Barre titre */}
-      <div style={{
-        height: 28, display: "flex", alignItems: "center", justifyContent: "space-between",
-        padding: "0 10px", background: "rgba(255,92,0,0.1)",
-        borderBottom: "1px solid rgba(255,92,0,0.2)",
-      }}>
-        <span style={{ fontSize: 9, fontWeight: 800, color: C.orange, letterSpacing: 1.5, textTransform: "uppercase" }}>
-          🎵 NBA HIP HOP
-        </span>
-        <div style={{ display: "flex", gap: 6 }}>
-          <button onClick={() => setExpanded(e => !e)} style={{
-            background: "none", border: "none", color: C.muted, fontSize: 11,
-            cursor: "pointer", padding: 0, lineHeight: 1,
-          }}>{expanded ? "⊟" : "⊞"}</button>
-        </div>
-      </div>
+      transition: "all 0.3s ease",
+      cursor: expanded ? "default" : "pointer",
+    }} onClick={!expanded ? () => setExpanded(true) : undefined}>
 
-      {/* Player YouTube */}
-      {active ? (
-        <iframe
-          src={YT_PLAYLIST}
-          width={W} height={H}
-          allow="autoplay; encrypted-media"
-          allowFullScreen
-          style={{ display: "block", border: "none" }}
-        />
+      {expanded ? (
+        <>
+          <div style={{
+            height: 32, display: "flex", alignItems: "center", justifyContent: "space-between",
+            padding: "0 12px", background: "#0d0d0d",
+            borderBottom: "1px solid rgba(30,215,96,0.15)",
+          }}>
+            <span style={{ fontSize: 10, fontWeight: 800, color: "#1ed760", letterSpacing: 1.5 }}>🎵 NBA HYPE HITS</span>
+            <button onClick={() => setExpanded(false)} style={{
+              background: "none", border: "none", color: "#666", fontSize: 14,
+              cursor: "pointer", padding: 0, lineHeight: 1,
+            }}>✕</button>
+          </div>
+          <iframe
+            src={SPOTIFY_SRC}
+            width="300" height="200"
+            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+            loading="lazy"
+            style={{ display: "block", border: "none" }}
+          />
+        </>
       ) : (
-        <div
-          onClick={() => setActive(true)}
-          style={{
-            width: W, height: H,
-            display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-            cursor: "pointer", gap: 6,
-            background: "linear-gradient(135deg, rgba(255,92,0,0.08), rgba(0,0,0,0.5))",
-          }}
-        >
-          <div style={{ fontSize: expanded ? 28 : 18, lineHeight: 1 }}>▶</div>
-          {expanded && <div style={{ fontSize: 11, color: C.muted, textAlign: "center", padding: "0 10px" }}>Clique pour lancer la playlist</div>}
-        </div>
+        <div style={{
+          width: 52, height: 52,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          fontSize: 22,
+        }}>🎵</div>
       )}
     </div>
   );
