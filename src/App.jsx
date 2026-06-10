@@ -224,22 +224,25 @@ function SectionTitle({ children }) {
 const SPOTIFY_SRC = "https://open.spotify.com/embed/playlist/37i9dQZF1DX0XUsuxWHRQd?utm_source=generator&theme=0";
 
 function HoopiqRadio() {
-  const [expanded, setExpanded] = useState(false);
+  const [hovered, setHovered] = useState(false);
 
   return (
-    <div style={{
-      position: "fixed", bottom: 20, right: 20, zIndex: 1000,
-      width: expanded ? 300 : 52, height: expanded ? 232 : 52,
-      borderRadius: expanded ? 16 : "50%",
-      overflow: "hidden",
-      background: expanded ? "#121212" : "#1ed760",
-      border: expanded ? "1px solid rgba(30,215,96,0.35)" : "none",
-      boxShadow: "0 8px 32px rgba(0,0,0,0.8)",
-      transition: "all 0.3s ease",
-      cursor: expanded ? "default" : "pointer",
-    }} onClick={!expanded ? () => setExpanded(true) : undefined}>
-
-      {expanded ? (
+    <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        position: "fixed", bottom: 20, right: 20, zIndex: 1000,
+        width: hovered ? 300 : 52, height: hovered ? 232 : 52,
+        borderRadius: hovered ? 16 : "50%",
+        overflow: "hidden",
+        background: hovered ? "#121212" : "#1ed760",
+        border: hovered ? "1px solid rgba(30,215,96,0.35)" : "none",
+        boxShadow: "0 8px 32px rgba(0,0,0,0.8)",
+        transition: "all 0.3s ease",
+        cursor: "pointer",
+      }}
+    >
+      {hovered ? (
         <>
           <div style={{
             height: 32, display: "flex", alignItems: "center", justifyContent: "space-between",
@@ -247,10 +250,6 @@ function HoopiqRadio() {
             borderBottom: "1px solid rgba(30,215,96,0.15)",
           }}>
             <span style={{ fontSize: 10, fontWeight: 800, color: "#1ed760", letterSpacing: 1.5 }}>🎵 NBA HYPE HITS</span>
-            <button onClick={() => setExpanded(false)} style={{
-              background: "none", border: "none", color: "#666", fontSize: 14,
-              cursor: "pointer", padding: 0, lineHeight: 1,
-            }}>✕</button>
           </div>
           <iframe
             src={SPOTIFY_SRC}
@@ -261,11 +260,7 @@ function HoopiqRadio() {
           />
         </>
       ) : (
-        <div style={{
-          width: 52, height: 52,
-          display: "flex", alignItems: "center", justifyContent: "center",
-          fontSize: 22,
-        }}>🎵</div>
+        <div style={{ width: 52, height: 52, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22 }}>🎵</div>
       )}
     </div>
   );
