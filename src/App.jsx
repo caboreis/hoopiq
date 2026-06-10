@@ -756,6 +756,8 @@ function App({ user, onLogout }) {
   const [chatInput, setChatInput] = useState("");
   const [chatLoading, setChatLoading] = useState(false);
   const [bullsPlayers, setBullsPlayers] = useState([]);
+  const [playerSearch, setPlayerSearch] = useState("");
+  const [showAnalysisModal, setShowAnalysisModal] = useState(false);
   const [favoriteTeam, setFavoriteTeamState] = useState(() => {
     try { return JSON.parse(localStorage.getItem("hoopiq_fav_team")) || NBA_TEAMS[3]; } catch { return NBA_TEAMS[3]; }
   });
@@ -1240,119 +1242,242 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
         )}
 
         {/* ── PLAYERS ── */}
-        {tab === "players" && (
-          <div className="fade-in">
-            <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 46, letterSpacing: 2, marginBottom: 6 }}>ANALYSE <span style={{ color: C.orange }}>JOUEURS</span></h1>
-            <p style={{ color: C.muted, fontSize: 14, marginBottom: 24 }}>Analyse IA automatique · Clique sur un joueur pour changer</p>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
-              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                {bullsPlayers.length > 0 && (
-                  <Card style={{ padding: 20, marginBottom: 16 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-                      <div>
-                        <div style={{ fontSize: 13, fontWeight: 700, color: C.text }}>Chicago Bulls</div>
-                        <div style={{ fontSize: 11, color: C.muted }}>Joueurs réels Bulls en priorité</div>
-                      </div>
-                      <Badge color={C.red}>Priorité</Badge>
-                    </div>
-                    <div style={{ display: 'grid', gap: 12 }}>
-                      {bullsPlayers.slice(0, 6).map(p => (
-                        <div key={p.id} onClick={() => analyzePlayer(p)} style={{
-                          padding: 14, borderRadius: 14, background: selectedPlayer?.id === p.id ? 'rgba(255,92,0,0.08)' : 'rgba(255,255,255,0.03)',
-                          border: `1px solid ${selectedPlayer?.id === p.id ? 'rgba(255,92,0,0.45)' : C.border}`,
-                          cursor: 'pointer', transition: 'all .2s',
-                        }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                            <Avatar name={p.name} size={42} glow={selectedPlayer?.id === p.id} espnId={p.espnId} headshot={p.headshot} league={p.league} />
-                            <div style={{ flex: 1 }}>
-                              <div style={{ fontWeight: 700, fontSize: 14 }}>{p.name}</div>
-                              <div style={{ fontSize: 11, color: C.muted }}>{p.pos} · {p.team}</div>
-                            </div>
-                            <div style={{ textAlign: 'right' }}>
-                              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 18, color: C.orange }}>{p.score}</div>
-                              <div style={{ fontSize: 11, color: p.trend >= 0 ? C.green : C.red }}>{p.trend >= 0 ? `+${p.trend}` : p.trend}</div>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </Card>
-                )}
-                {(bullsPlayers.length ? bullsPlayers : PLAYERS).map(p => (
-                  <div key={p.id} onClick={() => analyzePlayer(p)} style={{
-                    background: selectedPlayer?.id === p.id ? "rgba(255,92,0,0.07)" : C.surface,
-                    border: `1px solid ${selectedPlayer?.id === p.id ? "rgba(255,92,0,0.45)" : C.border}`,
-                    borderRadius: 16, padding: "18px 20px", cursor: "pointer", transition: "all .2s",
-                  }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                      <Avatar name={p.name} size={50} glow={selectedPlayer?.id === p.id} espnId={p.espnId} headshot={p.headshot} league={p.league} />
+        {tab === "players" && (() => {
+          const allPlayers = bullsPlayers.length ? bullsPlayers : PLAYERS;
+          const q = playerSearch.toLowerCase();
+          const filteredPlayers = q
+            ? allPlayers.filter(p =>
+                p.name.toLowerCase().includes(q) ||
+                (p.team || "").toLowerCase().includes(q) ||
+                (p.pos || "").toLowerCase().includes(q)
+              )
+            : allPlayers;
+          return (
+            <div className="fade-in">
+              {/* Analysis Modal */}
+              {showAnalysisModal && selectedPlayer && (
+                <div
+                  onClick={() => setShowAnalysisModal(false)}
+                  style={{
+                    position: "fixed", inset: 0, zIndex: 1000,
+                    background: "rgba(0,0,0,0.85)", backdropFilter: "blur(12px)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    padding: 24, animation: "fadeIn .2s ease",
+                  }}
+                >
+                  <div
+                    onClick={e => e.stopPropagation()}
+                    style={{
+                      background: "#0d0d1a", border: "1px solid rgba(255,92,0,0.3)",
+                      borderRadius: 24, padding: 36, maxWidth: 680, width: "100%",
+                      maxHeight: "90vh", overflowY: "auto",
+                      boxShadow: "0 0 60px rgba(255,92,0,0.15)",
+                      animation: "slideUp .3s ease",
+                    }}
+                  >
+                    <style>{`
+                      @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+                      @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+                    `}</style>
+                    {/* Header modal */}
+                    <div style={{ display: "flex", alignItems: "center", gap: 20, marginBottom: 28 }}>
+                      <Avatar name={selectedPlayer.name} size={80} glow espnId={selectedPlayer.espnId} headshot={selectedPlayer.headshot} league={selectedPlayer.league} />
                       <div style={{ flex: 1 }}>
-                        <div style={{ fontWeight: 700, fontSize: 15 }}>{p.name} {p.hot && "🔥"}</div>
-                        <div style={{ fontSize: 12, color: C.muted, marginBottom: 8 }}>
-                          {p.league === "wnba" && <span style={{ color: "#c084fc", marginRight: 4 }}>🌸</span>}{p.team} · {p.pos}
+                        <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 34, letterSpacing: 2, lineHeight: 1 }}>
+                          {selectedPlayer.name}
                         </div>
-                        <div style={{ display: "flex", gap: 6 }}>
-                          <Badge color={C.orange}>{p.pts} pts</Badge>
-                          <Badge color={C.blue}>{p.ast} ast</Badge>
-                          <Badge color={C.green}>{p.reb} reb</Badge>
+                        <div style={{ fontSize: 13, color: C.muted, marginTop: 4 }}>
+                          {selectedPlayer.league === "wnba" && <span style={{ color: "#c084fc" }}>🌸 WNBA · </span>}
+                          {selectedPlayer.team} · {selectedPlayer.pos}
+                        </div>
+                        <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+                          <Badge color={C.orange}>{selectedPlayer.pts} pts</Badge>
+                          <Badge color={C.blue}>{selectedPlayer.ast} ast</Badge>
+                          <Badge color={C.green}>{selectedPlayer.reb} reb</Badge>
+                          <Badge color={C.gold}>{selectedPlayer.fg}% FG</Badge>
                         </div>
                       </div>
                       <div style={{ textAlign: "center" }}>
-                        <Ring score={p.score} size={60} />
-                        <div style={{ fontSize: 12, fontWeight: 700, color: p.trend >= 0 ? C.green : C.red, marginTop: 2 }}>{p.trend >= 0 ? "▲" : "▼"} {Math.abs(p.trend)}</div>
+                        <Ring score={selectedPlayer.score} size={72} />
+                        <div style={{ fontSize: 11, color: C.muted, marginTop: 4 }}>Score HoopIQ</div>
                       </div>
                     </div>
-                    <div style={{ marginTop: 14 }}>
-                      <div style={{ fontSize: 11, color: C.muted, marginBottom: 4 }}>% au tir ({p.fg}%)</div>
-                      <Bar value={p.fg} max={70} color={G.orange} />
-                    </div>
-                  </div>
-                ))}
-              </div>
 
-              {/* AI Panel */}
-              <div style={{ position: "sticky", top: 80, alignSelf: "start", display: "flex", flexDirection: "column", gap: 16 }}>
-                <Card glow={!!aiAnalysis}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
-                    <Badge>🤖 IA</Badge>
-                    <span style={{ fontSize: 13, fontWeight: 600 }}>Analyse · {selectedPlayer?.name}</span>
-                    {aiLoading && <span style={{ fontSize: 12, color: C.orange }}>⏳ Génération...</span>}
-                  </div>
-                  {!aiAnalysis && !aiLoading && <p style={{ color: C.muted, fontSize: 13 }}>👆 Sélectionne un joueur pour lancer l'analyse IA.</p>}
-                  {aiLoading && <div style={{ color: C.orange, fontSize: 13 }}>🔍 Analyse en cours...</div>}
-                  {aiAnalysis && (
-                    <div style={{ maxHeight: "400px", overflowY: "auto", paddingRight: 8 }}>
-                      <p style={{ fontSize: 14, lineHeight: 1.85, whiteSpace: "pre-wrap", color: "#dde", margin: 0 }}>
-                        {aiAnalysis}{!aiDone && <span style={{ animation: "blink 1s infinite", color: C.orange }}>▋</span>}
-                      </p>
-                    </div>
-                  )}
-                  {aiDone && <div style={{ marginTop: 12, padding: "8px 12px", background: "rgba(255,92,0,0.08)", borderRadius: 8, fontSize: 11, color: C.muted }}>✅ Généré par Claude · Score HoopIQ : <strong style={{ color: C.orange }}>{selectedPlayer?.score}/100</strong></div>}
-                </Card>
-
-                {selectedPlayer && (
-                  <Card>
-                    <SectionTitle>Statistiques détaillées</SectionTitle>
-                    {[
-                      { label: "Points / match", v: selectedPlayer.pts, max: 35, c: C.orange },
-                      { label: "Passes décisives", v: selectedPlayer.ast, max: 12, c: C.blue },
-                      { label: "Rebonds", v: selectedPlayer.reb, max: 15, c: C.green },
-                      { label: "% au tir", v: selectedPlayer.fg, max: 70, c: C.gold },
-                    ].map(s => (
-                      <div key={s.label} style={{ marginBottom: 14 }}>
-                        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 5 }}>
-                          <span style={{ color: C.muted }}>{s.label}</span>
-                          <strong style={{ color: s.c }}>{s.v}{s.label.includes("%") ? "%" : ""}</strong>
+                    {/* Stats bars */}
+                    <div style={{ background: "rgba(255,255,255,0.03)", borderRadius: 16, padding: "18px 22px", marginBottom: 24 }}>
+                      <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1.5, color: C.muted, textTransform: "uppercase", marginBottom: 16 }}>Statistiques</div>
+                      {[
+                        { label: "Points / match", v: selectedPlayer.pts, max: 35, c: C.orange },
+                        { label: "Passes décisives", v: selectedPlayer.ast, max: 12, c: C.blue },
+                        { label: "Rebonds", v: selectedPlayer.reb, max: 15, c: C.green },
+                        { label: "% au tir", v: selectedPlayer.fg, max: 70, c: C.gold },
+                      ].map(s => (
+                        <div key={s.label} style={{ marginBottom: 14 }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 5 }}>
+                            <span style={{ color: C.muted }}>{s.label}</span>
+                            <strong style={{ color: s.c }}>{s.v}{s.label.includes("%") ? "%" : ""}</strong>
+                          </div>
+                          <Bar value={s.v} max={s.max} color={s.c} />
                         </div>
-                        <Bar value={s.v} max={s.max} color={s.c} />
+                      ))}
+                    </div>
+
+                    {/* Analyse IA */}
+                    <div style={{ background: "rgba(255,92,0,0.04)", border: "1px solid rgba(255,92,0,0.15)", borderRadius: 16, padding: "22px 24px", marginBottom: 24 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
+                        <Badge>🤖 IA</Badge>
+                        <span style={{ fontSize: 13, fontWeight: 700 }}>Analyse HoopIQ Scout</span>
+                        {aiLoading && <span style={{ fontSize: 12, color: C.orange }}>⏳ Génération...</span>}
                       </div>
-                    ))}
-                  </Card>
+                      {aiLoading && <div style={{ color: C.orange, fontSize: 14 }}>🔍 Analyse en cours...</div>}
+                      {aiAnalysis && (
+                        <p style={{ fontSize: 15, lineHeight: 1.9, whiteSpace: "pre-wrap", color: "#dde", margin: 0 }}>
+                          {aiAnalysis}{!aiDone && <span style={{ animation: "blink 1s infinite", color: C.orange }}>▋</span>}
+                        </p>
+                      )}
+                    </div>
+
+                    <button
+                      onClick={() => setShowAnalysisModal(false)}
+                      style={{
+                        width: "100%", padding: "14px", borderRadius: 14,
+                        background: "rgba(255,92,0,0.1)", border: "1px solid rgba(255,92,0,0.3)",
+                        color: C.orange, fontSize: 14, fontWeight: 700,
+                        cursor: "pointer", fontFamily: "inherit",
+                      }}
+                    >Fermer ✕</button>
+                  </div>
+                </div>
+              )}
+
+              <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 46, letterSpacing: 2, marginBottom: 6 }}>ANALYSE <span style={{ color: C.orange }}>JOUEURS</span></h1>
+              <p style={{ color: C.muted, fontSize: 14, marginBottom: 20 }}>Analyse IA automatique · Clique sur un joueur pour changer</p>
+
+              {/* Search bar */}
+              <div style={{ position: "relative", marginBottom: 24 }}>
+                <span style={{ position: "absolute", left: 16, top: "50%", transform: "translateY(-50%)", fontSize: 16, color: C.muted, pointerEvents: "none" }}>🔍</span>
+                <input
+                  value={playerSearch}
+                  onChange={e => setPlayerSearch(e.target.value)}
+                  placeholder="Rechercher par nom, équipe ou poste..."
+                  style={{
+                    width: "100%", padding: "13px 18px 13px 44px",
+                    borderRadius: 14, fontSize: 14, fontFamily: "inherit",
+                    background: "rgba(255,255,255,0.05)",
+                    border: `1px solid ${playerSearch ? "rgba(255,92,0,0.5)" : C.border}`,
+                    color: C.text, outline: "none", boxSizing: "border-box",
+                    transition: "border-color .2s",
+                    boxShadow: playerSearch ? "0 0 0 3px rgba(255,92,0,0.08)" : "none",
+                  }}
+                />
+                {playerSearch && (
+                  <button
+                    onClick={() => setPlayerSearch("")}
+                    style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: C.muted, fontSize: 16, cursor: "pointer", padding: 4 }}
+                  >✕</button>
                 )}
               </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                  {filteredPlayers.length === 0 && (
+                    <div style={{ textAlign: "center", padding: 40, color: C.muted, fontSize: 14 }}>
+                      Aucun joueur ne correspond à "{playerSearch}"
+                    </div>
+                  )}
+                  {filteredPlayers.map(p => (
+                    <div key={p.id} onClick={() => analyzePlayer(p)} style={{
+                      background: selectedPlayer?.id === p.id ? "rgba(255,92,0,0.07)" : C.surface,
+                      border: `1px solid ${selectedPlayer?.id === p.id ? "rgba(255,92,0,0.45)" : C.border}`,
+                      borderRadius: 16, padding: "18px 20px", cursor: "pointer", transition: "all .2s",
+                    }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                        <Avatar name={p.name} size={50} glow={selectedPlayer?.id === p.id} espnId={p.espnId} headshot={p.headshot} league={p.league} />
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontWeight: 700, fontSize: 15 }}>{p.name} {p.hot && "🔥"}</div>
+                          <div style={{ fontSize: 12, color: C.muted, marginBottom: 8 }}>
+                            {p.league === "wnba" && <span style={{ color: "#c084fc", marginRight: 4 }}>🌸</span>}{p.team} · {p.pos}
+                          </div>
+                          <div style={{ display: "flex", gap: 6 }}>
+                            <Badge color={C.orange}>{p.pts} pts</Badge>
+                            <Badge color={C.blue}>{p.ast} ast</Badge>
+                            <Badge color={C.green}>{p.reb} reb</Badge>
+                          </div>
+                        </div>
+                        <div style={{ textAlign: "center" }}>
+                          <Ring score={p.score} size={60} />
+                          <div style={{ fontSize: 12, fontWeight: 700, color: p.trend >= 0 ? C.green : C.red, marginTop: 2 }}>{p.trend >= 0 ? "▲" : "▼"} {Math.abs(p.trend)}</div>
+                        </div>
+                      </div>
+                      <div style={{ marginTop: 14 }}>
+                        <div style={{ fontSize: 11, color: C.muted, marginBottom: 4 }}>% au tir ({p.fg}%)</div>
+                        <Bar value={p.fg} max={70} color={G.orange} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* AI Panel */}
+                <div style={{ position: "sticky", top: 80, alignSelf: "start", display: "flex", flexDirection: "column", gap: 16 }}>
+                  <Card glow={!!aiAnalysis}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
+                      <Badge>🤖 IA</Badge>
+                      <span style={{ fontSize: 13, fontWeight: 600 }}>Analyse · {selectedPlayer?.name}</span>
+                      {aiLoading && <span style={{ fontSize: 12, color: C.orange }}>⏳ Génération...</span>}
+                    </div>
+                    {!aiAnalysis && !aiLoading && <p style={{ color: C.muted, fontSize: 13 }}>👆 Sélectionne un joueur pour lancer l'analyse IA.</p>}
+                    {aiLoading && <div style={{ color: C.orange, fontSize: 13 }}>🔍 Analyse en cours...</div>}
+                    {aiAnalysis && (
+                      <div style={{ maxHeight: "260px", overflowY: "auto", paddingRight: 8 }}>
+                        <p style={{ fontSize: 14, lineHeight: 1.85, whiteSpace: "pre-wrap", color: "#dde", margin: 0 }}>
+                          {aiAnalysis}{!aiDone && <span style={{ animation: "blink 1s infinite", color: C.orange }}>▋</span>}
+                        </p>
+                      </div>
+                    )}
+                    {aiDone && (
+                      <>
+                        <div style={{ marginTop: 12, padding: "8px 12px", background: "rgba(255,92,0,0.08)", borderRadius: 8, fontSize: 11, color: C.muted }}>✅ Généré par Claude · Score HoopIQ : <strong style={{ color: C.orange }}>{selectedPlayer?.score}/100</strong></div>
+                        <button
+                          onClick={() => setShowAnalysisModal(true)}
+                          style={{
+                            marginTop: 14, width: "100%", padding: "12px 16px",
+                            borderRadius: 12, cursor: "pointer", fontFamily: "inherit",
+                            background: "linear-gradient(135deg, rgba(255,92,0,0.15), rgba(255,92,0,0.05))",
+                            border: "1px solid rgba(255,92,0,0.4)",
+                            color: C.orange, fontSize: 13, fontWeight: 700,
+                            transition: "all .2s",
+                          }}
+                        >
+                          Voir l'analyse complète 🔍
+                        </button>
+                      </>
+                    )}
+                  </Card>
+
+                  {selectedPlayer && (
+                    <Card>
+                      <SectionTitle>Statistiques détaillées</SectionTitle>
+                      {[
+                        { label: "Points / match", v: selectedPlayer.pts, max: 35, c: C.orange },
+                        { label: "Passes décisives", v: selectedPlayer.ast, max: 12, c: C.blue },
+                        { label: "Rebonds", v: selectedPlayer.reb, max: 15, c: C.green },
+                        { label: "% au tir", v: selectedPlayer.fg, max: 70, c: C.gold },
+                      ].map(s => (
+                        <div key={s.label} style={{ marginBottom: 14 }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 5 }}>
+                            <span style={{ color: C.muted }}>{s.label}</span>
+                            <strong style={{ color: s.c }}>{s.v}{s.label.includes("%") ? "%" : ""}</strong>
+                          </div>
+                          <Bar value={s.v} max={s.max} color={s.c} />
+                        </div>
+                      ))}
+                    </Card>
+                  )}
+                </div>
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* ── MATCHES ── */}
         {tab === "matches" && <MatchesTab liveScores={liveScores} wnbaScores={wnbaScores} nbaLoading={nbaLoading} nbaError={nbaError} setTab={setTab} />}
