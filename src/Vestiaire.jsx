@@ -32,6 +32,22 @@ const TEAMS = [
   ["UTA", "Utah Jazz", "#4d94c7"], ["WAS", "Washington Wizards", "#4fa3ff"],
 ];
 
+// 12 équipes WNBA
+const WNBA_TEAMS = [
+  ["ATL-W", "Atlanta Dream",       "#C8102E"],
+  ["CHI-W", "Chicago Sky",         "#418FDE"],
+  ["CON-W", "Connecticut Sun",     "#E8832A"],
+  ["DAL-W", "Dallas Wings",        "#4fa3ff"],
+  ["IND-W", "Indiana Fever",       "#C8102E"],
+  ["LAS-W", "Las Vegas Aces",      "#C8102E"],
+  ["LAX-W", "Los Angeles Sparks",  "#9d7bd8"],
+  ["MIN-W", "Minnesota Lynx",      "#236192"],
+  ["NYL-W", "New York Liberty",    "#86CEBC"],
+  ["PHX-W", "Phoenix Mercury",     "#E56020"],
+  ["SEA-W", "Seattle Storm",       "#2C5234"],
+  ["WAS-W", "Washington Mystics",  "#4fa3ff"],
+];
+
 const AVATAR_COLORS = ["#ff5c00", "#4fa3ff", "#22d37a", "#c084fc", "#ffd700", "#ff4d6d", "#1db954"];
 function avatarColor(name) {
   let h = 0;
@@ -69,6 +85,7 @@ export default function Vestiaire({ user }) {
   const me = user || { name: "Invité", email: "" };
   const [games, setGames] = useState([]);
   const [room, setRoom] = useState("general");
+  const [league, setLeague] = useState("nba"); // "nba" | "wnba"
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [aiThinking, setAiThinking] = useState(false);
@@ -92,7 +109,7 @@ export default function Vestiaire({ user }) {
     if (room === "general") return "Général";
     if (room.startsWith("team:")) {
       const ab = room.slice(5);
-      return (TEAMS.find(t => t[0] === ab)?.[1]) || ab;
+      return (TEAMS.find(t => t[0] === ab)?.[1]) || (WNBA_TEAMS.find(t => t[0] === ab)?.[1]) || ab;
     }
     if (room.startsWith("match:")) {
       const g = games.find(x => `match:${x.id}` === room);
@@ -207,21 +224,47 @@ export default function Vestiaire({ user }) {
           🏀 LE VESTIAIRE
         </div>
 
+        {/* Toggle NBA / WNBA */}
+        <div style={{ display: "flex", gap: 4, margin: "10px 4px 4px", padding: 3, background: "rgba(255,255,255,0.04)", borderRadius: 10, border: `1px solid ${C.border}` }}>
+          <button onClick={() => { setLeague("nba"); setRoom("general"); }} style={{
+            flex: 1, padding: "6px 0", borderRadius: 8, border: "none", cursor: "pointer", fontSize: 12, fontWeight: 800, fontFamily: "inherit", transition: "all .2s",
+            background: league === "nba" ? `linear-gradient(135deg,${C.orange},${C.orangeL || "#ff8c42"})` : "transparent",
+            color: league === "nba" ? "#fff" : C.muted,
+          }}>🏀 NBA</button>
+          <button onClick={() => { setLeague("wnba"); setRoom("general-wnba"); }} style={{
+            flex: 1, padding: "6px 0", borderRadius: 8, border: "none", cursor: "pointer", fontSize: 12, fontWeight: 800, fontFamily: "inherit", transition: "all .2s",
+            background: league === "wnba" ? "linear-gradient(135deg,#c084fc,#e879a0)" : "transparent",
+            color: league === "wnba" ? "#fff" : C.muted,
+          }}>🌸 WNBA</button>
+        </div>
+
         <SectionTitle>Communauté</SectionTitle>
-        <RoomRow label="général" active={room === "general"} onSelect={() => setRoom("general")} />
+        <RoomRow label="général" active={room === (league === "wnba" ? "general-wnba" : "general")} onSelect={() => setRoom(league === "wnba" ? "general-wnba" : "general")} />
 
-        <SectionTitle>🔴 Matchs en direct</SectionTitle>
-        {liveGames.length ? liveGames.map(g => (
-          <RoomRow key={g.id} label={`${g.home.abbr} vs ${g.away.abbr}`} dot={C.red} active={room === `match:${g.id}`} onSelect={() => setRoom(`match:${g.id}`)} />
-        )) : <div style={{ fontSize: 11, color: C.muted, padding: "2px 10px", opacity: 0.7 }}>Aucun match live</div>}
-        {otherGames.map(g => (
-          <RoomRow key={g.id} label={`${g.home.abbr} vs ${g.away.abbr}`} dot={g.status === "final" ? C.muted : C.blue} active={room === `match:${g.id}`} onSelect={() => setRoom(`match:${g.id}`)} />
-        ))}
+        {league === "nba" && (
+          <>
+            <SectionTitle>🔴 Matchs en direct</SectionTitle>
+            {liveGames.length ? liveGames.map(g => (
+              <RoomRow key={g.id} label={`${g.home.abbr} vs ${g.away.abbr}`} dot={C.red} active={room === `match:${g.id}`} onSelect={() => setRoom(`match:${g.id}`)} />
+            )) : <div style={{ fontSize: 11, color: C.muted, padding: "2px 10px", opacity: 0.7 }}>Aucun match live</div>}
+            {otherGames.map(g => (
+              <RoomRow key={g.id} label={`${g.home.abbr} vs ${g.away.abbr}`} dot={g.status === "final" ? C.muted : C.blue} active={room === `match:${g.id}`} onSelect={() => setRoom(`match:${g.id}`)} />
+            ))}
+            <SectionTitle>🏟️ Équipes NBA</SectionTitle>
+            {TEAMS.map(([ab, name, color]) => (
+              <RoomRow key={ab} label={name} dot={color} active={room === `team:${ab}`} onSelect={() => setRoom(`team:${ab}`)} />
+            ))}
+          </>
+        )}
 
-        <SectionTitle>🏟️ Équipes NBA</SectionTitle>
-        {TEAMS.map(([ab, name, color]) => (
-          <RoomRow key={ab} label={name} dot={color} active={room === `team:${ab}`} onSelect={() => setRoom(`team:${ab}`)} />
-        ))}
+        {league === "wnba" && (
+          <>
+            <SectionTitle>🌸 Équipes WNBA</SectionTitle>
+            {WNBA_TEAMS.map(([ab, name, color]) => (
+              <RoomRow key={ab} label={name} dot={color} active={room === `team:${ab}`} onSelect={() => setRoom(`team:${ab}`)} />
+            ))}
+          </>
+        )}
       </div>
 
       {/* Main */}

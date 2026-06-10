@@ -132,43 +132,42 @@ const LEGEND_CARDS = [
 ];
 
 const PACKS = [
-  { id: "standard", name: "Pack Standard", price: "Gratuit", cards: 3, desc: "3 cartes aléatoires", emoji: "📦", color: "#6b7280" },
-  { id: "nba", name: "Pack NBA", price: "9€", cards: 5, desc: "5 cartes · 1 Rare garanti", emoji: "🏀", color: "#ff5c00" },
-  { id: "allstar", name: "Pack All-Star", price: "29€", cards: 8, desc: "8 cartes · 1 Épique garanti", emoji: "⭐", color: "#c084fc" },
-  { id: "legend", name: "Pack Légende", price: "89€", cards: 5, desc: "5 cartes · 1 OR garanti 🏆", emoji: "✨", color: "#ffd700" },
+  { id: "standard", name: "Pack Standard",  price: "Gratuit", cards: 3, desc: "3 cartes NBA aléatoires",           emoji: "📦", color: "#6b7280" },
+  { id: "nba",      name: "Pack NBA",        price: "9€",      cards: 5, desc: "5 cartes · 1 Rare garanti",         emoji: "🏀", color: "#ff5c00" },
+  { id: "wnba",     name: "Pack WNBA",       price: "9€",      cards: 5, desc: "5 joueuses · 1 Rare garanti 🌸",    emoji: "🌸", color: "#c084fc" },
+  { id: "allstar",  name: "Pack All-Star",   price: "29€",     cards: 8, desc: "8 cartes · 1 Épique garanti",       emoji: "⭐", color: "#f5c842" },
+  { id: "legend",   name: "Pack Légende",    price: "89€",     cards: 5, desc: "5 cartes · 1 OR garanti 🏆",        emoji: "✨", color: "#ffd700" },
 ];
 
+// ── LÉGENDES WNBA (cartes OR) ──
+const WNBA_LEGEND_CARDS = [
+  { id: 801, espnId: null, league: "wnba", name: "Sue Bird", pos: "PG", team: "Seattle Storm", era: "2002-2022", pts: 13.0, ast: 5.8, reb: 3.1, fg: 44, score: 100, rarity: "gold", trait: "LA PLUS GRANDE", titles: 4 },
+  { id: 802, espnId: null, league: "wnba", name: "Diana Taurasi", pos: "PG", team: "Phoenix Mercury", era: "2004-2023", pts: 19.9, ast: 4.5, reb: 3.9, fg: 43, score: 99, rarity: "gold", trait: "WHITE MAMBA", titles: 3 },
+];
+
+// ── ROSTER WNBA COMPLET ──
 const WNBA_PLAYERS = [
-  {
-    id: 901, espnId: 4433403, league: "wnba",
-    name: "Caitlin Clark", pos: "PG", team: "Indiana Fever", teamColor: "#C8102E",
-    pts: 19.2, ast: 8.4, reb: 5.7, fg: 40, score: 97,
-    rarity: "legendary", trait: "ROY 2024",
-  },
-  {
-    id: 902, espnId: 4572126, league: "wnba",
-    name: "Angel Reese", pos: "PF", team: "Chicago Sky", teamColor: "#418FDE",
-    pts: 13.1, ast: 2.2, reb: 13.1, fg: 44, score: 89,
-    rarity: "epic", trait: "DOUBLE-DOUBLE QUEEN",
-  },
-  {
-    id: 903, espnId: 3149391, league: "wnba",
-    name: "Breanna Stewart", pos: "PF", team: "New York Liberty", teamColor: "#86CEBC",
-    pts: 19.3, ast: 3.3, reb: 9.3, fg: 45, score: 94,
-    rarity: "epic", trait: "STEWIE",
-  },
-  {
-    id: 904, espnId: 3149557, league: "wnba",
-    name: "A'ja Wilson", pos: "C", team: "Las Vegas Aces", teamColor: "#C8102E",
-    pts: 26.4, ast: 3.5, reb: 11.9, fg: 52, score: 98,
-    rarity: "epic", trait: "MVP 2024",
-  },
-  {
-    id: 905, espnId: 4066670, league: "wnba",
-    name: "Sabrina Ionescu", pos: "PG", team: "New York Liberty", teamColor: "#86CEBC",
-    pts: 17.4, ast: 8.1, reb: 4.5, fg: 42, score: 92,
-    rarity: "epic", trait: "TRIPLE-DOUBLE",
-  },
+  // ── LÉGENDAIRES ──
+  { id: 901, espnId: 4433403, league: "wnba", name: "Caitlin Clark",    pos: "PG", team: "Indiana Fever",      teamColor: "#C8102E", pts: 19.2, ast: 8.4, reb: 5.7,  fg: 40, score: 97, rarity: "legendary", trait: "ROY 2024"            },
+  { id: 902, espnId: 3149391, league: "wnba", name: "A'ja Wilson",       pos: "C",  team: "Las Vegas Aces",     teamColor: "#C8102E", pts: 26.4, ast: 3.5, reb: 11.9, fg: 52, score: 98, rarity: "legendary", trait: "MVP 2024"             },
+  // ── ÉPIQUES ──
+  { id: 903, espnId: 2998928, league: "wnba", name: "Breanna Stewart",  pos: "PF", team: "New York Liberty",   teamColor: "#86CEBC", pts: 19.3, ast: 3.3, reb: 9.3,  fg: 45, score: 94, rarity: "epic",      trait: "STEWIE"              },
+  { id: 904, espnId: 4066533, league: "wnba", name: "Sabrina Ionescu",  pos: "PG", team: "New York Liberty",   teamColor: "#86CEBC", pts: 17.4, ast: 8.1, reb: 4.5,  fg: 42, score: 92, rarity: "epic",      trait: "TRIPLE-DOUBLE"       },
+  { id: 905, espnId: 4433402, league: "wnba", name: "Angel Reese",      pos: "PF", team: "Atlanta Dream",      teamColor: "#C41230", pts: 13.1, ast: 2.2, reb: 13.1, fg: 44, score: 89, rarity: "epic",      trait: "DOUBLE-DOUBLE QUEEN" },
+  { id: 906, espnId: 3065570, league: "wnba", name: "Kelsey Plum",      pos: "PG", team: "Los Angeles Sparks", teamColor: "#9d7bd8", pts: 17.8, ast: 4.4, reb: 2.5,  fg: 43, score: 88, rarity: "epic",      trait: "CLUTCH QUEEN"        },
+  { id: 907, espnId: 3917450, league: "wnba", name: "Napheesa Collier", pos: "PF", team: "Minnesota Lynx",     teamColor: "#236192", pts: 20.1, ast: 3.1, reb: 9.8,  fg: 51, score: 91, rarity: "epic",      trait: "PHEE"                },
+  { id: 908, espnId: 2529140, league: "wnba", name: "Alyssa Thomas",    pos: "PF", team: "Phoenix Mercury",    teamColor: "#e56020", pts: 14.0, ast: 7.9, reb: 9.2,  fg: 52, score: 90, rarity: "epic",      trait: "TRIPLE MENACE"       },
+  { id: 909, espnId: 2999101, league: "wnba", name: "Jonquel Jones",    pos: "PF", team: "New York Liberty",   teamColor: "#86CEBC", pts: 14.9, ast: 3.1, reb: 7.4,  fg: 50, score: 87, rarity: "epic",      trait: "MVP 2021"            },
+  { id: 910, espnId: 4398674, league: "wnba", name: "Rhyne Howard",     pos: "SG", team: "Atlanta Dream",      teamColor: "#C41230", pts: 17.7, ast: 3.9, reb: 4.2,  fg: 41, score: 86, rarity: "epic",      trait: "ROY 2022"            },
+  // ── RARES ──
+  { id: 911, espnId: 2529122, league: "wnba", name: "Chelsea Gray",     pos: "PG", team: "Las Vegas Aces",     teamColor: "#C8102E", pts: 12.5, ast: 6.0, reb: 3.4,  fg: 47, score: 84, rarity: "rare",      trait: "FINALES MVP"         },
+  { id: 912, espnId: 2987869, league: "wnba", name: "Jewell Loyd",      pos: "SG", team: "Las Vegas Aces",     teamColor: "#C8102E", pts: 20.3, ast: 3.8, reb: 3.9,  fg: 44, score: 85, rarity: "rare",      trait: "SCOREUSE"            },
+  { id: 913, espnId: 869,     league: "wnba", name: "DeWanna Bonner",   pos: "SF", team: "Phoenix Mercury",    teamColor: "#e56020", pts: 15.2, ast: 3.5, reb: 6.1,  fg: 43, score: 82, rarity: "rare",      trait: "VÉTÉRANE"            },
+  { id: 914, espnId: 2566106, league: "wnba", name: "Dearica Hamby",    pos: "PF", team: "Los Angeles Sparks", teamColor: "#9d7bd8", pts: 13.5, ast: 3.4, reb: 8.7,  fg: 48, score: 80, rarity: "rare",      trait: "ENERGY"              },
+  { id: 915, espnId: 4432831, league: "wnba", name: "Aliyah Boston",    pos: "PF", team: "Indiana Fever",      teamColor: "#C8102E", pts: 13.9, ast: 3.6, reb: 7.4,  fg: 50, score: 83, rarity: "rare",      trait: "ROY 2023"            },
+  // ── COMMUNES ──
+  { id: 916, espnId: 2987891, league: "wnba", name: "Courtney Williams", pos: "PG", team: "Minnesota Lynx",    teamColor: "#236192", pts: 11.8, ast: 4.9, reb: 4.1,  fg: 39, score: 74, rarity: "common",    trait: "WARRIOR"             },
+  { id: 917, espnId: 2491205, league: "wnba", name: "Skylar Diggins",   pos: "PG", team: "Chicago Sky",        teamColor: "#418FDE", pts: 14.1, ast: 5.3, reb: 2.8,  fg: 41, score: 77, rarity: "common",    trait: "POINT GOD"           },
 ];
 
 const ALL_PLAYERS = NBA_TEAMS.flatMap(t => t.players.map(p => ({ ...p, team: t.name, teamId: t.id, teamColor: t.color })));
@@ -178,15 +177,18 @@ function PlayerPhoto({ espnId, photo, name, size, league }) {
   const [error, setError] = useState(false);
   const initials = name.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
   const sport = league === "wnba" ? "wnba" : "nba";
-  const url = photo || `https://a.espncdn.com/combiner/i?img=/i/headshots/${sport}/players/full/${espnId}.png&w=350&h=254`;
+  const url = photo || (espnId ? `https://a.espncdn.com/combiner/i?img=/i/headshots/${sport}/players/full/${espnId}.png&w=350&h=254` : null);
+  const showPlaceholder = !url || error || !loaded;
   return (
     <div style={{ width: size, height: size * 0.85, position: "relative", overflow: "hidden" }}>
-      {!loaded && !error && <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: size * 0.28, fontWeight: 900, color: "rgba(255,255,255,0.2)" }}>{initials}</div>}
-      {error ? (
-        <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: size * 0.35 }}>🏀</div>
-      ) : (
+      {showPlaceholder && (
+        <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ fontSize: size * 0.28, fontWeight: 900, color: (!url || error) ? "rgba(255,255,255,0.55)" : "rgba(255,255,255,0.2)", fontFamily: "'Bebas Neue',cursive", letterSpacing: 2, textShadow: "0 2px 12px rgba(0,0,0,0.8)" }}>{initials}</div>
+        </div>
+      )}
+      {url && !error && (
         <img src={url} alt={name} onLoad={() => setLoaded(true)} onError={() => setError(true)}
-          style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top center", opacity: loaded ? 1 : 0, transition: "opacity 0.3s ease", filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.8))" }} />
+          style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top center", opacity: loaded ? 1 : 0, transition: "opacity 0.3s ease", filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.8))", position: "absolute", inset: 0 }} />
       )}
     </div>
   );
@@ -254,17 +256,30 @@ function PackOpening({ pack, onClose, onDone }) {
   const [cards, setCards] = useState([]);
 
   const generate = () => {
+    const allLegends = [...LEGEND_CARDS, ...WNBA_LEGEND_CARDS];
     if (pack.id === "legend") {
-      const gold = LEGEND_CARDS[Math.floor(Math.random() * LEGEND_CARDS.length)];
-      const rest = [...ALL_PLAYERS].sort(() => Math.random() - 0.5).slice(0, 4);
+      const gold = allLegends[Math.floor(Math.random() * allLegends.length)];
+      const rest = [...ALL_PLAYERS, ...WNBA_PLAYERS].sort(() => Math.random() - 0.5).slice(0, 4);
       return [gold, ...rest];
+    }
+    if (pack.id === "wnba") {
+      const pool = [...WNBA_PLAYERS].sort(() => Math.random() - 0.5);
+      const result = [];
+      const rare = pool.filter(p => p.rarity === "rare" || p.rarity === "epic" || p.rarity === "legendary");
+      if (rare.length) result.push(rare[Math.floor(Math.random() * rare.length)]);
+      if (Math.random() < 0.08) result.push(WNBA_LEGEND_CARDS[Math.floor(Math.random() * WNBA_LEGEND_CARDS.length)]);
+      while (result.length < pack.cards) {
+        const c = pool[result.length % pool.length];
+        if (!result.find(r => r.id === c.id)) result.push(c);
+      }
+      return result.slice(0, pack.cards);
     }
     const pool = [...ALL_PLAYERS].sort(() => Math.random() - 0.5);
     const result = [];
     if (pack.id === "allstar") {
       const epic = pool.filter(p => p.rarity === "epic" || p.rarity === "legendary");
       if (epic.length) result.push(epic[Math.floor(Math.random() * epic.length)]);
-      if (Math.random() < 0.1) result.push(LEGEND_CARDS[Math.floor(Math.random() * LEGEND_CARDS.length)]);
+      if (Math.random() < 0.1) result.push(allLegends[Math.floor(Math.random() * allLegends.length)]);
     }
     if (pack.id === "nba") {
       const rare = pool.filter(p => p.rarity === "rare" || p.rarity === "epic" || p.rarity === "legendary");
@@ -448,7 +463,7 @@ export default function Cards() {
                   <div style={{ height: 1, flex: 1, background: "rgba(192,132,252,0.2)" }} />
                 </div>
                 <h1 style={{ fontFamily: "'Bebas Neue',cursive", fontSize: 48, letterSpacing: 2, lineHeight: 1, margin: 0, background: "linear-gradient(135deg,#fff,#c084fc)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>STARS DE LA WNBA</h1>
-                <p style={{ color: "rgba(192,132,252,0.7)", fontSize: 13, marginTop: 6 }}>Les 5 joueuses les plus dominantes de la ligue · Saison 2024</p>
+                <p style={{ color: "rgba(192,132,252,0.7)", fontSize: 13, marginTop: 6 }}>17 joueuses · 2 Légendes OR · Saison 2024</p>
               </div>
             </div>
 
@@ -456,10 +471,15 @@ export default function Cards() {
             <div style={{ display: "flex", gap: 8, marginBottom: 24, flexWrap: "wrap" }}>
               {[
                 ["all", "Toutes"],
-                ["Indiana Fever", "🔴 Indiana Fever"],
-                ["Chicago Sky", "🔵 Chicago Sky"],
-                ["New York Liberty", "🩵 New York Liberty"],
-                ["Las Vegas Aces", "♠ Las Vegas Aces"],
+                ["Indiana Fever", "🔴 Fever"],
+                ["Las Vegas Aces", "♠ Aces"],
+                ["New York Liberty", "🩵 Liberty"],
+                ["Chicago Sky", "🔵 Sky"],
+                ["Minnesota Lynx", "🐾 Lynx"],
+                ["Connecticut Sun", "🌞 Sun"],
+                ["Atlanta Dream", "🌸 Dream"],
+                ["Seattle Storm", "⚡ Storm"],
+                ["Los Angeles Sparks", "💜 Sparks"],
               ].map(([id, label]) => (
                 <button key={id} onClick={() => setWnbaFilter(id)} style={{
                   padding: "6px 16px", borderRadius: 20, fontFamily: "inherit", cursor: "pointer", fontSize: 12,
@@ -523,6 +543,25 @@ export default function Cards() {
                 ))}
               </div>
             </div>
+
+            {/* WNBA Legends OR */}
+            <div style={{ marginTop: 28, background: "linear-gradient(160deg,rgba(255,215,0,0.06),rgba(192,132,252,0.06))", border: "1px solid rgba(255,215,0,0.25)", borderRadius: 16, padding: 24, animation: "wnbaGlow 3s ease-in-out infinite" }}>
+              <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: 2, color: "#ffd700", textTransform: "uppercase", marginBottom: 6, fontFamily: "monospace" }}>✦ LÉGENDES OR WNBA</div>
+              <p style={{ fontSize: 12, color: "#888", marginBottom: 18, marginTop: 0 }}>Ces cartes ultra-rares peuvent tomber dans un Pack Légende · 8% de chance dans le Pack WNBA</p>
+              <div style={{ display: "flex", gap: 20, flexWrap: "wrap" }}>
+                {WNBA_LEGEND_CARDS.map((card, i) => (
+                  <div key={card.id} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+                    <div style={{ animation: `float ${3 + i * 0.8}s ease-in-out infinite` }}>
+                      <HoloCard card={card} size="normal" onClick={() => setSelectedCard(card)} />
+                    </div>
+                    <div style={{ textAlign: "center" }}>
+                      <div style={{ fontSize: 12, fontWeight: 800, color: "#ffd700" }}>{card.name}</div>
+                      <div style={{ fontSize: 10, color: "#888" }}>{card.era} · {card.titles} titres 🏆</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         )}
 
@@ -557,7 +596,7 @@ export default function Cards() {
         {view === "packs" && (
           <div>
             <h1 style={{ fontFamily: "'Bebas Neue',cursive", fontSize: 40, letterSpacing: 2, marginBottom: 8 }}>OUVRIR DES <span style={{ color: "#ff5c00" }}>PACKS</span></h1>
-            <p style={{ color: "#6b7280", fontSize: 13, marginBottom: 32 }}>Obtiens les stars de toutes les équipes NBA + les légendes en OR 🏆</p>
+            <p style={{ color: "#6b7280", fontSize: 13, marginBottom: 32 }}>Obtiens les stars NBA · les joueuses WNBA · et les légendes OR 🏆</p>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 20, marginBottom: 36 }}>
               {PACKS.map(pack => (
                 <div key={pack.id} className="pack-h" onClick={() => setOpenPack(pack)} style={{ background: pack.id === "legend" ? "linear-gradient(160deg,#1a1000,#3d2800)" : `linear-gradient(160deg,rgba(0,0,0,0.9),${pack.color}20)`, border: `2px solid ${pack.color}${pack.id === "legend" ? "cc" : "50"}`, borderRadius: 20, padding: 28, textAlign: "center", cursor: "pointer", transition: "all .3s", animation: pack.id === "legend" ? "gp 3s ease-in-out infinite" : "none" }}>
@@ -571,11 +610,20 @@ export default function Cards() {
               ))}
             </div>
             <div style={{ background: "rgba(255,215,0,0.05)", border: "1px solid rgba(255,215,0,0.2)", borderRadius: 16, padding: 20 }}>
-              <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 2, color: "#ffd700", textTransform: "uppercase", marginBottom: 14, fontFamily: "monospace" }}>✦ Légendes disponibles</div>
-              <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+              <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 2, color: "#ffd700", textTransform: "uppercase", marginBottom: 6, fontFamily: "monospace" }}>✦ Légendes disponibles</div>
+              <p style={{ fontSize: 12, color: "#888", marginBottom: 14, marginTop: 0 }}>NBA · Les Grands du jeu</p>
+              <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 20 }}>
                 {LEGEND_CARDS.map(card => (
                   <HoloCard key={card.id} card={card} size="small" onClick={() => setSelectedCard(card)} />
                 ))}
+              </div>
+              <div style={{ borderTop: "1px solid rgba(192,132,252,0.2)", paddingTop: 16 }}>
+                <p style={{ fontSize: 12, color: "#c084fc", marginBottom: 14, marginTop: 0, fontWeight: 700 }}>🌸 WNBA · Les pionnières</p>
+                <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+                  {WNBA_LEGEND_CARDS.map(card => (
+                    <HoloCard key={card.id} card={card} size="small" onClick={() => setSelectedCard(card)} />
+                  ))}
+                </div>
               </div>
             </div>
           </div>

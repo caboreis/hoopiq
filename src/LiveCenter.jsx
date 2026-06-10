@@ -10,8 +10,97 @@ const C = {
   text: "#f0f0ff", muted: "#6b6b88",
 };
 
-const API = "http://localhost:3001";
+const API = (import.meta.env.DEV ? "http://localhost:3001" : "") + "";
 const POLL_MS = 15000;
+const ESPN_WNBA = "https://site.api.espn.com/apis/site/v2/sports/basketball/wnba";
+
+function parseWnbaGames(data) {
+  return (data.events || []).map(ev => {
+    const comp = ev.competitions?.[0] || {};
+    const competitors = comp.competitors || [];
+    const home = competitors.find(c => c.homeAway === "home") || competitors[0] || {};
+    const away = competitors.find(c => c.homeAway === "away") || competitors[1] || {};
+
+    const stateId = ev.status?.type?.id;
+    const status = stateId === "2" ? "live" : stateId === "3" ? "final" : "upcoming";
+
+    const mapTeam = (c) => ({
+      abbr: c.team?.abbreviation || "?",
+      name: c.team?.displayName || "",
+      short: c.team?.shortDisplayName || "",
+      logo: c.team?.logo || "",
+      color: "#" + (c.team?.color || "c084fc"),
+      score: status === "upcoming" ? "-" : (c.score || "0"),
+      pts_q: (c.linescores || []).map(l => l.value ?? l.displayValue ?? ""),
+      record: c.records?.[0]?.summary || "",
+    });
+
+    const homeTeam = mapTeam(home);
+    const awayTeam = mapTeam(away);
+    const winProb = home.probabilities?.[0]?.homeWinPercentage;
+    const prediction = winProb != null ? Math.round(winProb * 100) : 50;
+
+    return {
+      id: ev.id,
+      league: "wnba",
+      status,
+      quarter: ev.status?.period || 0,
+      clock: ev.status?.displayClock || "",
+      home: homeTeam,
+      away: awayTeam,
+      prediction,
+      ai_comment: `${homeTeam.abbr} accueille ${awayTeam.abbr}${status === "live" ? ` — Q${ev.status?.period} ${ev.status?.displayClock}` : status === "final" ? " — Match terminé" : " — À venir"}.`,
+      momentum: null,
+    };
+  });
+}
+
+async function fetchWnbaDetail(gameId) {
+  const res = await fetch(`${ESPN_WNBA}/summary?event=${gameId}`);
+  if (!res.ok) throw new Error();
+  const d = await res.json();
+  const box = d.boxscore || {};
+  const teams = (box.teams || []).map(t => ({
+    abbr: t.team?.abbreviation,
+    players: (t.statistics?.[0]?.athletes || t.players || []).map(p => {
+      const stats = p.stats || [];
+      return {
+        name: p.athlete?.shortName || p.athlete?.displayName || "",
+        headshot: p.athlete?.headshot?.href || null,
+        pts: stats[18] ?? stats[13] ?? 0,
+        reb: stats[6] ?? 0,
+        ast: stats[7] ?? 0,
+        pm: stats[20] ?? stats[15] ?? "",
+        starter: p.starter ?? false,
+      };
+    }).filter(p => p.name),
+  }));
+
+  const teamStats = (box.teams || []).map(t => {
+    const stats = t.statistics || [];
+    const get = (k) => stats.find(s => s.name === k || s.abbreviation === k)?.displayValue || "0";
+    return {
+      abbr: t.team?.abbreviation,
+      fg: get("fieldGoalsMade") || get("fieldGoals"),
+      fgPct: get("fieldGoalPct"),
+      tpPct: get("threePointPct"),
+      reb: get("rebounds") || get("totalRebounds"),
+      ast: get("assists"),
+      to: get("turnovers"),
+    };
+  });
+
+  const plays = (d.plays || []).slice(-30).reverse().map(p => ({
+    period: p.period?.number || p.period || 1,
+    clock: p.clock?.displayValue || "",
+    text: p.text || "",
+    scoring: p.scoringPlay || false,
+    home: p.homeScore ?? "",
+    away: p.awayScore ?? "",
+  }));
+
+  return { id: String(gameId), teams, teamStats, plays, winProbHome: null };
+}
 
 const lastWord = (n) => (n || "").split(" ").slice(-1)[0];
 const numOf = (v) => parseInt(String(v).replace(/[^\d-]/g, ""), 10) || 0;
@@ -348,7 +437,10 @@ function NBAMusicPlayer({ visible }) {
 
 export default function LiveCenter() {
   const [games, setGames] = useState([]);
+  const [wnbaGames, setWnbaGames] = useState([]);
+  const [leagueFilter, setLeagueFilter] = useState("all");
   const [selectedId, setSelectedId] = useState(null);
+  const [selectedLeague, setSelectedLeague] = useState("nba");
   const [detail, setDetail] = useState(null);
   const [centerTab, setCenterTab] = useState("box"); // box | stats
   const [feedTab, setFeedTab] = useState("ia"); // ia | plays
@@ -366,7 +458,7 @@ export default function LiveCenter() {
 
   const now = () => new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
 
-  // ---- Fetch game list + poll ----
+  // ---- Fetch NBA game list + poll ----
   useEffect(() => {
     let active = true;
     async function load() {
@@ -375,16 +467,10 @@ export default function LiveCenter() {
         if (!res.ok) throw new Error("fetch failed");
         const data = await res.json();
         if (!active) return;
-        const list = data.games || [];
+        const list = (data.games || []).map(g => ({ ...g, league: "nba" }));
         setGames(list);
         setError(false);
         setLoading(false);
-
-        setSelectedId(prev => {
-          if (prev && list.some(g => g.id === prev)) return prev;
-          const live = list.find(g => g.status === "live");
-          return (live || list[0])?.id ?? null;
-        });
 
         if (!seeded.current) {
           seeded.current = true;
@@ -418,16 +504,47 @@ export default function LiveCenter() {
     return () => { active = false; clearInterval(interval); };
   }, []);
 
+  // ---- Fetch WNBA games + poll ----
+  useEffect(() => {
+    let active = true;
+    async function loadWnba() {
+      try {
+        const res = await fetch(`${ESPN_WNBA}/scoreboard`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!active) return;
+        const list = parseWnbaGames(data);
+        setWnbaGames(list);
+        setLoading(false);
+
+        // auto-select first game if nothing selected yet
+        setSelectedId(prev => {
+          if (prev) return prev;
+          const live = list.find(g => g.status === "live");
+          return (live || list[0])?.id ?? null;
+        });
+      } catch { /* WNBA fetch is best-effort */ }
+    }
+    loadWnba();
+    const iv = setInterval(loadWnba, POLL_MS);
+    return () => { active = false; clearInterval(iv); };
+  }, []);
+
   // ---- Fetch detail for selected game + poll ----
   useEffect(() => {
     if (!selectedId) return;
     let active = true;
     async function loadDetail() {
       try {
-        const res = await fetch(`${API}/api/nba/game/${selectedId}`);
-        if (!res.ok) throw new Error();
-        const d = await res.json();
-        if (active) setDetail(d);
+        if (selectedLeague === "wnba") {
+          const d = await fetchWnbaDetail(selectedId);
+          if (active) setDetail(d);
+        } else {
+          const res = await fetch(`${API}/api/nba/game/${selectedId}`);
+          if (!res.ok) throw new Error();
+          const d = await res.json();
+          if (active) setDetail(d);
+        }
       } catch {
         if (active) setDetail(null);
       }
@@ -435,9 +552,17 @@ export default function LiveCenter() {
     loadDetail();
     const iv = setInterval(loadDetail, POLL_MS);
     return () => { active = false; clearInterval(iv); };
-  }, [selectedId]);
+  }, [selectedId, selectedLeague]);
 
-  const selectedGame = games.find(g => g.id === selectedId) || games[0] || null;
+  const allGames = [
+    ...games,
+    ...wnbaGames.filter(w => !games.some(n => n.id === w.id)),
+  ];
+  const visibleGames = leagueFilter === "nba" ? games
+    : leagueFilter === "wnba" ? wnbaGames
+    : allGames;
+
+  const selectedGame = allGames.find(g => g.id === selectedId) || allGames[0] || null;
   const det = detail && selectedGame && detail.id === String(selectedGame.id) ? detail : null;
 
   // win prob: prefer real ESPN curve, fallback to heuristic
@@ -479,9 +604,10 @@ export default function LiveCenter() {
     setFeedTab("ia");
   };
 
-  const liveCount = games.filter(g => g.status === "live").length;
-  const upcomingCount = games.filter(g => g.status === "upcoming").length;
-  const finalCount = games.filter(g => g.status === "final").length;
+  const liveCount = allGames.filter(g => g.status === "live").length;
+  const upcomingCount = allGames.filter(g => g.status === "upcoming").length;
+  const finalCount = allGames.filter(g => g.status === "final").length;
+  const wnbaLiveCount = wnbaGames.filter(g => g.status === "live").length;
 
   const tabBtn = (active) => ({
     flex: 1, padding: "9px 0", borderRadius: 8, border: "none", cursor: "pointer", fontFamily: "inherit",
@@ -510,8 +636,9 @@ export default function LiveCenter() {
           <div style={{ width: 8, height: 8, borderRadius: "50%", background: liveCount ? C.red : C.muted, animation: liveCount ? "pulse 1s infinite" : "none" }} />
           <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 20, background: `linear-gradient(135deg,${C.orange},${C.gold})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", letterSpacing: 3 }}>HOOP IQ · LIVE CENTER</div>
         </div>
-        <div style={{ display: "flex", gap: 16, fontSize: 12, color: C.muted }}>
-          <span style={{ color: liveCount ? C.red : C.muted }}>🔴 {liveCount} matchs live</span>
+        <div style={{ display: "flex", gap: 16, fontSize: 12, color: C.muted, alignItems: "center" }}>
+          <span style={{ color: liveCount ? C.red : C.muted }}>🔴 {liveCount} live</span>
+          {wnbaLiveCount > 0 && <span style={{ color: C.purple }}>🌸 {wnbaLiveCount} WNBA live</span>}
           <span>{upcomingCount} à venir</span>
           <span>{finalCount} terminés</span>
         </div>
@@ -520,7 +647,7 @@ export default function LiveCenter() {
       {loading ? (
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "calc(100vh - 60px)", gap: 16, color: C.muted }}>
           <div style={{ width: 36, height: 36, border: `3px solid ${C.border}`, borderTopColor: C.orange, borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
-          <div style={{ fontSize: 13 }}>Chargement des matchs NBA en direct…</div>
+          <div style={{ fontSize: 13 }}>Chargement des matchs NBA & WNBA en direct…</div>
         </div>
       ) : error ? (
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "calc(100vh - 60px)", gap: 10, color: C.muted }}>
@@ -528,28 +655,59 @@ export default function LiveCenter() {
           <div style={{ fontSize: 14, color: C.text }}>Impossible de joindre le serveur NBA</div>
           <div style={{ fontSize: 12 }}>Vérifie que le backend tourne (npm run dev:all) sur le port 3001.</div>
         </div>
-      ) : games.length === 0 ? (
+      ) : allGames.length === 0 ? (
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "calc(100vh - 60px)", gap: 10, color: C.muted }}>
           <div style={{ fontSize: 40 }}>🏀</div>
-          <div style={{ fontSize: 14, color: C.text }}>Aucun match NBA programmé aujourd'hui</div>
+          <div style={{ fontSize: 14, color: C.text }}>Aucun match NBA ou WNBA programmé aujourd'hui</div>
           <div style={{ fontSize: 12 }}>Reviens un soir de match pour le suivi en direct !</div>
         </div>
       ) : (
       <div style={{ display: "grid", gridTemplateColumns: "340px 1fr 320px", gap: 0, height: "calc(100vh - 60px)" }}>
 
         {/* LEFT — Game list */}
-        <div style={{ background: C.bg2, borderRight: `1px solid ${C.border}`, overflowY: "auto", padding: 16 }}>
-          <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: 2, color: C.muted, textTransform: "uppercase", marginBottom: 14, fontFamily: "monospace" }}>Matchs du soir</div>
-          {games.map(game => {
+        <div style={{ background: C.bg2, borderRight: `1px solid ${C.border}`, overflowY: "auto", padding: 16, display: "flex", flexDirection: "column" }}>
+          {/* League toggle */}
+          <div style={{ display: "flex", gap: 4, marginBottom: 14, background: "rgba(255,255,255,0.04)", padding: 3, borderRadius: 10, border: `1px solid ${C.border}` }}>
+            {[
+              { id: "all", label: "Tous", count: allGames.length },
+              { id: "nba", label: "🏀 NBA", count: games.length },
+              { id: "wnba", label: "🌸 WNBA", count: wnbaGames.length },
+            ].map(f => (
+              <button key={f.id} onClick={() => setLeagueFilter(f.id)} style={{
+                flex: 1, padding: "6px 4px", borderRadius: 7, border: "none", cursor: "pointer", fontFamily: "inherit",
+                fontSize: 11, fontWeight: 800, transition: "all .15s",
+                background: leagueFilter === f.id ? (f.id === "wnba" ? "rgba(192,132,252,0.18)" : "rgba(255,92,0,0.15)") : "transparent",
+                color: leagueFilter === f.id ? (f.id === "wnba" ? C.purple : C.orange) : C.muted,
+              }}>{f.label} <span style={{ opacity: 0.6 }}>({f.count})</span></button>
+            ))}
+          </div>
+
+          <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: 2, color: C.muted, textTransform: "uppercase", marginBottom: 12, fontFamily: "monospace" }}>Matchs du soir</div>
+
+          {visibleGames.length === 0 && (
+            <div style={{ textAlign: "center", padding: "24px 0", color: C.muted, fontSize: 12 }}>
+              {leagueFilter === "wnba" ? "Aucun match WNBA aujourd'hui" : "Aucun match NBA aujourd'hui"}
+            </div>
+          )}
+
+          {visibleGames.map(game => {
+            const isWnba = game.league === "wnba";
             const isSelected = selectedGame && selectedGame.id === game.id;
+            const accentColor = isWnba ? C.purple : C.orange;
             return (
-              <div key={game.id} className="game-card" onClick={() => setSelectedId(game.id)} style={{
-                background: isSelected ? "rgba(255,92,0,0.07)" : C.surface,
-                border: `1px solid ${isSelected ? "rgba(255,92,0,0.35)" : C.border}`,
-                borderRadius: 14, padding: "14px 16px", marginBottom: 10, cursor: "pointer", transition: "all .2s",
+              <div key={game.id} className="game-card" onClick={() => { setSelectedId(game.id); setSelectedLeague(isWnba ? "wnba" : "nba"); setDetail(null); }} style={{
+                background: isSelected ? (isWnba ? "rgba(192,132,252,0.07)" : "rgba(255,92,0,0.07)") : C.surface,
+                border: `1px solid ${isSelected ? (isWnba ? "rgba(192,132,252,0.35)" : "rgba(255,92,0,0.35)") : C.border}`,
+                borderRadius: 14, padding: "12px 14px", marginBottom: 10, cursor: "pointer", transition: "all .2s",
               }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-                  <LiveBadge status={game.status} quarter={game.quarter} clock={game.clock} />
+                {/* League badge + status */}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    {isWnba && (
+                      <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: 1, color: C.purple, background: "rgba(192,132,252,0.14)", padding: "2px 7px", borderRadius: 5, border: "1px solid rgba(192,132,252,0.25)" }}>🌸 WNBA</span>
+                    )}
+                    <LiveBadge status={game.status} quarter={game.quarter} clock={game.clock} />
+                  </div>
                   {game.momentum && <span style={{ fontSize: 10, color: (game.momentum === game.home.abbr ? game.home.color : game.away.color), fontWeight: 800 }}>↑ {game.momentum}</span>}
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -570,13 +728,15 @@ export default function LiveCenter() {
                   </div>
                 </div>
                 <PredBar pct={game.prediction} home={game.home} away={game.away} />
-                <button onClick={(e) => { e.stopPropagation(); setWatchGame(game); }} style={{
-                  width: "100%", marginTop: 4, padding: "8px 0", borderRadius: 9,
-                  border: `1px solid ${game.status === "live" ? "rgba(255,77,109,0.35)" : C.border}`,
-                  background: game.status === "live" ? "rgba(255,77,109,0.1)" : "rgba(255,255,255,0.04)",
-                  color: game.status === "live" ? C.red : C.muted, fontWeight: 800, fontSize: 12, cursor: "pointer", fontFamily: "inherit",
-                  display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
-                }}>{watchMeta(game.status).label}</button>
+                {!isWnba && (
+                  <button onClick={(e) => { e.stopPropagation(); setWatchGame(game); }} style={{
+                    width: "100%", marginTop: 4, padding: "8px 0", borderRadius: 9,
+                    border: `1px solid ${game.status === "live" ? "rgba(255,77,109,0.35)" : C.border}`,
+                    background: game.status === "live" ? "rgba(255,77,109,0.1)" : "rgba(255,255,255,0.04)",
+                    color: game.status === "live" ? C.red : C.muted, fontWeight: 800, fontSize: 12, cursor: "pointer", fontFamily: "inherit",
+                    display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                  }}>{watchMeta(game.status).label}</button>
+                )}
               </div>
             );
           })}
@@ -587,7 +747,16 @@ export default function LiveCenter() {
           {selectedGame && (
             <div style={{ animation: "fadeUp .3s ease" }} key={selectedGame.id}>
               {/* Scoreboard */}
-              <div style={{ background: `linear-gradient(160deg, ${selectedGame.home.color}15, rgba(0,0,0,0.5), ${selectedGame.away.color}15)`, border: `1px solid rgba(255,255,255,0.08)`, borderRadius: 20, padding: "28px 32px", marginBottom: 20 }}>
+              <div style={{ background: selectedGame.league === "wnba"
+                  ? `linear-gradient(160deg, rgba(192,132,252,0.12), rgba(0,0,0,0.5), rgba(192,132,252,0.08))`
+                  : `linear-gradient(160deg, ${selectedGame.home.color}15, rgba(0,0,0,0.5), ${selectedGame.away.color}15)`,
+                border: `1px solid ${selectedGame.league === "wnba" ? "rgba(192,132,252,0.2)" : "rgba(255,255,255,0.08)"}`,
+                borderRadius: 20, padding: "28px 32px", marginBottom: 20 }}>
+                {selectedGame.league === "wnba" && (
+                  <div style={{ marginBottom: 12 }}>
+                    <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: 2, color: C.purple, background: "rgba(192,132,252,0.12)", padding: "3px 12px", borderRadius: 6, border: "1px solid rgba(192,132,252,0.25)" }}>🌸 WNBA · EN DIRECT</span>
+                  </div>
+                )}
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                   <TeamScore team={selectedGame.home} score={selectedGame.home.score} pts_q={selectedGame.home.pts_q} quarter={selectedGame.quarter} side="home" />
                   <div style={{ textAlign: "center", padding: "0 24px" }}>
@@ -603,20 +772,37 @@ export default function LiveCenter() {
                 <div style={{ marginTop: 16 }}>
                   <PredBar pct={winPct} home={selectedGame.home} away={selectedGame.away} label={winLabel} />
                 </div>
-                <button onClick={() => setWatchGame(selectedGame)} style={{
-                  width: "100%", marginTop: 14, padding: "11px 0", borderRadius: 11,
-                  border: `1px solid ${selectedGame.status === "live" ? "rgba(255,77,109,0.4)" : "rgba(255,255,255,0.12)"}`,
-                  background: selectedGame.status === "live" ? "linear-gradient(135deg, rgba(255,77,109,0.18), rgba(255,92,0,0.12))" : "rgba(255,255,255,0.05)",
-                  color: "#fff", fontWeight: 800, fontSize: 14,
-                  cursor: "pointer", fontFamily: "inherit", display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                }}>{watchMeta(selectedGame.status).label} — {selectedGame.home.abbr} vs {selectedGame.away.abbr}</button>
+                {selectedGame.league !== "wnba" && (
+                  <button onClick={() => setWatchGame(selectedGame)} style={{
+                    width: "100%", marginTop: 14, padding: "11px 0", borderRadius: 11,
+                    border: `1px solid ${selectedGame.status === "live" ? "rgba(255,77,109,0.4)" : "rgba(255,255,255,0.12)"}`,
+                    background: selectedGame.status === "live" ? "linear-gradient(135deg, rgba(255,77,109,0.18), rgba(255,92,0,0.12))" : "rgba(255,255,255,0.05)",
+                    color: "#fff", fontWeight: 800, fontSize: 14,
+                    cursor: "pointer", fontFamily: "inherit", display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                  }}>{watchMeta(selectedGame.status).label} — {selectedGame.home.abbr} vs {selectedGame.away.abbr}</button>
+                )}
+                {selectedGame.league === "wnba" && (
+                  <a href="https://www.wnba.com/watch" target="_blank" rel="noopener noreferrer" style={{
+                    display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                    width: "100%", marginTop: 14, padding: "11px 0", borderRadius: 11, textDecoration: "none",
+                    border: "1px solid rgba(192,132,252,0.3)",
+                    background: "rgba(192,132,252,0.08)",
+                    color: C.purple, fontWeight: 800, fontSize: 14, fontFamily: "inherit",
+                  }}>🌸 Regarder sur WNBA.com</a>
+                )}
               </div>
 
               {/* AI Comment */}
-              <div style={{ background: "rgba(255,92,0,0.07)", border: `1px solid rgba(255,92,0,0.2)`, borderRadius: 14, padding: "14px 18px", marginBottom: 20, borderLeft: `3px solid ${C.orange}` }}>
-                <div style={{ fontSize: 10, fontWeight: 800, color: C.orange, fontFamily: "monospace", letterSpacing: 1.5, marginBottom: 6 }}>🤖 IA LIVE</div>
-                <p style={{ fontSize: 14, color: "#dde", lineHeight: 1.6, margin: 0 }}>{selectedGame.ai_comment}</p>
-              </div>
+              {(() => {
+                const isWnba = selectedGame.league === "wnba";
+                const ac = isWnba ? C.purple : C.orange;
+                return (
+                  <div style={{ background: isWnba ? "rgba(192,132,252,0.06)" : "rgba(255,92,0,0.07)", border: `1px solid ${isWnba ? "rgba(192,132,252,0.2)" : "rgba(255,92,0,0.2)"}`, borderRadius: 14, padding: "14px 18px", marginBottom: 20, borderLeft: `3px solid ${ac}` }}>
+                    <div style={{ fontSize: 10, fontWeight: 800, color: ac, fontFamily: "monospace", letterSpacing: 1.5, marginBottom: 6 }}>🤖 {isWnba ? "IA WNBA" : "IA LIVE"}</div>
+                    <p style={{ fontSize: 14, color: "#dde", lineHeight: 1.6, margin: 0 }}>{selectedGame.ai_comment}</p>
+                  </div>
+                );
+              })()}
 
               {/* Tabs */}
               <div style={{ display: "flex", gap: 6, background: C.surface, padding: 4, borderRadius: 12, marginBottom: 16, border: `1px solid ${C.border}` }}>
