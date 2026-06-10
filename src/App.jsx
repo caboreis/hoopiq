@@ -1049,16 +1049,75 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
               boxShadow: "0 0 100px rgba(200,16,46,0.25)",
               animation: "nflModalIn .35s cubic-bezier(.34,1.56,.64,1)",
             }}>
-              {/* Vidéo YouTube muted autoplay */}
-              <div style={{ position: "relative", width: "100%", paddingTop: "56.25%", background: "#000" }}>
-                <iframe
-                  src="https://www.youtube.com/embed/xpyau8zvvuw?autoplay=1&mute=1&loop=1&playlist=xpyau8zvvuw&controls=0&showinfo=0&rel=0&modestbranding=1"
-                  allow="autoplay; encrypted-media"
-                  allowFullScreen
-                  style={{ position: "absolute", inset: 0, width: "100%", height: "100%", border: "none" }}
-                />
-                {/* Overlay gradient bas */}
-                <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 80, background: "linear-gradient(transparent, #0d0005)", pointerEvents: "none" }} />
+              {/* Cinematic NFL Hero Animation */}
+              <div style={{ position: "relative", width: "100%", height: 260, background: "#000", overflow: "hidden" }}>
+                <style>{`
+                  @keyframes nflParticle { 0%{transform:translateY(0) translateX(0) scale(1);opacity:1} 100%{transform:translateY(-280px) translateX(var(--dx)) scale(0);opacity:0} }
+                  @keyframes nflShieldPulse { 0%,100%{transform:scale(1);filter:drop-shadow(0 0 20px #C8102E)} 50%{transform:scale(1.06);filter:drop-shadow(0 0 40px #FFB612)} }
+                  @keyframes nflScanline { 0%{transform:translateY(-100%)} 100%{transform:translateY(400%)} }
+                  @keyframes nflTextReveal { 0%{opacity:0;letter-spacing:20px} 100%{opacity:1;letter-spacing:6px} }
+                  @keyframes nflGlitch { 0%,94%,100%{transform:translateX(0)} 95%{transform:translateX(-4px)} 97%{transform:translateX(4px)} }
+                  @keyframes nflLineGrow { from{width:0} to{width:140px} }
+                  @keyframes nflVignette { 0%,100%{opacity:0.6} 50%{opacity:0.3} }
+                `}</style>
+
+                {/* Fond dégradé animé */}
+                <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 50% 60%, #3a0008 0%, #1a0003 40%, #000 100%)" }} />
+
+                {/* Grille de terrain */}
+                <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", opacity: 0.08 }} viewBox="0 0 560 260">
+                  {[0,56,112,168,224,280,336,392,448,504,560].map(x => (
+                    <line key={x} x1={x} y1="0" x2={x} y2="260" stroke="#fff" strokeWidth="0.5"/>
+                  ))}
+                  {[0,52,104,156,208,260].map(y => (
+                    <line key={y} x1="0" y1={y} x2="560" y2={y} stroke="#fff" strokeWidth="0.5"/>
+                  ))}
+                </svg>
+
+                {/* Particles 🏈 */}
+                {[...Array(14)].map((_, i) => (
+                  <div key={i} style={{
+                    position: "absolute",
+                    left: `${8 + i * 6.5}%`,
+                    bottom: `${10 + (i % 4) * 8}%`,
+                    fontSize: i % 3 === 0 ? 18 : 13,
+                    animation: `nflParticle ${2.2 + (i % 4) * 0.6}s ease-out ${i * 0.28}s infinite`,
+                    "--dx": `${(i % 2 === 0 ? 1 : -1) * (20 + i * 5)}px`,
+                    opacity: 0,
+                  }}>🏈</div>
+                ))}
+
+                {/* Scanline cinéma */}
+                <div style={{
+                  position: "absolute", left: 0, right: 0, height: 2,
+                  background: "linear-gradient(90deg, transparent, rgba(200,16,46,0.6), transparent)",
+                  animation: "nflScanline 2.4s linear infinite",
+                }} />
+
+                {/* Bouclier central */}
+                <div style={{
+                  position: "absolute", inset: 0,
+                  display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10,
+                }}>
+                  <div style={{ fontSize: 64, animation: "nflShieldPulse 2s ease-in-out infinite" }}>🏈</div>
+                  <div style={{
+                    fontFamily: "'Bebas Neue', cursive", fontSize: 42, letterSpacing: 6, lineHeight: 1,
+                    background: "linear-gradient(135deg, #C8102E, #FFB612, #C8102E)",
+                    backgroundSize: "200%",
+                    WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+                    animation: "nflTextReveal 1s ease both, nflGlitch 4s ease-in-out infinite",
+                  }}>NFL ZONE</div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <div style={{ height: 1, width: 0, background: "#C8102E", animation: "nflLineGrow 1.2s ease .4s both" }} />
+                    <span style={{ fontSize: 11, fontWeight: 800, color: "#FFB612", letterSpacing: 3, textTransform: "uppercase" }}>Bientôt sur HoopIQ</span>
+                    <div style={{ height: 1, width: 0, background: "#C8102E", animation: "nflLineGrow 1.2s ease .4s both" }} />
+                  </div>
+                </div>
+
+                {/* Vignette overlay */}
+                <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 50% 50%, transparent 40%, rgba(0,0,0,0.7) 100%)", animation: "nflVignette 3s ease-in-out infinite" }} />
+                {/* Gradient bas */}
+                <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 60, background: "linear-gradient(transparent, #0d0005)" }} />
               </div>
 
               {/* Contenu */}
