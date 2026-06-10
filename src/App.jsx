@@ -824,18 +824,22 @@ function App({ user, onLogout }) {
 
   const TABS = [
     { id: "dashboard", label: "Dashboard", icon: "⚡" },
-    { id: "players", label: "Joueurs", icon: "🏀" },
-    { id: "matches", label: "Matchs", icon: "📊" },
-    { id: "chat", label: "IA Chat", icon: "🤖" },
-    { id: "jarvis", label: "JARVIS", icon: "🦾" },
-    { id: "account", label: "Compte", icon: "👤" },
-    { id: "agent", label: "Agent IA", icon: "🤖" },
+    { id: "live",      label: "Live",      icon: "🔴", badge: liveScores.filter(g => g.status === "live" || g.status?.toLowerCase().includes("live")).length || null },
+    { id: "oracle",    label: "Oracle",    icon: "🔮" },
+    { sep: true },
+    { id: "players",   label: "Joueurs",   icon: "🏀" },
+    { id: "matches",   label: "Matchs",    icon: "📊" },
+    { sep: true },
+    { id: "vestiaire", label: "Vestiaire", icon: "💬" },
+    { id: "cards",     label: "Cartes",    icon: "🎴" },
+    { sep: true },
+    { id: "chat",      label: "IA Chat",   icon: "🤖" },
+    { id: "jarvis",    label: "JARVIS",    icon: "🦾" },
+    { id: "agent",     label: "Agent IA",  icon: "🧠" },
     { id: "marketing", label: "Marketing", icon: "🚀" },
-     { id: "cards", label: "Cartes", icon: "🎴" },
-     { id: "live", label: "Live", icon: "🔴" },
-     { id: "oracle", label: "Oracle", icon: "🔮" },
-     { id: "vestiaire", label: "Vestiaire", icon: "💬" },
-];
+    { sep: true },
+    { id: "account",   label: "Compte",    icon: "👤" },
+  ];
   return (
     <div style={{ minHeight: "100vh", background: C.bg, color: C.text, fontFamily: "'DM Sans', sans-serif" }}>
       <style>{`
@@ -845,27 +849,41 @@ function App({ user, onLogout }) {
         @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
         @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
         @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
-        .nav-tab:hover { color: ${C.orange} !important; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
+        @keyframes glow-pulse { 0%,100%{box-shadow:0 0 0 0 rgba(255,92,0,0.4)} 50%{box-shadow:0 0 0 6px rgba(255,92,0,0)} }
+        .nav-tab:hover { color: ${C.orange} !important; background: rgba(255,92,0,0.07) !important; }
         .nav-tabs::-webkit-scrollbar { height: 0; display: none; }
         .player-row:hover { background: rgba(255,92,0,0.06) !important; cursor:pointer; }
-        .stat-card:hover { border-color: rgba(255,92,0,0.3) !important; transform:translateY(-2px); }
+        .stat-card:hover { border-color: rgba(255,92,0,0.35) !important; transform:translateY(-3px); box-shadow: 0 8px 32px rgba(0,0,0,0.4) !important; }
+        .kpi-card { position: relative; overflow: hidden; }
+        .kpi-card::after { content:''; position:absolute; top:0; left:0; right:0; height:2px; background: var(--kpi-color); opacity:.8; }
         .fade-in { animation: fadeUp .5s ease both; }
+        .nav-sep { width: 1px; height: 20px; background: rgba(255,255,255,0.07); margin: 0 4px; align-self: center; flex-shrink: 0; }
       `}</style>
 
       {/* TOP NAV */}
-      <nav style={{ position: "sticky", top: 0, zIndex: 100, height: 62, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 28px", background: "rgba(6,6,15,0.92)", backdropFilter: "blur(20px)", borderBottom: `1px solid ${C.border}` }}>
+      <nav style={{ position: "sticky", top: 0, zIndex: 100, height: 62, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 20px", background: "rgba(6,6,15,0.96)", backdropFilter: "blur(24px)", borderBottom: `1px solid rgba(255,255,255,0.06)`, boxShadow: "0 4px 24px rgba(0,0,0,0.5)" }}>
         <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 24, background: G.orange, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", letterSpacing: 3 }}>HOOP IQ</div>
 
         {/* Tabs */}
-        <div className="nav-tabs" style={{ display: "flex", gap: 1, flex: 1, minWidth: 0, overflowX: "auto", justifyContent: "center", margin: "0 8px" }}>
-          {TABS.map(t => (
+        <div className="nav-tabs" style={{ display: "flex", gap: 1, flex: 1, minWidth: 0, overflowX: "auto", justifyContent: "center", margin: "0 8px", alignItems: "center" }}>
+          {TABS.map((t, i) => t.sep ? (
+            <div key={`sep-${i}`} className="nav-sep" />
+          ) : (
             <button key={t.id} className="nav-tab" onClick={() => setTab(t.id)} style={{
-              padding: "7px 9px", borderRadius: 8, border: "none", cursor: "pointer",
-              background: tab === t.id ? "rgba(255,92,0,0.12)" : "transparent",
+              position: "relative",
+              padding: "7px 10px", borderRadius: 8, border: "none", cursor: "pointer",
+              background: tab === t.id ? "rgba(255,92,0,0.13)" : "transparent",
               color: tab === t.id ? C.orange : C.muted, fontWeight: tab === t.id ? 700 : 500,
-              fontSize: 12.5, transition: "all .2s", fontFamily: "'DM Sans', sans-serif", flexShrink: 0, whiteSpace: "nowrap",
+              fontSize: 12, transition: "all .2s", fontFamily: "'DM Sans', sans-serif", flexShrink: 0, whiteSpace: "nowrap",
               borderBottom: tab === t.id ? `2px solid ${C.orange}` : "2px solid transparent",
-            }}>{t.icon} {t.label}</button>
+            }}>
+              {t.icon} {t.label}
+              {t.badge > 0 && (
+                <span style={{ position: "absolute", top: 3, right: 3, width: 14, height: 14, borderRadius: "50%", background: C.red, color: "#fff", fontSize: 9, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center", lineHeight: 1, animation: "glow-pulse 2s infinite" }}>{t.badge}</span>
+              )}
+            </button>
           ))}
         </div>
 
@@ -883,11 +901,25 @@ function App({ user, onLogout }) {
         {/* ── DASHBOARD ── */}
         {tab === "dashboard" && (
           <div className="fade-in">
-            <div style={{ marginBottom: 28 }}>
-              <div style={{ fontSize: 13, color: C.muted, marginBottom: 4 }}>Bienvenue, {user.name} 👋</div>
-              <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 46, letterSpacing: 2, lineHeight: 1 }}>
-                TABLEAU DE <span style={{ color: C.orange }}>BORD</span>
-              </h1>
+            <div style={{ marginBottom: 28, display: "flex", alignItems: "flex-end", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
+              <div>
+                <div style={{ fontSize: 13, color: C.muted, marginBottom: 4 }}>Bienvenue, {user.name} 👋</div>
+                <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 46, letterSpacing: 2, lineHeight: 1 }}>
+                  TABLEAU DE <span style={{ background: G.orange, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>BORD</span>
+                </h1>
+              </div>
+              <div style={{ display: "flex", gap: 10 }}>
+                {liveScores.filter(g => g.status?.toLowerCase().includes("live")).length > 0 && (
+                  <div onClick={() => setTab("live")} style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: 8, padding: "8px 16px", borderRadius: 20, background: "rgba(255,77,109,0.1)", border: "1px solid rgba(255,77,109,0.3)" }}>
+                    <span style={{ width: 8, height: 8, borderRadius: "50%", background: C.red, animation: "pulse 1.2s infinite", display: "inline-block" }} />
+                    <span style={{ fontSize: 12, fontWeight: 700, color: C.red }}>{liveScores.filter(g => g.status?.toLowerCase().includes("live")).length} match{liveScores.filter(g => g.status?.toLowerCase().includes("live")).length > 1 ? "s" : ""} en direct</span>
+                  </div>
+                )}
+                <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 16px", borderRadius: 20, background: C.surface, border: `1px solid ${C.border}` }}>
+                  <span style={{ fontSize: 12, color: C.muted }}>📅</span>
+                  <span style={{ fontSize: 12, color: C.muted }}>{new Date().toLocaleDateString("fr-FR", { weekday: "short", day: "numeric", month: "short" })}</span>
+                </div>
+              </div>
             </div>
 
             {/* KPI Row */}
@@ -898,13 +930,18 @@ function App({ user, onLogout }) {
                 { label: "Précision IA", val: "89%", icon: "🎯", sub: "Sur 248 matchs", color: C.orange },
                 { label: "Alertes actives", val: "7", icon: "🔔", sub: "Performance haute", color: C.gold },
               ].map((k, i) => (
-                <div key={k.label} className="stat-card" style={{
+                <div key={k.label} className="stat-card kpi-card" style={{
                   background: C.surface, border: `1px solid ${C.border}`, borderRadius: 16,
-                  padding: 20, transition: "all .2s", animationDelay: `${i * .08}s`,
+                  padding: "18px 20px", transition: "all .25s", animationDelay: `${i * .08}s`,
+                  boxShadow: `0 2px 16px rgba(0,0,0,0.25)`,
+                  "--kpi-color": k.color,
                 }}>
-                  <div style={{ fontSize: 28, marginBottom: 8 }}>{k.icon}</div>
-                  <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 38, color: k.color, lineHeight: 1 }}>{k.val}</div>
-                  <div style={{ fontSize: 12, color: C.text, fontWeight: 600, marginTop: 4 }}>{k.label}</div>
+                  <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 10 }}>
+                    <div style={{ width: 40, height: 40, borderRadius: 12, background: `${k.color}18`, border: `1px solid ${k.color}30`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>{k.icon}</div>
+                    <div style={{ width: 8, height: 8, borderRadius: "50%", background: k.color, opacity: 0.7, marginTop: 6 }} />
+                  </div>
+                  <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 40, color: k.color, lineHeight: 1, letterSpacing: 1 }}>{k.val}</div>
+                  <div style={{ fontSize: 12, color: C.text, fontWeight: 600, marginTop: 5 }}>{k.label}</div>
                   <div style={{ fontSize: 11, color: C.muted, marginTop: 2 }}>{k.sub}</div>
                 </div>
               ))}
@@ -923,19 +960,22 @@ function App({ user, onLogout }) {
                       <div style={{ color: C.muted, fontSize: 13 }}>Aucun match disponible pour le moment.</div>
                     ) : (
                       liveScores.map(game => (
-                        <div key={game.id} style={{ padding: 14, borderRadius: 14, background: 'rgba(255,255,255,0.03)', border: `1px solid ${C.border}` }}>
+                        <div key={game.id} style={{ padding: "12px 14px", borderRadius: 12, background: 'rgba(255,255,255,0.03)', border: `1px solid ${C.border}`, marginBottom: 10, borderLeft: `3px solid ${game.status?.toLowerCase().includes("live") ? C.red : C.border}`, transition: "all .2s" }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                            <div style={{ fontSize: 13, color: C.muted }}>{game.status}</div>
-                            <div style={{ fontSize: 11, color: C.orange }}>{game.clock}</div>
+                            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                              {game.status?.toLowerCase().includes("live") && <span style={{ width: 6, height: 6, borderRadius: "50%", background: C.red, animation: "pulse 1.2s infinite", display: "inline-block" }} />}
+                              <span style={{ fontSize: 11, color: game.status?.toLowerCase().includes("live") ? C.red : C.muted, fontWeight: game.status?.toLowerCase().includes("live") ? 700 : 400, textTransform: "uppercase", letterSpacing: 0.5 }}>{game.status}</span>
+                            </div>
+                            <div style={{ fontSize: 11, color: C.orange, fontFamily: "monospace" }}>{game.clock}</div>
                           </div>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
                             <div style={{ flex: 1 }}>
-                              <div style={{ fontWeight: 700 }}>{game.home.name}</div>
+                              <div style={{ fontWeight: 700, fontSize: 13 }}>{game.home.name}</div>
                               <div style={{ fontSize: 12, color: C.muted }}>{game.away.name}</div>
                             </div>
                             <div style={{ textAlign: 'right' }}>
-                              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 24, color: C.orange }}>{game.home.score} — {game.away.score}</div>
-                              <div style={{ fontSize: 11, color: C.muted }}>{game.home.abbreviation} vs {game.away.abbreviation}</div>
+                              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 26, color: C.text, letterSpacing: 1 }}>{game.home.score} <span style={{ color: C.muted, fontSize: 18 }}>—</span> {game.away.score}</div>
+                              <div style={{ fontSize: 10, color: C.muted, letterSpacing: 1 }}>{game.home.abbreviation} vs {game.away.abbreviation}</div>
                             </div>
                           </div>
                         </div>
