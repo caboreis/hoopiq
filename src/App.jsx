@@ -876,6 +876,15 @@ function App({ user, onLogout }) {
     };
   }, []);
 
+  // Auto-analyse le meilleur joueur quand on ouvre l'onglet Joueurs
+  useEffect(() => {
+    if (tab === "players" && !selectedPlayer) {
+      const list = bullsPlayers.length ? bullsPlayers : PLAYERS;
+      const best = list.reduce((a, b) => (b.score > a.score ? b : a), list[0]);
+      if (best) analyzePlayer(best);
+    }
+  }, [tab]);
+
   useEffect(() => {
     const loadNbaData = async () => {
       setNbaLoading(true)
@@ -1254,7 +1263,7 @@ function App({ user, onLogout }) {
         {tab === "players" && (
           <div className="fade-in">
             <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 46, letterSpacing: 2, marginBottom: 6 }}>ANALYSE <span style={{ color: C.orange }}>JOUEURS</span></h1>
-            <p style={{ color: C.muted, fontSize: 14, marginBottom: 24 }}>Clique sur un joueur pour générer son analyse IA complète</p>
+            <p style={{ color: C.muted, fontSize: 14, marginBottom: 24 }}>Analyse IA automatique · Clique sur un joueur pour changer</p>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                 {bullsPlayers.length > 0 && (
