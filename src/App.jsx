@@ -9,6 +9,7 @@ import Vestiaire from "./Vestiaire.jsx";
 import PreMatch from "./PreMatch.jsx";
 import Challenges from "./Challenges.jsx";
 import Leaderboard from "./Leaderboard.jsx";
+import Duel from "./Duel.jsx";
 /* ─────────────────────────────────────────
    DESIGN SYSTEM
 ───────────────────────────────────────── */
@@ -116,12 +117,6 @@ const NBA_TEAMS = [
   { id: 30, name: "Charlotte Hornets",      abbr: "CHA", color: "#1D1160" },
 ];
 
-const MATCHES = [
-  { id: 1, home: "Paris Bulls", away: "Lyon Hawks", hs: 98, as: 87, date: "04 Jun", done: true, mvp: "Marcus Johnson", pred: 72 },
-  { id: 2, home: "Marseille Jets", away: "Paris Bulls", hs: 72, as: 91, date: "01 Jun", done: true, mvp: "Kevin Tran", pred: 55 },
-  { id: 3, home: "Lyon Hawks", away: "Bordeaux Lions", hs: null, as: null, date: "10 Jun", done: false, pred: 67 },
-  { id: 4, home: "Paris Bulls", away: "Marseille Jets", hs: null, as: null, date: "14 Jun", done: false, pred: 81 },
-];
 
 /* ─────────────────────────────────────────
    UTILS / ATOMS
@@ -475,12 +470,14 @@ function AuthModal({ mode, onClose, onSuccess }) {
     }
     setLoading(true);
     await new Promise(r => setTimeout(r, 900));
+    setLoading(false);
     onSuccess({ name: form.email.split("@")[0], email: form.email, plan: "pro" });
   };
 
   const handleSignup = async () => {
     setLoading(true);
     await new Promise(r => setTimeout(r, 1200));
+    setLoading(false);
     onSuccess({ name: form.name || form.email.split("@")[0], email: form.email, plan: form.plan });
   };
 
@@ -937,6 +934,7 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
     { id: "dashboard",   label: "Dashboard",  icon: "⚡" },
     { id: "live",        label: "Live",       icon: "🔴", badge: (liveScores.filter(g => g.status === "live" || g.status?.toLowerCase().includes("live")).length + wnbaLiveCount) || null },
     { id: "oracle",      label: "Oracle",     icon: "🔮" },
+    { id: "duel",        label: "Duel IA",    icon: "⚔️" },
     { id: "prematch",    label: "Pronostics", icon: "⚡" },
     { id: "challenges",  label: "Défis",      icon: "🎯" },
     { id: "leaderboard", label: "Classement", icon: "🏆" },
@@ -1346,12 +1344,29 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
               <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
                 {/* Next match */}
                 <Card glow>
-                  <SectionTitle>📅 Prochain match</SectionTitle>
-                  <div style={{ fontWeight: 700, marginBottom: 4 }}>Lyon Hawks</div>
-                  <div style={{ fontSize: 12, color: C.muted, marginBottom: 12 }}>vs Bordeaux Lions · 10 Jun</div>
-                  <div style={{ padding: "10px 12px", background: "rgba(255,92,0,0.06)", borderRadius: 8, fontSize: 13, borderLeft: `3px solid ${C.orange}` }}>
-                    🎯 <strong style={{ color: C.orange }}>67%</strong> de chance de victoire Lyon selon l'IA
-                  </div>
+                  <SectionTitle>📅 Prochain match NBA</SectionTitle>
+                  {(() => {
+                    const next = liveScores.find(g => g.status !== "Final" && !g.status?.includes("Final")) || liveScores[0];
+                    if (nbaLoading) return <div style={{ fontSize: 13, color: C.muted }}>Chargement...</div>;
+                    if (!next) return <div style={{ fontSize: 13, color: C.muted }}>Aucun match à venir aujourd'hui.</div>;
+                    const isLive = next.status === "live" || next.status?.toLowerCase().includes("live");
+                    return (
+                      <>
+                        <div style={{ fontWeight: 700, marginBottom: 2 }}>{next.home.name || next.home.abbreviation}</div>
+                        <div style={{ fontSize: 12, color: C.muted, marginBottom: 12 }}>vs {next.away.name || next.away.abbreviation} · {isLive ? "🔴 En direct" : next.status}</div>
+                        {isLive && (
+                          <div style={{ padding: "10px 12px", background: "rgba(255,77,109,0.06)", borderRadius: 8, fontSize: 13, borderLeft: `3px solid ${C.red}` }}>
+                            🔴 <strong style={{ color: C.red }}>{next.home.score} – {next.away.score}</strong> · {next.clock}
+                          </div>
+                        )}
+                        {!isLive && (
+                          <div style={{ padding: "10px 12px", background: "rgba(255,92,0,0.06)", borderRadius: 8, fontSize: 13, borderLeft: `3px solid ${C.orange}` }}>
+                            📅 Match prévu · Analyse IA disponible dans Oracle
+                          </div>
+                        )}
+                      </>
+                    );
+                  })()}
                 </Card>
 
                 {/* Plan card */}
@@ -1699,12 +1714,22 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
                 </Card>
                 <Card>
                   <SectionTitle>📊 Stats rapides</SectionTitle>
-                  {[{ l: "Meilleur marqueur", v: "M. Johnson · 24.3" }, { l: "Meilleur passeur", v: "M. Johnson · 8.1" }, { l: "Meilleur rebondeur", v: "K. Tran · 11.3" }].map(s => (
-                    <div key={s.l} style={{ marginBottom: 10 }}>
-                      <div style={{ fontSize: 11, color: C.muted }}>{s.l}</div>
-                      <div style={{ fontSize: 13, fontWeight: 600 }}>{s.v}</div>
-                    </div>
-                  ))}
+                  {(() => {
+                    const pool = bullsPlayers.length ? bullsPlayers : PLAYERS;
+                    const scorer = pool.reduce((a, b) => b.pts > a.pts ? b : a, pool[0]);
+                    const passer = pool.reduce((a, b) => b.ast > a.ast ? b : a, pool[0]);
+                    const rebounder = pool.reduce((a, b) => b.reb > a.reb ? b : a, pool[0]);
+                    return [
+                      { l: "Meilleur marqueur", v: `${scorer?.name?.split(" ").pop()} · ${scorer?.pts}` },
+                      { l: "Meilleur passeur", v: `${passer?.name?.split(" ").pop()} · ${passer?.ast}` },
+                      { l: "Meilleur rebondeur", v: `${rebounder?.name?.split(" ").pop()} · ${rebounder?.reb}` },
+                    ].map(s => (
+                      <div key={s.l} style={{ marginBottom: 10 }}>
+                        <div style={{ fontSize: 11, color: C.muted }}>{s.l}</div>
+                        <div style={{ fontSize: 13, fontWeight: 600 }}>{s.v}</div>
+                      </div>
+                    ));
+                  })()}
                 </Card>
               </div>
             </div>
@@ -1735,6 +1760,7 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
   </div>
 )}
 {tab === "oracle" && <Oracle />}
+        {tab === "duel" && <Duel />}
         {tab === "prematch" && <PreMatch />}
         {tab === "challenges" && <Challenges />}
         {tab === "leaderboard" && <Leaderboard />}
