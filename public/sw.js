@@ -1,59 +1,41 @@
-const CACHE_NAME = "hoopiq-v1";
-const STATIC_ASSETS = [
-  "/",
-  "/index.html",
-  "/manifest.json",
-  "/icons/icon-192.png",
-  "/icons/icon-512.png",
-];
+// Cache version — change automatiquement à chaque déploiement
+const CACHE_VERSION = "hoopiq-" + Date.now();
 
-// Installation — mise en cache des assets statiques
-self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
-  );
+// Installation immédiate sans mettre en cache quoi que ce soit
+self.addEventListener("install", () => {
   self.skipWaiting();
 });
 
-// Activation — suppression des anciens caches
+// Activation — supprime TOUS les anciens caches sans exception
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
-    )
+    caches.keys().then((keys) => Promise.all(keys.map((k) => caches.delete(k))))
   );
   self.clients.claim();
 });
 
-// Fetch — stratégie Network First pour les APIs, Cache First pour les assets
+// Fetch — Network First TOUJOURS (plus de blank page au déploiement)
 self.addEventListener("fetch", (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Toujours réseau pour les appels API
-  if (url.pathname.startsWith("/api/")) {
-    event.respondWith(
-      fetch(request).catch(() =>
-        new Response(JSON.stringify({ error: "Hors ligne" }), {
-          headers: { "Content-Type": "application/json" },
-        })
-      )
-    );
-    return;
-  }
+  // GET uniquement, pas les cross-origin (ESPN, Supabase, etc.)
+  if (request.method !== "GET" || url.origin !== self.location.origin) return;
 
-  // Cache First puis réseau pour tout le reste
   event.respondWith(
-    caches.match(request).then((cached) => {
-      if (cached) return cached;
-      return fetch(request).then((response) => {
-        if (!response || response.status !== 200 || response.type !== "basic") {
-          return response;
+    fetch(request)
+      .then((response) => {
+        // Cache uniquement les assets statiques immuables (pas HTML ni JS/CSS du bundle)
+        if (
+          response.ok &&
+          !url.pathname.startsWith("/api/") &&
+          (url.pathname.startsWith("/icons/") || url.pathname === "/manifest.json")
+        ) {
+          const clone = response.clone();
+          caches.open(CACHE_VERSION).then((cache) => cache.put(request, clone));
         }
-        const clone = response.clone();
-        caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
         return response;
-      });
-    })
+      })
+      .catch(() => caches.match(request))
   );
 });
