@@ -194,12 +194,12 @@ def fetch_player_photo(player_name: str, diameter: int = 236):
         print(f"⚠️  Téléchargement ESPN échoué: {e}")
         return None
 
-    # ESPN headshots are 426×320 — crop tightly around the head/upper body
+    # ESPN headshots vary in size (600x436, 426x320…) — crop a square
     w, h = raw.size
     side = min(w, h)
     left = (w - side) // 2
-    top  = max(0, int(h * 0.04))   # slight top crop to centre the face
-    raw = raw.crop((left, top, left + side, top + side))
+    # Keep top at 0 so we never exceed image bounds; the player fills the square
+    raw = raw.crop((left, 0, left + side, side))
     raw = raw.resize((diameter, diameter), Image.LANCZOS)
 
     # Circular mask
@@ -207,7 +207,15 @@ def fetch_player_photo(player_name: str, diameter: int = 236):
     ImageDraw.Draw(mask).ellipse([0, 0, diameter - 1, diameter - 1], fill=255)
     result = Image.new("RGBA", (diameter, diameter), (0, 0, 0, 0))
     result.paste(raw, (0, 0), mask)
-    print(f"✅ Photo ESPN : {player_name}")
+
+    # Sanity check: at least 10% of pixels must be opaque (avoid blank/broken images)
+    alpha_data = list(result.split()[3].getdata())
+    opaque_pct = sum(1 for p in alpha_data if p > 64) / len(alpha_data)
+    if opaque_pct < 0.10:
+        print(f"⚠️  Photo ESPN trop transparente ({opaque_pct:.0%}) : {player_name}")
+        return None
+
+    print(f"✅ Photo ESPN : {player_name} ({opaque_pct:.0%} opaque)")
     return result
 
 
