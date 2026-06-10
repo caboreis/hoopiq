@@ -983,49 +983,116 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
       `}</style>
 
       {/* NFL TEASER MODAL */}
-      {showNflTeaser && (
-        <div onClick={() => setShowNflTeaser(false)} style={{
-          position: "fixed", inset: 0, zIndex: 2000,
-          background: "rgba(0,0,0,0.88)", backdropFilter: "blur(16px)",
-          display: "flex", alignItems: "center", justifyContent: "center", padding: 24,
-        }}>
-          <div onClick={e => e.stopPropagation()} style={{
-            background: "linear-gradient(145deg, #0d0005, #06060f)",
-            border: "1px solid rgba(200,16,46,0.4)",
-            borderRadius: 24, padding: "40px 36px", maxWidth: 480, width: "100%", textAlign: "center",
-            boxShadow: "0 0 80px rgba(200,16,46,0.2)",
-            animation: "nflModalIn .35s cubic-bezier(.34,1.56,.64,1)",
+      {showNflTeaser && (() => {
+        // Beat hype Web Audio — démarre à l'ouverture, s'arrête à la fermeture
+        const closeTeaser = () => {
+          setShowNflTeaser(false);
+          if (window._nflBeatStop) { window._nflBeatStop(); window._nflBeatStop = null; }
+        };
+        // Lance le beat une seule fois au mount via ref trick
+        if (!window._nflBeatStop) {
+          try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            let running = true;
+            const playKick = (t) => {
+              const osc = ctx.createOscillator(); const gain = ctx.createGain();
+              osc.connect(gain); gain.connect(ctx.destination);
+              osc.frequency.setValueAtTime(160, t); osc.frequency.exponentialRampToValueAtTime(30, t + 0.08);
+              gain.gain.setValueAtTime(1.2, t); gain.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+              osc.start(t); osc.stop(t + 0.15);
+            };
+            const playSnare = (t) => {
+              const buf = ctx.createBuffer(1, ctx.sampleRate * 0.1, ctx.sampleRate);
+              const data = buf.getChannelData(0);
+              for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / data.length);
+              const src = ctx.createBufferSource(); const gain = ctx.createGain();
+              src.buffer = buf; gain.gain.setValueAtTime(0.5, t);
+              src.connect(gain); gain.connect(ctx.destination);
+              src.start(t);
+            };
+            const playBass = (t, freq) => {
+              const osc = ctx.createOscillator(); const gain = ctx.createGain();
+              osc.type = "sawtooth"; osc.frequency.value = freq;
+              gain.gain.setValueAtTime(0.25, t); gain.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+              osc.connect(gain); gain.connect(ctx.destination);
+              osc.start(t); osc.stop(t + 0.35);
+            };
+            const bpm = 140, beat = 60 / bpm;
+            let step = 0;
+            const bassLine = [55, 55, 55, 73, 55, 55, 62, 55];
+            const schedule = () => {
+              if (!running) return;
+              const now = ctx.currentTime;
+              for (let i = 0; i < 4; i++) {
+                const t = now + i * beat;
+                playKick(t);
+                if (i === 1 || i === 3) playSnare(t);
+                playBass(t, bassLine[step % bassLine.length]);
+                step++;
+              }
+              setTimeout(schedule, beat * 4 * 1000 * 0.85);
+            };
+            schedule();
+            window._nflBeatStop = () => { running = false; ctx.close(); };
+          } catch {}
+        }
+        return (
+          <div onClick={closeTeaser} style={{
+            position: "fixed", inset: 0, zIndex: 2000,
+            background: "rgba(0,0,0,0.92)", backdropFilter: "blur(20px)",
+            display: "flex", alignItems: "center", justifyContent: "center", padding: 20,
           }}>
-            <div style={{ fontSize: 64, marginBottom: 16 }}>🏈</div>
-            <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 48, letterSpacing: 3, margin: "0 0 8px",
-              background: "linear-gradient(135deg, #C8102E, #FFB612)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-              NFL ZONE
-            </h2>
-            <p style={{ fontSize: 15, color: "#f0f0ff", marginBottom: 8, fontWeight: 600 }}>Bientôt disponible sur HoopIQ</p>
-            <p style={{ fontSize: 13, color: "#6b6b88", lineHeight: 1.6, marginBottom: 28 }}>
-              32 équipes · Stats live · Scores ESPN · Analyse IA<br/>
-              Mahomes, Lamar Jackson, CeeDee Lamb et plus encore 🔥
-            </p>
-            <div style={{ display: "flex", gap: 8, justifyContent: "center", marginBottom: 24, flexWrap: "wrap" }}>
-              {["32 équipes NFL","Stars & Stats","Scores Live","Analyse IA"].map(tag => (
-                <span key={tag} style={{ fontSize: 11, fontWeight: 800, padding: "4px 12px", borderRadius: 20,
-                  background: "rgba(200,16,46,0.12)", border: "1px solid rgba(200,16,46,0.3)", color: "#ff6b6b" }}>
-                  {tag}
-                </span>
-              ))}
-            </div>
-            <button onClick={() => setShowNflTeaser(false)} style={{
-              width: "100%", padding: "14px", borderRadius: 14,
-              background: "linear-gradient(135deg, #C8102E, #a00d23)",
-              border: "none", color: "#fff", fontSize: 15, fontWeight: 800,
-              cursor: "pointer", fontFamily: "inherit",
-              boxShadow: "0 4px 24px rgba(200,16,46,0.4)",
+            <div onClick={e => e.stopPropagation()} style={{
+              background: "linear-gradient(145deg, #0d0005, #06060f)",
+              border: "1px solid rgba(200,16,46,0.45)",
+              borderRadius: 24, overflow: "hidden", maxWidth: 560, width: "100%",
+              boxShadow: "0 0 100px rgba(200,16,46,0.25)",
+              animation: "nflModalIn .35s cubic-bezier(.34,1.56,.64,1)",
             }}>
-              J'attends avec impatience ! 🏈
-            </button>
+              {/* Vidéo YouTube muted autoplay */}
+              <div style={{ position: "relative", width: "100%", paddingTop: "56.25%", background: "#000" }}>
+                <iframe
+                  src="https://www.youtube.com/embed/xpyau8zvvuw?autoplay=1&mute=1&loop=1&playlist=xpyau8zvvuw&controls=0&showinfo=0&rel=0&modestbranding=1"
+                  allow="autoplay; encrypted-media"
+                  allowFullScreen
+                  style={{ position: "absolute", inset: 0, width: "100%", height: "100%", border: "none" }}
+                />
+                {/* Overlay gradient bas */}
+                <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 80, background: "linear-gradient(transparent, #0d0005)", pointerEvents: "none" }} />
+              </div>
+
+              {/* Contenu */}
+              <div style={{ padding: "24px 28px 28px", textAlign: "center" }}>
+                <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 44, letterSpacing: 3, margin: "0 0 6px",
+                  background: "linear-gradient(135deg, #C8102E, #FFB612)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+                  NFL ZONE
+                </h2>
+                <p style={{ fontSize: 14, color: "#f0f0ff", marginBottom: 6, fontWeight: 600 }}>Bientôt disponible sur HoopIQ 🔥</p>
+                <p style={{ fontSize: 12, color: "#6b6b88", lineHeight: 1.6, marginBottom: 20 }}>
+                  32 équipes · Stars · Scores ESPN live · Analyse IA
+                </p>
+                <div style={{ display: "flex", gap: 8, justifyContent: "center", marginBottom: 20, flexWrap: "wrap" }}>
+                  {["Mahomes","Lamar Jackson","CeeDee Lamb","Micah Parsons"].map(tag => (
+                    <span key={tag} style={{ fontSize: 11, fontWeight: 800, padding: "3px 10px", borderRadius: 20,
+                      background: "rgba(200,16,46,0.12)", border: "1px solid rgba(200,16,46,0.3)", color: "#ff6b6b" }}>
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+                <button onClick={closeTeaser} style={{
+                  width: "100%", padding: "13px", borderRadius: 14,
+                  background: "linear-gradient(135deg, #C8102E, #a00d23)",
+                  border: "none", color: "#fff", fontSize: 14, fontWeight: 800,
+                  cursor: "pointer", fontFamily: "inherit",
+                  boxShadow: "0 4px 24px rgba(200,16,46,0.4)",
+                }}>
+                  J'attends avec impatience ! 🏈
+                </button>
+              </div>
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* TOP NAV */}
       <nav style={{ position: "sticky", top: 0, zIndex: 100, height: 62, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 20px", background: "rgba(6,6,15,0.96)", backdropFilter: "blur(24px)", borderBottom: `1px solid rgba(255,255,255,0.06)`, boxShadow: "0 4px 24px rgba(0,0,0,0.5)" }}>
