@@ -33,6 +33,17 @@ const LEAGUES = [
     sport: "mens-college-basketball",
     desc: "Futures stars NBA",
   },
+  {
+    id: "wnba",
+    label: "WNBA",
+    icon: "🌸",
+    color: "#c084fc",
+    api: "https://site.api.espn.com/apis/site/v2/sports/basketball/wnba/scoreboard",
+    summaryBase: "https://site.api.espn.com/apis/site/v2/sports/basketball/wnba/summary",
+    badge: "WNBA",
+    sport: "wnba",
+    desc: "Futures stars WNBA",
+  },
 ];
 
 /* ── Stats parsing ──────────────────────────────────────────── */
