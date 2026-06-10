@@ -186,201 +186,66 @@ function SectionTitle({ children }) {
 /* ─────────────────────────────────────────
    HOOPIQ RADIO
 ───────────────────────────────────────── */
-const RADIO_STREAMS = [
-  { url: "https://listen.shoutcast.com/top-40-rhythmic",                                          name: "Top 40 Rhythmic", emoji: "🔥" },
-  { url: "https://playerservices.streamtheworld.com/api/livestream-redirect/POWER1051.mp3",       name: "Power 105.1 NYC", emoji: "⚡" },
-  { url: "https://playerservices.streamtheworld.com/api/livestream-redirect/JAMN945.mp3",         name: "Jam'n 94.5",      emoji: "🏀" },
-];
-
-const SPOTIFY_FALLBACK = "https://open.spotify.com/embed/playlist/37i9dQZF1DX0XUsuxWHRQd?utm_source=generator&theme=0";
+const YT_PLAYLIST = "https://www.youtube.com/embed/videoseries?list=PLH-gkHn0OFBFuEd_JjG9MR7A7JUBxfyWF&autoplay=1&mute=0&loop=1&enablejsapi=1&rel=0&modestbranding=1";
 
 function HoopiqRadio() {
-  const [playing,      setPlaying]      = useState(false);
-  const [loading,      setLoading]      = useState(false);
-  const [error,        setError]        = useState(false);
-  const [stIdx,        setStIdx]        = useState(0);
-  const [volume,       setVolume]       = useState(70);
-  const [muted,        setMuted]        = useState(false);
-  const [spotifyMode,  setSpotifyMode]  = useState(false); // tous les streams ont échoué
-  const [failedCount,  setFailedCount]  = useState(0);
-  const audioRef   = useRef(null);
-  const playingRef = useRef(false);
+  const [expanded, setExpanded] = useState(false);
+  const [active,   setActive]   = useState(false);
 
-  const station = RADIO_STREAMS[stIdx];
-
-  // Sync ref avec state
-  useEffect(() => { playingRef.current = playing; }, [playing]);
-
-  // Tentative d'autoplay au montage (marchera si l'utilisateur a déjà interagi)
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    audio.volume = volume / 100;
-    audio.play().then(() => { setPlaying(true); setError(false); }).catch(() => {});
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Changement de station
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    const wasPlaying = playingRef.current;
-    audio.pause();
-    audio.src = RADIO_STREAMS[stIdx].url;
-    audio.load();
-    if (wasPlaying) {
-      setLoading(true);
-      audio.play().then(() => { setPlaying(true); setError(false); }).catch(() => { setPlaying(false); setLoading(false); });
-    }
-  }, [stIdx]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const togglePlay = () => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    if (playing) {
-      audio.pause();
-      setPlaying(false);
-    } else {
-      setLoading(true);
-      setError(false);
-      audio.play()
-        .then(() => { setPlaying(true); setLoading(false); })
-        .catch(() => { setError(true); setLoading(false); });
-    }
-  };
-
-  const nextStation = () => {
-    setSpotifyMode(false);
-    setError(false);
-    setStIdx(i => (i + 1) % RADIO_STREAMS.length);
-  };
-
-  const onVolume = (e) => {
-    const v = +e.target.value;
-    setVolume(v);
-    audioRef.current.volume = v / 100;
-    if (v > 0 && muted) { audioRef.current.muted = false; setMuted(false); }
-  };
-
-  const onMute = () => {
-    const next = !muted;
-    setMuted(next);
-    audioRef.current.muted = next;
-  };
-
-  const volIcon = (muted || volume === 0) ? "🔇" : volume < 40 ? "🔉" : "🔊";
+  const W = expanded ? 320 : 120;
+  const H = expanded ? 180 : 68;
 
   return (
-    <>
-      {/* Élément audio HTML5 — invisible, géré par les handlers */}
-      <audio
-        ref={audioRef}
-        src={station.url}
-        preload="none"
-        onPlaying={() => { setPlaying(true); setLoading(false); setError(false); }}
-        onWaiting={() => setLoading(true)}
-        onCanPlay={() => setLoading(false)}
-        onError={() => {
-          setError(true); setPlaying(false); setLoading(false);
-          setFailedCount(prev => {
-            const next = prev + 1;
-            if (next >= RADIO_STREAMS.length) setSpotifyMode(true);
-            else setStIdx(i => (i + 1) % RADIO_STREAMS.length); // essaie la suivante auto
-            return next;
-          });
-        }}
-      />
-
-      {/* Fallback Spotify — s'affiche si tous les streams ont échoué */}
-      {spotifyMode && (
-        <div style={{
-          position: "fixed", bottom: 52, right: 20, zIndex: 999,
-          borderRadius: "12px 12px 0 0", overflow: "hidden",
-          border: `1px solid rgba(30,215,96,0.4)`,
-          boxShadow: "0 -6px 24px rgba(0,0,0,0.7)",
-          animation: "fadeUp .3s ease",
-        }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "6px 10px", background: "#121212", borderBottom: "1px solid rgba(30,215,96,0.2)" }}>
-            <span style={{ fontSize: 10, color: "#1ed760", fontWeight: 800, letterSpacing: 1 }}>🎵 SPOTIFY · NBA Hype Hits</span>
-            <button onClick={() => setSpotifyMode(false)} style={{ background: "none", border: "none", color: "#666", fontSize: 12, cursor: "pointer", padding: 0, lineHeight: 1 }}>✕</button>
-          </div>
-          <iframe
-            src={SPOTIFY_FALLBACK}
-            width="300" height="152"
-            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-            loading="lazy"
-            style={{ display: "block", border: "none" }}
-          />
-        </div>
-      )}
-
-      {/* Barre de contrôle — se cache quand la souris n'est pas dessus */}
+    <div style={{
+      position: "fixed", bottom: 20, right: 20, zIndex: 1000,
+      width: W, height: H + 28,
+      borderRadius: 12, overflow: "hidden",
+      background: "#0d0d1f",
+      border: "1px solid rgba(255,92,0,0.35)",
+      boxShadow: "0 8px 32px rgba(0,0,0,0.8)",
+      transition: "width 0.3s ease, height 0.3s ease",
+    }}>
+      {/* Barre titre */}
       <div style={{
-        position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 998,
-        height: 52, background: "rgba(4,4,12,0.97)", backdropFilter: "blur(20px)",
-        borderTop: `1px solid rgba(255,92,0,0.22)`,
-        boxShadow: "0 -4px 28px rgba(0,0,0,0.7)",
-        display: "flex", alignItems: "center", gap: 14, padding: "0 20px",
-        fontFamily: "'DM Sans', sans-serif",
-        transform: "translateY(42px)",
-        transition: "transform 0.3s ease",
-      }}
-        onMouseEnter={e => e.currentTarget.style.transform = "translateY(0)"}
-        onMouseLeave={e => e.currentTarget.style.transform = "translateY(42px)"}
-      >
-
-        {/* Badge */}
-        <div style={{ display: "flex", alignItems: "center", gap: 7, padding: "3px 12px", background: "rgba(255,92,0,0.09)", border: "1px solid rgba(255,92,0,0.28)", borderRadius: 20, flexShrink: 0 }}>
-          {playing && !loading && <span style={{ width: 6, height: 6, borderRadius: "50%", background: C.orange, animation: "pulse 1s infinite", display: "inline-block" }} />}
-          {loading && <span style={{ width: 10, height: 10, border: `2px solid ${C.border}`, borderTopColor: C.orange, borderRadius: "50%", animation: "spin 0.7s linear infinite", display: "inline-block" }} />}
-          <span style={{ fontSize: 13 }}>📻</span>
-          <span style={{ fontSize: 10, fontWeight: 800, color: C.orange, letterSpacing: 2, textTransform: "uppercase" }}>HOOPIQ RADIO</span>
-        </div>
-
-        {/* Info station */}
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: (playing || spotifyMode) ? C.text : C.muted, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", transition: "color .2s" }}>
-            {spotifyMode ? "🎵 NBA Hype Hits · Spotify" : `${station.emoji} ${station.name}`}
-          </div>
-          <div style={{ fontSize: 9, color: spotifyMode ? "#1ed760" : error ? C.red : C.muted, letterSpacing: 1, textTransform: "uppercase", marginTop: 1 }}>
-            {spotifyMode ? "🎵 Mode Spotify activé" : error ? "⚠ Stream indisponible — essaie la suivante →" : loading ? "Connexion…" : playing ? `${stIdx + 1} / ${RADIO_STREAMS.length} · En direct` : "Prêt"}
-          </div>
-        </div>
-
-        {/* Play / Pause */}
-        <button onClick={togglePlay} style={{
-          width: 36, height: 36, borderRadius: "50%", cursor: "pointer", flexShrink: 0,
-          background: playing ? "rgba(255,92,0,0.14)" : `linear-gradient(135deg,${C.orange},#ff8c42)`,
-          color: playing ? C.orange : "#fff", fontSize: 15,
-          border: playing ? `1px solid rgba(255,92,0,0.38)` : "none",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          transition: "all .2s",
-        }}>
-          {loading ? "…" : playing ? "⏸" : "▶"}
-        </button>
-
-        {/* Station suivante */}
-        <button onClick={nextStation} style={{
-          background: "none", border: `1px solid ${C.border}`, color: C.muted,
-          fontSize: 11, cursor: "pointer", padding: "5px 11px", borderRadius: 8,
-          fontFamily: "inherit", display: "flex", alignItems: "center", gap: 5, flexShrink: 0,
-        }}
-          onMouseEnter={e => { e.currentTarget.style.color = C.orange; e.currentTarget.style.borderColor = "rgba(255,92,0,0.4)"; }}
-          onMouseLeave={e => { e.currentTarget.style.color = C.muted; e.currentTarget.style.borderColor = C.border; }}
-        >⏭ <span>Station suiv.</span></button>
-
-        {/* Volume */}
-        <div style={{ display: "flex", alignItems: "center", gap: 7, flexShrink: 0 }}>
-          <button onClick={onMute} style={{ background: "none", border: "none", color: (muted || volume === 0) ? C.muted : C.orange, fontSize: 15, cursor: "pointer", padding: 2, lineHeight: 1 }}>
-            {volIcon}
-          </button>
-          <input type="range" min={0} max={100} value={muted ? 0 : volume} onChange={onVolume}
-            style={{ width: 76, accentColor: C.orange, cursor: "pointer" }} />
-          <span style={{ fontSize: 10, color: C.muted, width: 22, textAlign: "right", fontFamily: "monospace" }}>
-            {muted ? 0 : volume}
-          </span>
+        height: 28, display: "flex", alignItems: "center", justifyContent: "space-between",
+        padding: "0 10px", background: "rgba(255,92,0,0.1)",
+        borderBottom: "1px solid rgba(255,92,0,0.2)",
+      }}>
+        <span style={{ fontSize: 9, fontWeight: 800, color: C.orange, letterSpacing: 1.5, textTransform: "uppercase" }}>
+          🎵 NBA HIP HOP
+        </span>
+        <div style={{ display: "flex", gap: 6 }}>
+          <button onClick={() => setExpanded(e => !e)} style={{
+            background: "none", border: "none", color: C.muted, fontSize: 11,
+            cursor: "pointer", padding: 0, lineHeight: 1,
+          }}>{expanded ? "⊟" : "⊞"}</button>
         </div>
       </div>
-    </>
+
+      {/* Player YouTube */}
+      {active ? (
+        <iframe
+          src={YT_PLAYLIST}
+          width={W} height={H}
+          allow="autoplay; encrypted-media"
+          allowFullScreen
+          style={{ display: "block", border: "none" }}
+        />
+      ) : (
+        <div
+          onClick={() => setActive(true)}
+          style={{
+            width: W, height: H,
+            display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+            cursor: "pointer", gap: 6,
+            background: "linear-gradient(135deg, rgba(255,92,0,0.08), rgba(0,0,0,0.5))",
+          }}
+        >
+          <div style={{ fontSize: expanded ? 28 : 18, lineHeight: 1 }}>▶</div>
+          {expanded && <div style={{ fontSize: 11, color: C.muted, textAlign: "center", padding: "0 10px" }}>Clique pour lancer la playlist</div>}
+        </div>
+      )}
+    </div>
   );
 }
 
