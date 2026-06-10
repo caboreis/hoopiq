@@ -127,7 +127,8 @@ export default function Jarvis() {
     const newHistory = [{ role: "user", content: msg }];
 
     try {
-      const res = await fetch("http://localhost:3001/api/anthropic", {
+      const API = (import.meta.env.DEV ? 'http://localhost:3001' : '') + '/api/anthropic';
+      const res = await fetch(API, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

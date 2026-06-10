@@ -39,9 +39,18 @@
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
 
-    <!-- ── Enregistrement du Service Worker ── -->
+    <!-- ── Service Worker : désinstalle l'ancien cache puis re-enregistre ── -->
     <script>
       if ('serviceWorker' in navigator) {
+        // Désinstalle tous les SW en place (vieux cache bloquant)
+        navigator.serviceWorker.getRegistrations().then(regs => {
+          regs.forEach(r => r.unregister());
+        });
+        // Vide tous les caches existants
+        if (window.caches) {
+          caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
+        }
+        // Re-enregistre proprement après le chargement
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('/sw.js')
             .then(reg => console.log('[HoopIQ SW] Enregistré :', reg.scope))
