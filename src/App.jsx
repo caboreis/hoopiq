@@ -176,29 +176,62 @@ const RADIO_PLAYLISTS = [
 ];
 
 function HoopiqRadio() {
-  const [playing, setPlaying] = useState(false);
+  const [unlocked, setUnlocked] = useState(false); // son débloqué par l'utilisateur
+  const [playing, setPlaying] = useState(true);    // lecture (muted au départ)
+  const [showPlayer, setShowPlayer] = useState(false);
   const [plIdx, setPlIdx] = useState(0);
   const [volume, setVolume] = useState(70);
   const [muted, setMuted] = useState(false);
   const [iframeKey, setIframeKey] = useState(0);
   const iframeRef = useRef(null);
+  const volumeRef = useRef(70); // ref pour la closure du listener
+  const unlockedRef = useRef(false);
 
   const pl = RADIO_PLAYLISTS[plIdx];
-  const src = `https://www.youtube.com/embed/videoseries?list=${pl.id}&autoplay=1&enablejsapi=1&rel=0&modestbranding=1`;
+  // mute=1 : muted autoplay TOUJOURS autorisé par les navigateurs
+  const src = `https://www.youtube.com/embed/videoseries?list=${pl.id}&autoplay=1&mute=1&enablejsapi=1&controls=0&rel=0&modestbranding=1`;
 
   const sendYT = (func, args = []) =>
     iframeRef.current?.contentWindow?.postMessage(JSON.stringify({ event: "command", func, args }), "*");
 
-  // Apply volume once the player has time to initialise
+  // Débloque le son au premier clic utilisateur n'importe où
   useEffect(() => {
-    if (!playing) return;
-    const t = setTimeout(() => sendYT("setVolume", [muted ? 0 : volume]), 1800);
+    const unlock = () => {
+      if (unlockedRef.current) return;
+      unlockedRef.current = true;
+      setUnlocked(true);
+      // Délai pour que le player YouTube soit initialisé
+      setTimeout(() => {
+        sendYT("unMute");
+        sendYT("setVolume", [volumeRef.current]);
+      }, 800);
+    };
+    document.addEventListener("click", unlock, { once: true });
+    return () => document.removeEventListener("click", unlock);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Après un changement de playlist : re-unmute si le son était déjà débloqué
+  useEffect(() => {
+    if (!unlockedRef.current) return;
+    const t = setTimeout(() => {
+      sendYT("unMute");
+      sendYT("setVolume", [volumeRef.current]);
+    }, 1500);
     return () => clearTimeout(t);
-  }, [playing, iframeKey]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [iframeKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const togglePlay = () => {
-    if (!playing) { setIframeKey(k => k + 1); setPlaying(true); }
-    else { sendYT("pauseVideo"); setPlaying(false); }
+    // Premier clic sur ▶ = déblocage du son aussi
+    if (!unlockedRef.current) {
+      unlockedRef.current = true;
+      setUnlocked(true);
+      setTimeout(() => {
+        sendYT("unMute");
+        sendYT("setVolume", [volumeRef.current]);
+      }, 800);
+    }
+    if (playing) { sendYT("pauseVideo"); setPlaying(false); }
+    else { sendYT("playVideo"); setPlaying(true); }
   };
 
   const nextPl = () => {
@@ -209,34 +242,78 @@ function HoopiqRadio() {
 
   const onVolume = (e) => {
     const v = +e.target.value;
+    volumeRef.current = v;
     setVolume(v);
     setMuted(v === 0);
     sendYT("setVolume", [v]);
+    if (v > 0 && muted) { sendYT("unMute"); setMuted(false); }
   };
 
   const onMute = () => {
     const next = !muted;
     setMuted(next);
     sendYT(next ? "mute" : "unMute");
+    if (!next) sendYT("setVolume", [volumeRef.current]);
   };
 
   const volIcon = (muted || volume === 0) ? "🔇" : volume < 40 ? "🔉" : "🔊";
 
   return (
     <>
-      {/* Hidden iframe — audio only */}
-      {playing && (
-        <iframe
-          key={iframeKey}
-          ref={iframeRef}
-          title="HoopIQ Radio"
-          src={src}
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media"
-          style={{ position: "fixed", left: -9999, top: 0, width: 1, height: 1, opacity: 0, pointerEvents: "none" }}
-        />
+      {/* Iframe TOUJOURS montée (muted) — audio démarre dès le chargement */}
+      <iframe
+        key={iframeKey}
+        ref={iframeRef}
+        title="HoopIQ Radio"
+        src={src}
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; picture-in-picture"
+        allowFullScreen
+        style={showPlayer
+          ? { position: "fixed", bottom: 76, right: 20, width: 120, height: 68, zIndex: 999, border: "none", borderRadius: "0 0 10px 10px" }
+          : { position: "fixed", left: -9999, top: 0, width: 1, height: 1, opacity: 0, pointerEvents: "none" }
+        }
+      />
+
+      {/* Bulle mini-lecteur quand showPlayer */}
+      {showPlayer && (
+        <div style={{
+          position: "fixed", bottom: 60, right: 20, zIndex: 999, width: 120,
+          background: "rgba(4,4,12,0.97)", border: `1px solid rgba(255,92,0,0.35)`,
+          borderRadius: "10px 10px 0 0", boxShadow: "0 -4px 20px rgba(0,0,0,0.6)",
+          animation: "fadeUp .2s ease",
+        }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "4px 8px", borderBottom: "1px solid rgba(255,92,0,0.2)" }}>
+            <span style={{ fontSize: 9, color: C.orange, fontWeight: 800, letterSpacing: 1 }}>📻 {pl.emoji}</span>
+            <button onClick={() => setShowPlayer(false)} style={{ background: "none", border: "none", color: C.muted, fontSize: 12, cursor: "pointer", lineHeight: 1, padding: 0 }}>✕</button>
+          </div>
+        </div>
       )}
 
-      {/* Control bar */}
+      {/* Toast "activer le son" — avant le premier clic */}
+      {!unlocked && (
+        <div style={{
+          position: "fixed", bottom: 60, right: 20, zIndex: 1000, width: 220,
+          background: "rgba(4,4,12,0.97)", backdropFilter: "blur(16px)",
+          border: `1px solid rgba(255,92,0,0.4)`, borderRadius: 12,
+          padding: "12px 16px", boxShadow: "0 8px 32px rgba(0,0,0,0.7)",
+          animation: "fadeUp .3s ease",
+        }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <span style={{ width: 7, height: 7, borderRadius: "50%", background: C.orange, animation: "pulse 1s infinite", display: "inline-block" }} />
+              <span style={{ fontSize: 10, fontWeight: 800, color: C.orange, letterSpacing: 1.5, textTransform: "uppercase" }}>HOOPIQ RADIO</span>
+            </div>
+          </div>
+          <div style={{ fontSize: 11, color: "#ccc", marginBottom: 10, lineHeight: 1.5 }}>
+            🎵 Hip Hop NBA prêt.<br />Clique n'importe où pour le son !
+          </div>
+          <div style={{ width: "100%", height: 3, background: "rgba(255,255,255,0.06)", borderRadius: 2 }}>
+            <div style={{ height: "100%", background: C.orange, borderRadius: 2, animation: "shimmer 1.5s linear infinite", backgroundSize: "200% 100%", backgroundImage: `linear-gradient(90deg,${C.orange} 0%,#ffb300 50%,${C.orange} 100%)` }} />
+          </div>
+        </div>
+      )}
+
+      {/* Barre de contrôle */}
       <div style={{
         position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 998,
         height: 52, background: "rgba(4,4,12,0.97)", backdropFilter: "blur(20px)",
@@ -245,21 +322,20 @@ function HoopiqRadio() {
         display: "flex", alignItems: "center", gap: 14, padding: "0 20px",
         fontFamily: "'DM Sans', sans-serif",
       }}>
-
-        {/* Brand badge */}
+        {/* Badge */}
         <div style={{ display: "flex", alignItems: "center", gap: 7, padding: "3px 12px", background: "rgba(255,92,0,0.09)", border: "1px solid rgba(255,92,0,0.28)", borderRadius: 20, flexShrink: 0 }}>
-          {playing && <span style={{ width: 6, height: 6, borderRadius: "50%", background: C.orange, animation: "pulse 1s infinite", display: "inline-block" }} />}
+          {playing && unlocked && <span style={{ width: 6, height: 6, borderRadius: "50%", background: C.orange, animation: "pulse 1s infinite", display: "inline-block" }} />}
           <span style={{ fontSize: 13 }}>📻</span>
           <span style={{ fontSize: 10, fontWeight: 800, color: C.orange, letterSpacing: 2, textTransform: "uppercase" }}>HOOPIQ RADIO</span>
         </div>
 
-        {/* Playlist info */}
+        {/* Info playlist */}
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: playing ? C.text : C.muted, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", transition: "color .2s" }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: (playing && unlocked) ? C.text : C.muted, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", transition: "color .2s" }}>
             {pl.emoji} {pl.name}
           </div>
           <div style={{ fontSize: 9, color: C.muted, letterSpacing: 1, textTransform: "uppercase", marginTop: 1 }}>
-            {plIdx + 1} / {RADIO_PLAYLISTS.length} · YouTube
+            {!unlocked ? "🔇 En attente du premier clic…" : `${plIdx + 1} / ${RADIO_PLAYLISTS.length} · YouTube`}
           </div>
         </div>
 
@@ -275,29 +351,35 @@ function HoopiqRadio() {
           {playing ? "⏸" : "▶"}
         </button>
 
-        {/* Next playlist */}
-        <button onClick={nextPl} title="Playlist suivante" style={{
+        {/* Toggle mini-lecteur */}
+        <button onClick={() => setShowPlayer(s => !s)} style={{
+          background: showPlayer ? "rgba(255,92,0,0.12)" : "none",
+          border: `1px solid ${showPlayer ? "rgba(255,92,0,0.4)" : C.border}`,
+          color: showPlayer ? C.orange : C.muted,
+          fontSize: 11, cursor: "pointer", padding: "5px 10px", borderRadius: 8,
+          fontFamily: "inherit", display: "flex", alignItems: "center", gap: 4,
+          flexShrink: 0, transition: "all .15s",
+        }}>
+          📺 <span>{showPlayer ? "Masquer" : "Lecteur"}</span>
+        </button>
+
+        {/* Playlist suivante */}
+        <button onClick={nextPl} style={{
           background: "none", border: `1px solid ${C.border}`, color: C.muted,
           fontSize: 11, cursor: "pointer", padding: "5px 11px", borderRadius: 8,
-          fontFamily: "inherit", display: "flex", alignItems: "center", gap: 5,
-          flexShrink: 0, transition: "color .15s, border-color .15s",
+          fontFamily: "inherit", display: "flex", alignItems: "center", gap: 5, flexShrink: 0,
         }}
           onMouseEnter={e => { e.currentTarget.style.color = C.orange; e.currentTarget.style.borderColor = "rgba(255,92,0,0.4)"; }}
           onMouseLeave={e => { e.currentTarget.style.color = C.muted; e.currentTarget.style.borderColor = C.border; }}
-        >
-          ⏭ <span>Playlist suiv.</span>
-        </button>
+        >⏭ <span>Playlist suiv.</span></button>
 
         {/* Volume */}
         <div style={{ display: "flex", alignItems: "center", gap: 7, flexShrink: 0 }}>
           <button onClick={onMute} style={{ background: "none", border: "none", color: (muted || volume === 0) ? C.muted : C.orange, fontSize: 15, cursor: "pointer", padding: 2, lineHeight: 1 }}>
             {volIcon}
           </button>
-          <input
-            type="range" min={0} max={100} value={muted ? 0 : volume}
-            onChange={onVolume}
-            style={{ width: 76, accentColor: C.orange, cursor: "pointer", opacity: playing ? 1 : 0.4 }}
-          />
+          <input type="range" min={0} max={100} value={muted ? 0 : volume} onChange={onVolume}
+            style={{ width: 76, accentColor: C.orange, cursor: "pointer", opacity: unlocked ? 1 : 0.35 }} />
           <span style={{ fontSize: 10, color: C.muted, width: 22, textAlign: "right", fontFamily: "monospace" }}>
             {muted ? 0 : volume}
           </span>
