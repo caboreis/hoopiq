@@ -1,0 +1,44 @@
+{
+  "name": "HoopIQ",
+  "short_name": "HoopIQ",
+  "description": "L'intelligence artificielle du basket — analyses NBA en temps réel, prédictions IA, stats avancées.",
+  "theme_color": "#ff5c00",
+  "background_color": "#06060f",
+  "display": "standalone",
+  "orientation": "portrait",
+  "start_url": "/",
+  "scope": "/",
+  "lang": "fr",
+  "categories": ["sports", "productivity"],
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Live NBA",
+      "short_name": "Live",
+      "description": "Scores NBA en direct",
+      "url": "/?tab=live",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Oracle IA",
+      "short_name": "Oracle",
+      "description": "Pronostics IA",
+      "url": "/?tab=oracle",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

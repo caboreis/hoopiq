@@ -1,13 +1,53 @@
 <!doctype html>
-<html lang="en">
+<html lang="fr">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+    <!-- ── Titre & Description ── -->
+    <title>HoopIQ — L'IA du Basket</title>
+    <meta name="description" content="Analyses NBA en temps réel, prédictions IA, stats avancées. L'intelligence artificielle du basket." />
+    <meta name="theme-color" content="#ff5c00" />
+
+    <!-- ── Favicon ── -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>hoopiq</title>
+    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png" />
+
+    <!-- ── PWA Manifest ── -->
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- ── Apple PWA (iPhone / iPad) ── -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="HoopIQ" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192.png" />
+    <link rel="apple-touch-icon" sizes="512x512" href="/icons/icon-512.png" />
+
+    <!-- ── Open Graph (partage réseaux sociaux) ── -->
+    <meta property="og:title" content="HoopIQ — L'IA du Basket" />
+    <meta property="og:description" content="Analyses NBA en temps réel, prédictions IA, stats avancées." />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/icons/icon-512.png" />
+
+    <!-- ── Couleur de fond pendant le chargement ── -->
+    <style>
+      html, body { background: #06060f; margin: 0; padding: 0; }
+    </style>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+
+    <!-- ── Enregistrement du Service Worker ── -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('[HoopIQ SW] Enregistré :', reg.scope))
+            .catch(err => console.warn('[HoopIQ SW] Erreur :', err));
+        });
+      }
+    </script>
   </body>
 </html>
