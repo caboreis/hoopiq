@@ -1058,7 +1058,7 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
                 ) : (
                   bullsPlayers.slice(0, 6).map(player => (
                     <div key={player.id} style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
-                      <Avatar name={player.name} size={42} />
+                      <Avatar name={player.name} size={42} espnId={player.espnId} headshot={player.headshot} league={player.league} />
                       <div style={{ flex: 1 }}>
                         <div style={{ fontWeight: 700 }}>{player.name}</div>
                         <div style={{ fontSize: 12, color: C.muted }}>{player.pos} · {player.fg}% fg</div>
