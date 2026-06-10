@@ -13,6 +13,42 @@ const C = {
 const API = (import.meta.env.DEV ? "http://localhost:3001" : "") + "";
 const POLL_MS = 15000;
 const ESPN_WNBA = "https://site.api.espn.com/apis/site/v2/sports/basketball/wnba";
+const ESPN_NFL  = "https://site.api.espn.com/apis/site/v2/sports/football/nfl";
+
+function parseNflGames(data) {
+  return (data.events || []).map(ev => {
+    const comp = ev.competitions?.[0] || {};
+    const competitors = comp.competitors || [];
+    const home = competitors.find(c => c.homeAway === "home") || competitors[0] || {};
+    const away = competitors.find(c => c.homeAway === "away") || competitors[1] || {};
+    const stateId = ev.status?.type?.id;
+    const status = stateId === "2" ? "live" : stateId === "3" ? "final" : "upcoming";
+    const mapTeam = (c) => ({
+      abbr: c.team?.abbreviation || "?",
+      name: c.team?.displayName || "",
+      short: c.team?.shortDisplayName || "",
+      logo: c.team?.logo || "",
+      color: "#" + (c.team?.color || "C8102E"),
+      score: status === "upcoming" ? "-" : (c.score || "0"),
+      pts_q: (c.linescores || []).map(l => l.value ?? l.displayValue ?? ""),
+      record: c.records?.[0]?.summary || "",
+    });
+    const homeTeam = mapTeam(home);
+    const awayTeam = mapTeam(away);
+    return {
+      id: ev.id,
+      league: "nfl",
+      status,
+      quarter: ev.status?.period || 0,
+      clock: ev.status?.displayClock || "",
+      home: homeTeam,
+      away: awayTeam,
+      prediction: 50,
+      ai_comment: `${awayTeam.abbr} @ ${homeTeam.abbr}${status === "live" ? ` — Q${ev.status?.period} ${ev.status?.displayClock}` : status === "final" ? " — Match terminé" : " — À venir"}.`,
+      momentum: null,
+    };
+  });
+}
 
 function parseWnbaGames(data) {
   return (data.events || []).map(ev => {
@@ -438,6 +474,7 @@ function NBAMusicPlayer({ visible }) {
 export default function LiveCenter() {
   const [games, setGames] = useState([]);
   const [wnbaGames, setWnbaGames] = useState([]);
+  const [nflGames, setNflGames] = useState([]);
   const [leagueFilter, setLeagueFilter] = useState("all");
   const [selectedId, setSelectedId] = useState(null);
   const [selectedLeague, setSelectedLeague] = useState("nba");
@@ -535,6 +572,23 @@ export default function LiveCenter() {
     return () => { active = false; clearInterval(iv); };
   }, []);
 
+  // ---- Fetch NFL games + poll ----
+  useEffect(() => {
+    let active = true;
+    async function loadNfl() {
+      try {
+        const res = await fetch(`${ESPN_NFL}/scoreboard`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!active) return;
+        setNflGames(parseNflGames(data));
+      } catch { /* NFL fetch is best-effort */ }
+    }
+    loadNfl();
+    const iv = setInterval(loadNfl, POLL_MS);
+    return () => { active = false; clearInterval(iv); };
+  }, []);
+
   // ---- Fetch detail for selected game + poll ----
   useEffect(() => {
     if (!selectedId) return;
@@ -562,9 +616,11 @@ export default function LiveCenter() {
   const allGames = [
     ...games,
     ...wnbaGames.filter(w => !games.some(n => n.id === w.id)),
+    ...nflGames.filter(f => !games.some(n => n.id === f.id)),
   ];
   const visibleGames = leagueFilter === "nba" ? games
     : leagueFilter === "wnba" ? wnbaGames
+    : leagueFilter === "nfl" ? nflGames
     : allGames;
 
   const selectedGame = allGames.find(g => g.id === selectedId) || allGames[0] || null;
@@ -674,15 +730,16 @@ export default function LiveCenter() {
           {/* League toggle */}
           <div style={{ display: "flex", gap: 4, marginBottom: 14, background: "rgba(255,255,255,0.04)", padding: 3, borderRadius: 10, border: `1px solid ${C.border}` }}>
             {[
-              { id: "all", label: "Tous", count: allGames.length },
-              { id: "nba", label: "🏀 NBA", count: games.length },
-              { id: "wnba", label: "🌸 WNBA", count: wnbaGames.length },
+              { id: "all",  label: "Tous",     count: allGames.length },
+              { id: "nba",  label: "🏀 NBA",   count: games.length },
+              { id: "wnba", label: "🌸 WNBA",  count: wnbaGames.length },
+              { id: "nfl",  label: "🏈 NFL",   count: nflGames.length },
             ].map(f => (
               <button key={f.id} onClick={() => setLeagueFilter(f.id)} style={{
                 flex: 1, padding: "6px 4px", borderRadius: 7, border: "none", cursor: "pointer", fontFamily: "inherit",
                 fontSize: 11, fontWeight: 800, transition: "all .15s",
-                background: leagueFilter === f.id ? (f.id === "wnba" ? "rgba(192,132,252,0.18)" : "rgba(255,92,0,0.15)") : "transparent",
-                color: leagueFilter === f.id ? (f.id === "wnba" ? C.purple : C.orange) : C.muted,
+                background: leagueFilter === f.id ? (f.id === "wnba" ? "rgba(192,132,252,0.18)" : f.id === "nfl" ? "rgba(200,16,46,0.18)" : "rgba(255,92,0,0.15)") : "transparent",
+                color: leagueFilter === f.id ? (f.id === "wnba" ? C.purple : f.id === "nfl" ? C.red : C.orange) : C.muted,
               }}>{f.label} <span style={{ opacity: 0.6 }}>({f.count})</span></button>
             ))}
           </div>
@@ -691,18 +748,19 @@ export default function LiveCenter() {
 
           {visibleGames.length === 0 && (
             <div style={{ textAlign: "center", padding: "24px 0", color: C.muted, fontSize: 12 }}>
-              {leagueFilter === "wnba" ? "Aucun match WNBA aujourd'hui" : "Aucun match NBA aujourd'hui"}
+              {leagueFilter === "wnba" ? "Aucun match WNBA aujourd'hui" : leagueFilter === "nfl" ? "Aucun match NFL aujourd'hui" : "Aucun match NBA aujourd'hui"}
             </div>
           )}
 
           {visibleGames.map(game => {
             const isWnba = game.league === "wnba";
+            const isNfl  = game.league === "nfl";
             const isSelected = selectedGame && selectedGame.id === game.id;
-            const accentColor = isWnba ? C.purple : C.orange;
+            const accentColor = isWnba ? C.purple : isNfl ? C.red : C.orange;
             return (
-              <div key={game.id} className="game-card" onClick={() => { setSelectedId(game.id); setSelectedLeague(isWnba ? "wnba" : "nba"); setDetail(null); }} style={{
-                background: isSelected ? (isWnba ? "rgba(192,132,252,0.07)" : "rgba(255,92,0,0.07)") : C.surface,
-                border: `1px solid ${isSelected ? (isWnba ? "rgba(192,132,252,0.35)" : "rgba(255,92,0,0.35)") : C.border}`,
+              <div key={game.id} className="game-card" onClick={() => { setSelectedId(game.id); setSelectedLeague(isWnba ? "wnba" : isNfl ? "nfl" : "nba"); setDetail(null); }} style={{
+                background: isSelected ? (isWnba ? "rgba(192,132,252,0.07)" : isNfl ? "rgba(200,16,46,0.07)" : "rgba(255,92,0,0.07)") : C.surface,
+                border: `1px solid ${isSelected ? (isWnba ? "rgba(192,132,252,0.35)" : isNfl ? "rgba(200,16,46,0.35)" : "rgba(255,92,0,0.35)") : C.border}`,
                 borderRadius: 14, padding: "12px 14px", marginBottom: 10, cursor: "pointer", transition: "all .2s",
               }}>
                 {/* League badge + status */}
@@ -710,6 +768,9 @@ export default function LiveCenter() {
                   <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                     {isWnba && (
                       <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: 1, color: C.purple, background: "rgba(192,132,252,0.14)", padding: "2px 7px", borderRadius: 5, border: "1px solid rgba(192,132,252,0.25)" }}>🌸 WNBA</span>
+                    )}
+                    {isNfl && (
+                      <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: 1, color: C.red, background: "rgba(200,16,46,0.14)", padding: "2px 7px", borderRadius: 5, border: "1px solid rgba(200,16,46,0.25)" }}>🏈 NFL</span>
                     )}
                     <LiveBadge status={game.status} quarter={game.quarter} clock={game.clock} />
                   </div>

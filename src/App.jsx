@@ -7,6 +7,8 @@ import LiveCenter from "./LiveCenter.jsx";
 import Oracle from "./Oracle.jsx";
 import Vestiaire from "./Vestiaire.jsx";
 import PreMatch from "./PreMatch.jsx";
+import Challenges from "./Challenges.jsx";
+import Leaderboard from "./Leaderboard.jsx";
 /* ─────────────────────────────────────────
    DESIGN SYSTEM
 ───────────────────────────────────────── */
@@ -926,10 +928,12 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
   };
 
   const TABS = [
-    { id: "dashboard", label: "Dashboard", icon: "⚡" },
-    { id: "live",      label: "Live",      icon: "🔴", badge: (liveScores.filter(g => g.status === "live" || g.status?.toLowerCase().includes("live")).length + wnbaLiveCount) || null },
-    { id: "oracle",    label: "Oracle",    icon: "🔮" },
-    { id: "prematch",  label: "Pronostics", icon: "⚡" },
+    { id: "dashboard",   label: "Dashboard",  icon: "⚡" },
+    { id: "live",        label: "Live",       icon: "🔴", badge: (liveScores.filter(g => g.status === "live" || g.status?.toLowerCase().includes("live")).length + wnbaLiveCount) || null },
+    { id: "oracle",      label: "Oracle",     icon: "🔮" },
+    { id: "prematch",    label: "Pronostics", icon: "⚡" },
+    { id: "challenges",  label: "Défis",      icon: "🎯" },
+    { id: "leaderboard", label: "Classement", icon: "🏆" },
     { sep: true },
     { id: "players",   label: "Joueurs",   icon: "🏀" },
     { id: "matches",   label: "Matchs",    icon: "📊" },
@@ -1448,6 +1452,8 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
 )}
 {tab === "oracle" && <Oracle />}
         {tab === "prematch" && <PreMatch />}
+        {tab === "challenges" && <Challenges />}
+        {tab === "leaderboard" && <Leaderboard />}
 {tab === "vestiaire" && (
   <div className="fade-in" style={{ height: "calc(100vh - 114px)", marginTop: -28, marginLeft: -24, marginRight: -24 }}>
     <Vestiaire user={user} />
