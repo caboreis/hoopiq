@@ -967,7 +967,6 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
         @keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
         @keyframes glow-pulse { 0%,100%{box-shadow:0 0 0 0 rgba(255,92,0,0.4)} 50%{box-shadow:0 0 0 6px rgba(255,92,0,0)} }
         .nav-tab:hover { color: ${C.orange} !important; background: rgba(255,92,0,0.07) !important; }
-        .nav-tabs::-webkit-scrollbar { height: 0; display: none; }
         .player-row:hover { background: rgba(255,92,0,0.06) !important; cursor:pointer; }
         .stat-card:hover { border-color: rgba(255,92,0,0.35) !important; transform:translateY(-3px); box-shadow: 0 8px 32px rgba(0,0,0,0.4) !important; }
         .kpi-card { position: relative; overflow: hidden; }
@@ -1098,51 +1097,70 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
         );
       })()}
 
-      {/* TOP NAV */}
-      <nav style={{ position: "sticky", top: 0, zIndex: 100, height: 62, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 20px", background: "rgba(6,6,15,0.96)", backdropFilter: "blur(24px)", borderBottom: `1px solid rgba(255,255,255,0.06)`, boxShadow: "0 4px 24px rgba(0,0,0,0.5)" }}>
-        <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 24, background: G.orange, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", letterSpacing: 3 }}>HOOP IQ</div>
+      {/* LAYOUT: sidebar + main */}
+      <div style={{ display: "flex", minHeight: "100vh" }}>
 
-        {/* Tabs */}
-        <div className="nav-tabs" style={{ display: "flex", gap: 1, flex: 1, minWidth: 0, overflowX: "auto", justifyContent: "center", margin: "0 8px", alignItems: "center" }}>
+      {/* SIDEBAR */}
+      <nav style={{
+        width: 220, flexShrink: 0, position: "fixed", top: 0, left: 0, bottom: 0, zIndex: 100,
+        background: "#0d0d1f", borderRight: `1px solid rgba(255,255,255,0.06)`,
+        display: "flex", flexDirection: "column", overflowY: "auto", overflowX: "hidden",
+      }}>
+        {/* Logo */}
+        <div style={{ padding: "20px 20px 16px", borderBottom: `1px solid rgba(255,255,255,0.06)` }}>
+          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 26, background: G.orange, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", letterSpacing: 3 }}>HOOP IQ</div>
+          <div style={{ fontSize: 10, color: C.muted, letterSpacing: 1, marginTop: 2 }}>Intelligence Basket IA</div>
+        </div>
+
+        {/* Nav items */}
+        <div style={{ flex: 1, padding: "12px 10px" }}>
           {TABS.map((t, i) => t.sep ? (
-            <div key={`sep-${i}`} className="nav-sep" />
+            <div key={`sep-${i}`} style={{ height: 1, background: "rgba(255,255,255,0.06)", margin: "8px 6px" }} />
           ) : t.soon ? (
             <button key={t.id} onClick={() => setShowNflTeaser(true)} style={{
-              position: "relative", padding: "7px 10px", borderRadius: 8, border: "1px solid rgba(200,16,46,0.3)",
-              cursor: "pointer", background: "rgba(200,16,46,0.07)", color: "#ff6b6b",
-              fontWeight: 700, fontSize: 12, transition: "all .2s", fontFamily: "'DM Sans', sans-serif",
-              flexShrink: 0, whiteSpace: "nowrap", borderBottom: "2px solid rgba(200,16,46,0.4)",
+              position: "relative", width: "100%", padding: "9px 12px", borderRadius: 10,
+              border: "1px solid rgba(200,16,46,0.25)", cursor: "pointer",
+              background: "rgba(200,16,46,0.07)", color: "#ff6b6b",
+              fontWeight: 700, fontSize: 13, transition: "all .2s", fontFamily: "'DM Sans', sans-serif",
+              display: "flex", alignItems: "center", gap: 10, marginBottom: 2, textAlign: "left",
               animation: "nflTabPulse 3s ease-in-out infinite",
             }}>
-              {t.icon} {t.label}
-              <span style={{ position: "absolute", top: -6, right: -4, fontSize: 8, fontWeight: 900, background: "#C8102E", color: "#fff", padding: "1px 5px", borderRadius: 6, letterSpacing: 0.5 }}>SOON</span>
+              <span style={{ fontSize: 16, flexShrink: 0 }}>{t.icon}</span>
+              <span style={{ flex: 1 }}>{t.label}</span>
+              <span style={{ fontSize: 8, fontWeight: 900, background: "#C8102E", color: "#fff", padding: "2px 5px", borderRadius: 5, letterSpacing: 0.5 }}>SOON</span>
             </button>
           ) : (
             <button key={t.id} className="nav-tab" onClick={() => setTab(t.id)} style={{
-              position: "relative",
-              padding: "7px 10px", borderRadius: 8, border: "none", cursor: "pointer",
+              position: "relative", width: "100%", padding: "9px 12px", borderRadius: 10, border: "none",
+              cursor: "pointer", display: "flex", alignItems: "center", gap: 10, marginBottom: 2,
               background: tab === t.id ? "rgba(255,92,0,0.13)" : "transparent",
-              color: tab === t.id ? C.orange : C.muted, fontWeight: tab === t.id ? 700 : 500,
-              fontSize: 12, transition: "all .2s", fontFamily: "'DM Sans', sans-serif", flexShrink: 0, whiteSpace: "nowrap",
-              borderBottom: tab === t.id ? `2px solid ${C.orange}` : "2px solid transparent",
+              color: tab === t.id ? C.orange : C.muted,
+              fontWeight: tab === t.id ? 700 : 500,
+              fontSize: 13, transition: "all .2s", fontFamily: "'DM Sans', sans-serif", textAlign: "left",
+              borderLeft: tab === t.id ? `3px solid ${C.orange}` : "3px solid transparent",
             }}>
-              {t.icon} {t.label}
+              <span style={{ fontSize: 16, flexShrink: 0 }}>{t.icon}</span>
+              <span style={{ flex: 1 }}>{t.label}</span>
               {t.badge > 0 && (
-                <span style={{ position: "absolute", top: 3, right: 3, width: 14, height: 14, borderRadius: "50%", background: C.red, color: "#fff", fontSize: 9, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center", lineHeight: 1, animation: "glow-pulse 2s infinite" }}>{t.badge}</span>
+                <span style={{ width: 18, height: 18, borderRadius: "50%", background: C.red, color: "#fff", fontSize: 9, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center", lineHeight: 1, animation: "glow-pulse 2s infinite", flexShrink: 0 }}>{t.badge}</span>
               )}
             </button>
           ))}
         </div>
 
-        {/* User */}
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <Badge color={plan.color}>{plan.icon} {plan.name}</Badge>
-          <Avatar name={user.name} size={34} />
-          <button onClick={onLogout} style={{ background: "none", border: "none", color: C.muted, cursor: "pointer", fontSize: 12 }}>Déconnexion</button>
+        {/* User footer */}
+        <div style={{ padding: "14px 16px", borderTop: `1px solid rgba(255,255,255,0.06)`, display: "flex", alignItems: "center", gap: 10 }}>
+          <Avatar name={user.name} size={32} />
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: C.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{user.name}</div>
+            <Badge color={plan.color} style={{ fontSize: 9 }}>{plan.icon} {plan.name}</Badge>
+          </div>
+          <button onClick={onLogout} title="Déconnexion" style={{ background: "none", border: "none", color: C.muted, cursor: "pointer", fontSize: 16, flexShrink: 0, padding: 4, lineHeight: 1 }}>⎋</button>
         </div>
       </nav>
 
       {/* CONTENT */}
+      <div style={{ marginLeft: 220, flex: 1, minWidth: 0 }}>
       <div style={{ maxWidth: 1140, margin: "0 auto", padding: "28px 24px 80px" }}>
 
         {/* ── DASHBOARD ── */}
@@ -1845,6 +1863,8 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
           </div>
         )}
       </div>
+      </div>{/* /content wrapper */}
+      </div>{/* /flex layout */}
 
       <HoopiqRadio />
     </div>
