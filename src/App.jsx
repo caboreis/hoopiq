@@ -6,6 +6,7 @@ import Cards from "./Cards.jsx";
 import LiveCenter from "./LiveCenter.jsx";
 import Oracle from "./Oracle.jsx";
 import Vestiaire from "./Vestiaire.jsx";
+import PreMatch from "./PreMatch.jsx";
 /* ─────────────────────────────────────────
    DESIGN SYSTEM
 ───────────────────────────────────────── */
@@ -297,7 +298,7 @@ function HoopiqRadio() {
         </div>
       )}
 
-      {/* Barre de contrôle */}
+      {/* Barre de contrôle — se cache quand la souris n'est pas dessus */}
       <div style={{
         position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 998,
         height: 52, background: "rgba(4,4,12,0.97)", backdropFilter: "blur(20px)",
@@ -305,7 +306,12 @@ function HoopiqRadio() {
         boxShadow: "0 -4px 28px rgba(0,0,0,0.7)",
         display: "flex", alignItems: "center", gap: 14, padding: "0 20px",
         fontFamily: "'DM Sans', sans-serif",
-      }}>
+        transform: "translateY(42px)",
+        transition: "transform 0.3s ease",
+      }}
+        onMouseEnter={e => e.currentTarget.style.transform = "translateY(0)"}
+        onMouseLeave={e => e.currentTarget.style.transform = "translateY(42px)"}
+      >
 
         {/* Badge */}
         <div style={{ display: "flex", alignItems: "center", gap: 7, padding: "3px 12px", background: "rgba(255,92,0,0.09)", border: "1px solid rgba(255,92,0,0.28)", borderRadius: 20, flexShrink: 0 }}>
@@ -826,6 +832,7 @@ function App({ user, onLogout }) {
     { id: "dashboard", label: "Dashboard", icon: "⚡" },
     { id: "live",      label: "Live",      icon: "🔴", badge: liveScores.filter(g => g.status === "live" || g.status?.toLowerCase().includes("live")).length || null },
     { id: "oracle",    label: "Oracle",    icon: "🔮" },
+    { id: "prematch",  label: "Pronostics", icon: "⚡" },
     { sep: true },
     { id: "players",   label: "Joueurs",   icon: "🏀" },
     { id: "matches",   label: "Matchs",    icon: "📊" },
@@ -1360,6 +1367,7 @@ function App({ user, onLogout }) {
   </div>
 )}
 {tab === "oracle" && <Oracle />}
+        {tab === "prematch" && <PreMatch />}
 {tab === "vestiaire" && (
   <div className="fade-in" style={{ height: "calc(100vh - 114px)", marginTop: -28, marginLeft: -24, marginRight: -24 }}>
     <Vestiaire user={user} />
