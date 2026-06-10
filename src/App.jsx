@@ -9,7 +9,6 @@ import Vestiaire from "./Vestiaire.jsx";
 import PreMatch from "./PreMatch.jsx";
 import Challenges from "./Challenges.jsx";
 import Leaderboard from "./Leaderboard.jsx";
-import NFL from "./NFL.jsx";
 /* ─────────────────────────────────────────
    DESIGN SYSTEM
 ───────────────────────────────────────── */
@@ -946,7 +945,6 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
     { sep: true },
     { id: "players",   label: "Joueurs",   icon: "🏀" },
     { id: "matches",   label: "Matchs",    icon: "📊" },
-    { id: "nfl",       label: "NFL",       icon: "🏈" },
     { sep: true },
     { id: "vestiaire", label: "Vestiaire", icon: "💬" },
     { id: "cards",     label: "Cartes",    icon: "🎴" },
@@ -1509,8 +1507,6 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
         {/* ── MATCHES ── */}
         {tab === "matches" && <MatchesTab liveScores={liveScores} wnbaScores={wnbaScores} nbaLoading={nbaLoading} nbaError={nbaError} setTab={setTab} />}
 
-        {/* ── NFL ── */}
-        {tab === "nfl" && <NFL />}
 
         {/* ── CHAT ── */}
         {tab === "chat" && (
