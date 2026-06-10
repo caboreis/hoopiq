@@ -10,6 +10,7 @@ import PreMatch from "./PreMatch.jsx";
 import Challenges from "./Challenges.jsx";
 import Leaderboard from "./Leaderboard.jsx";
 import Duel from "./Duel.jsx";
+import Scout from "./Scout.jsx";
 /* ─────────────────────────────────────────
    DESIGN SYSTEM
 ───────────────────────────────────────── */
@@ -941,6 +942,7 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
     { sep: true },
     { id: "players",   label: "Joueurs",   icon: "🏀" },
     { id: "matches",   label: "Matchs",    icon: "📊" },
+    { id: "scout",     label: "Scout",     icon: "🔍" },
     { id: "nfl-soon",  label: "NFL",       icon: "🏈", soon: true },
     { sep: true },
     { id: "vestiaire", label: "Vestiaire", icon: "💬" },
@@ -1764,6 +1766,9 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
             <Agent />
           </div>
         )}
+
+        {/* ── SCOUT ── */}
+        {tab === "scout" && <Scout />}
 
         {/* ── MARKETING ── */}
         {tab === "marketing" && isAdmin && <Marketing />}
