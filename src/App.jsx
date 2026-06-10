@@ -778,23 +778,29 @@ function App({ user, onLogout }) {
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [chatHistory]);
 
   useEffect(() => {
-    // Cleanup intervalle de streaming quand le composant se démonte
+    // Cleanup intervalle de streaming quand on quitte l'onglet joueurs ou démontage
+    if (tab !== "players" && streamIntervalRef.current) {
+      clearInterval(streamIntervalRef.current);
+      streamIntervalRef.current = null;
+      setAiLoading(false);
+    }
     return () => {
       if (streamIntervalRef.current) {
         clearInterval(streamIntervalRef.current);
         streamIntervalRef.current = null;
       }
     };
-  }, []);
+  }, [tab]);
 
-  // Auto-analyse le meilleur joueur quand on ouvre l'onglet Joueurs
+  // Auto-analyse le meilleur joueur quand on ouvre l'onglet Joueurs ou quand les joueurs chargent
   useEffect(() => {
     if (tab === "players" && !selectedPlayer) {
       const list = bullsPlayers.length ? bullsPlayers : PLAYERS;
       const best = list.reduce((a, b) => (b.score > a.score ? b : a), list[0]);
       if (best) analyzePlayer(best);
     }
-  }, [tab]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tab, bullsPlayers]);
 
   useEffect(() => {
     const loadNbaData = async () => {
@@ -812,7 +818,7 @@ function App({ user, onLogout }) {
         const scoresData = await scoresRes.json()
         const loadedPlayers = playersData.players || []
         setBullsPlayers(loadedPlayers)
-        setSelectedPlayer(prev => (prev && prev.team === 'Chicago Bulls' ? prev : (loadedPlayers[0] || prev)))
+        setSelectedPlayer(loadedPlayers[0] || null)
         setLiveScores(scoresData.games || [])
         // Fetch WNBA games en parallèle
         fetch("https://site.api.espn.com/apis/site/v2/sports/basketball/wnba/scoreboard")
@@ -1225,18 +1231,37 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
               </div>
             </div>
 
-            {/* Recent activity */}
+            {/* Recent activity — vrais matchs ESPN */}
             <Card style={{ marginTop: 20 }}>
-              <SectionTitle>⚡ Analyses récentes</SectionTitle>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 12 }}>
-                {MATCHES.filter(m => m.done).map(m => (
-                  <div key={m.id} style={{ padding: "14px 16px", background: "rgba(255,255,255,0.03)", borderRadius: 12, border: `1px solid ${C.border}` }}>
-                    <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 2 }}>{m.home} vs {m.away}</div>
-                    <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 22, color: C.orange }}>{m.hs} — {m.as}</div>
-                    <div style={{ fontSize: 11, color: C.muted, marginTop: 4 }}>🏆 MVP: <strong style={{ color: C.text }}>{m.mvp}</strong></div>
-                  </div>
-                ))}
-              </div>
+              <SectionTitle>⚡ Matchs récents</SectionTitle>
+              {[...liveScores, ...wnbaScores].length === 0 ? (
+                <div style={{ color: C.muted, fontSize: 13, textAlign: "center", padding: "16px 0" }}>Aucun match aujourd'hui — reviens ce soir 🏀</div>
+              ) : (
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 12 }}>
+                  {[...liveScores, ...wnbaScores].slice(0, 6).map(g => {
+                    const isLive = g.status === "live" || g.status?.toLowerCase().includes("live");
+                    const isFinal = g.status === "Final" || g.status?.includes("Final");
+                    return (
+                      <div key={g.id} onClick={() => setTab("live")} style={{ padding: "14px 16px", background: "rgba(255,255,255,0.03)", borderRadius: 12, border: `1px solid ${isLive ? "rgba(255,77,109,0.3)" : C.border}`, cursor: "pointer", transition: "all .2s" }}
+                        onMouseEnter={e => e.currentTarget.style.background = "rgba(255,92,0,0.06)"}
+                        onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.03)"}
+                      >
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                          <span style={{ fontSize: 10, fontWeight: 800, color: isLive ? C.red : isFinal ? C.green : C.muted, letterSpacing: 1 }}>
+                            {isLive ? "🔴 LIVE" : isFinal ? "✓ FINAL" : "🕐 À VENIR"}
+                          </span>
+                          {g.league === "wnba" && <span style={{ fontSize: 9, color: "#c084fc" }}>🌸 WNBA</span>}
+                        </div>
+                        <div style={{ fontWeight: 700, fontSize: 13 }}>{g.home.name || g.home.abbreviation}</div>
+                        <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 24, color: isLive ? C.red : C.orange, letterSpacing: 1 }}>
+                          {g.home.score} — {g.away.score}
+                        </div>
+                        <div style={{ fontSize: 12, color: C.muted }}>{g.away.name || g.away.abbreviation}</div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </Card>
           </div>
         )}
