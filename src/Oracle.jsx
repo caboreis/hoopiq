@@ -53,11 +53,15 @@ export default function Oracle() {
     setPredLoading(true);
     try {
       const res = await fetch(`${API}/api/nba/predict/${game.id}`);
-      if (!res.ok) throw new Error();
       const data = await res.json();
-      setPred(data.prediction);
-    } catch {
-      setPredError(true);
+      if (!res.ok || !data.prediction) {
+        console.error('Oracle error:', data);
+        setPredError(data.detail || data.error || 'Erreur inconnue');
+      } else {
+        setPred(data.prediction);
+      }
+    } catch (err) {
+      setPredError(err.message || 'Erreur réseau');
     }
     setPredLoading(false);
   };
@@ -140,7 +144,11 @@ export default function Oracle() {
             </div>
           ) : predError ? (
             <div style={{ border: `1px solid rgba(255,77,109,0.3)`, borderRadius: 18, padding: 40, textAlign: "center", color: C.red }}>
-              ❌ Échec de la prédiction. <button onClick={() => runPrediction(selected)} style={{ marginLeft: 8, background: "none", border: `1px solid ${C.red}`, color: C.red, borderRadius: 8, padding: "4px 10px", cursor: "pointer" }}>Réessayer</button>
+              <div style={{ marginBottom: 12 }}>❌ Échec de la prédiction</div>
+              {typeof predError === 'string' && predError !== 'true' && (
+                <div style={{ fontSize: 12, color: C.muted, marginBottom: 12, fontFamily: "monospace" }}>{predError}</div>
+              )}
+              <button onClick={() => runPrediction(selected)} style={{ background: "none", border: `1px solid ${C.red}`, color: C.red, borderRadius: 8, padding: "6px 16px", cursor: "pointer" }}>Réessayer</button>
             </div>
           ) : pred ? (
             <div className="fade-in">
