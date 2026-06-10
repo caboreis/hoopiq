@@ -81,6 +81,39 @@ const PLAYERS = [
   { id: 6,  name: "Angel Reese",       pos: "PF", team: "Atlanta Dream",      pts: 13.1, ast: 2.2, reb: 13.1, fg: 44, score: 89, trend: +3, hot: true,  league: "wnba", espnId: 4433402 },
 ];
 
+const NBA_TEAMS = [
+  { id: 1,  name: "Atlanta Hawks",          abbr: "ATL", color: "#E03A3E" },
+  { id: 2,  name: "Boston Celtics",         abbr: "BOS", color: "#007A33" },
+  { id: 3,  name: "Brooklyn Nets",          abbr: "BKN", color: "#000000" },
+  { id: 4,  name: "Chicago Bulls",          abbr: "CHI", color: "#CE1141" },
+  { id: 5,  name: "Cleveland Cavaliers",    abbr: "CLE", color: "#860038" },
+  { id: 6,  name: "Dallas Mavericks",       abbr: "DAL", color: "#00538C" },
+  { id: 7,  name: "Denver Nuggets",         abbr: "DEN", color: "#0E2240" },
+  { id: 8,  name: "Detroit Pistons",        abbr: "DET", color: "#C8102E" },
+  { id: 9,  name: "Golden State Warriors",  abbr: "GSW", color: "#1D428A" },
+  { id: 10, name: "Houston Rockets",        abbr: "HOU", color: "#CE1141" },
+  { id: 11, name: "Indiana Pacers",         abbr: "IND", color: "#002D62" },
+  { id: 12, name: "LA Clippers",            abbr: "LAC", color: "#C8102E" },
+  { id: 13, name: "Los Angeles Lakers",     abbr: "LAL", color: "#552583" },
+  { id: 14, name: "Memphis Grizzlies",      abbr: "MEM", color: "#5D76A9" },
+  { id: 15, name: "Miami Heat",             abbr: "MIA", color: "#98002E" },
+  { id: 16, name: "Milwaukee Bucks",        abbr: "MIL", color: "#00471B" },
+  { id: 17, name: "Minnesota Timberwolves", abbr: "MIN", color: "#0C2340" },
+  { id: 18, name: "New Orleans Pelicans",   abbr: "NOP", color: "#0C2340" },
+  { id: 19, name: "New York Knicks",        abbr: "NYK", color: "#006BB6" },
+  { id: 20, name: "Oklahoma City Thunder",  abbr: "OKC", color: "#007AC1" },
+  { id: 21, name: "Orlando Magic",          abbr: "ORL", color: "#0077C0" },
+  { id: 22, name: "Philadelphia 76ers",     abbr: "PHI", color: "#006BB6" },
+  { id: 23, name: "Phoenix Suns",           abbr: "PHX", color: "#1D1160" },
+  { id: 24, name: "Portland Trail Blazers", abbr: "POR", color: "#E03A3E" },
+  { id: 25, name: "Sacramento Kings",       abbr: "SAC", color: "#5A2D81" },
+  { id: 26, name: "San Antonio Spurs",      abbr: "SAS", color: "#C4CED4" },
+  { id: 27, name: "Toronto Raptors",        abbr: "TOR", color: "#CE1141" },
+  { id: 28, name: "Utah Jazz",              abbr: "UTA", color: "#002B5C" },
+  { id: 29, name: "Washington Wizards",     abbr: "WAS", color: "#002B5C" },
+  { id: 30, name: "Charlotte Hornets",      abbr: "CHA", color: "#1D1160" },
+];
+
 const MATCHES = [
   { id: 1, home: "Paris Bulls", away: "Lyon Hawks", hs: 98, as: 87, date: "04 Jun", done: true, mvp: "Marcus Johnson", pred: 72 },
   { id: 2, home: "Marseille Jets", away: "Paris Bulls", hs: 72, as: 91, date: "01 Jun", done: true, mvp: "Kevin Tran", pred: 55 },
@@ -721,6 +754,13 @@ function App({ user, onLogout }) {
   const [chatInput, setChatInput] = useState("");
   const [chatLoading, setChatLoading] = useState(false);
   const [bullsPlayers, setBullsPlayers] = useState([]);
+  const [favoriteTeam, setFavoriteTeamState] = useState(() => {
+    try { return JSON.parse(localStorage.getItem("hoopiq_fav_team")) || NBA_TEAMS[3]; } catch { return NBA_TEAMS[3]; }
+  });
+  const setFavoriteTeam = (team) => {
+    setFavoriteTeamState(team);
+    localStorage.setItem("hoopiq_fav_team", JSON.stringify(team));
+  };
   const [liveScores, setLiveScores] = useState([]);
   const [wnbaScores, setWnbaScores] = useState([]);
   const [wnbaLiveCount, setWnbaLiveCount] = useState(0);
@@ -759,7 +799,7 @@ function App({ user, onLogout }) {
       const apiBase = import.meta.env.DEV ? 'http://localhost:3001' : ''
       try {
         const [playersRes, scoresRes] = await Promise.all([
-          fetch(`${apiBase}/api/nba/players`),
+          fetch(`${apiBase}/api/nba/players?teamId=${favoriteTeam.id}`),
           fetch(`${apiBase}/api/nba/live-scores`),
         ])
         if (!playersRes.ok) throw new Error('Impossible de charger les joueurs Bulls')
@@ -800,7 +840,7 @@ function App({ user, onLogout }) {
       }
     }
     loadNbaData()
-  }, [])
+  }, [favoriteTeam.id])
 
   const analyzePlayer = async (player) => {
     setSelectedPlayer(player);
@@ -1050,11 +1090,30 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
               </Card>
 
               <Card glow>
-                <SectionTitle>Chicago Bulls Prioritaires</SectionTitle>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+                  <SectionTitle style={{ margin: 0 }}>🏀 Équipe Favorite</SectionTitle>
+                  <select
+                    value={favoriteTeam.id}
+                    onChange={e => {
+                      const team = NBA_TEAMS.find(t => t.id === +e.target.value);
+                      if (team) { setFavoriteTeam(team); setBullsPlayers([]); setSelectedPlayer(null); }
+                    }}
+                    style={{
+                      background: "rgba(255,255,255,0.05)", border: `1px solid rgba(255,255,255,0.12)`,
+                      color: favoriteTeam.color, borderRadius: 8, padding: "4px 8px",
+                      fontSize: 12, fontWeight: 700, cursor: "pointer", outline: "none",
+                      fontFamily: "inherit", maxWidth: 160,
+                    }}
+                  >
+                    {NBA_TEAMS.sort((a,b) => a.name.localeCompare(b.name)).map(t => (
+                      <option key={t.id} value={t.id} style={{ background: "#0d0d1f", color: "#fff" }}>{t.name}</option>
+                    ))}
+                  </select>
+                </div>
                 {nbaLoading ? (
-                  <div style={{ color: C.muted, fontSize: 13 }}>Chargement des Bulls...</div>
+                  <div style={{ color: C.muted, fontSize: 13 }}>Chargement {favoriteTeam.name}...</div>
                 ) : bullsPlayers.length === 0 ? (
-                  <div style={{ color: C.muted, fontSize: 13 }}>Aucun joueur Bulls trouvé.</div>
+                  <div style={{ color: C.muted, fontSize: 13 }}>Aucun joueur trouvé.</div>
                 ) : (
                   bullsPlayers.slice(0, 6).map(player => (
                     <div key={player.id} style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
