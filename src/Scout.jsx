@@ -217,7 +217,7 @@ function StatPill({ label, value, color, sub }) {
   return (
     <div style={{ textAlign: "center", padding: "6px 10px", background: "rgba(255,255,255,0.04)", borderRadius: 8, minWidth: 52 }}>
       <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 18, color, lineHeight: 1 }}>{value}</div>
-      <div style={{ fontSize: 9, color: C.muted, letterSpacing: 0.5, textTransform: "uppercase", marginTop: 1 }}>{label}</div>
+      <div style={{ fontSize: 11, color: C.muted, letterSpacing: 0.5, textTransform: "uppercase", marginTop: 2 }}>{label}</div>
       {sub && <div style={{ fontSize: 8, color, marginTop: 1 }}>{sub}</div>}
     </div>
   );
@@ -245,7 +245,7 @@ function PlayerCard({ player, leagueColor, rank, onAnalyze, isAnalyzing, isAnaly
           padding: "6px 14px", display: "flex", alignItems: "center", gap: 8,
         }}>
           <span style={{ animation: "pulse 1.5s infinite", display: "inline-block" }}>💎</span>
-          <span style={{ fontSize: 10, fontWeight: 800, color: C.gold, letterSpacing: 2 }}>ALERTE PÉPITE — TALENT EXCEPTIONNEL DÉTECTÉ</span>
+          <span style={{ fontSize: 13, fontWeight: 800, color: C.gold, letterSpacing: 2 }}>ALERTE PÉPITE — TALENT EXCEPTIONNEL DÉTECTÉ</span>
         </div>
       )}
       {badge?.icon === "🚀" && (
@@ -255,46 +255,46 @@ function PlayerCard({ player, leagueColor, rank, onAnalyze, isAnalyzing, isAnaly
           padding: "5px 14px", display: "flex", alignItems: "center", gap: 8,
         }}>
           <span>🚀</span>
-          <span style={{ fontSize: 10, fontWeight: 800, color: C.cyan, letterSpacing: 1.5 }}>PROCHAIN ALL-STAR</span>
+          <span style={{ fontSize: 13, fontWeight: 800, color: C.cyan, letterSpacing: 1.5 }}>PROCHAIN ALL-STAR</span>
         </div>
       )}
 
-      <div style={{ padding: "14px 16px" }}>
-        <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
+      <div style={{ padding: "18px 20px" }}>
+        <div style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
           {/* Rank + photo */}
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
             <div style={{
-              width: 22, height: 22, borderRadius: "50%",
+              width: 26, height: 26, borderRadius: "50%",
               background: rank === 1 ? C.gold : rank === 2 ? "#aaa" : rank === 3 ? "#cd7f32" : "rgba(255,255,255,0.08)",
               display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: 10, fontWeight: 800, color: rank <= 3 ? "#000" : C.muted,
+              fontSize: 12, fontWeight: 800, color: rank <= 3 ? "#000" : C.muted,
             }}>{rank}</div>
             {player.headshot ? (
               <img src={player.headshot} alt={player.name}
-                style={{ width: 44, height: 44, borderRadius: "50%", objectFit: "cover", objectPosition: "top", border: `2px solid ${badge ? badge.color : leagueColor}44`, background: "#111" }}
+                style={{ width: 54, height: 54, borderRadius: "50%", objectFit: "cover", objectPosition: "top", border: `2px solid ${badge ? badge.color : leagueColor}44`, background: "#111" }}
                 onError={e => { e.target.style.display = "none"; }} />
             ) : (
               <div style={{
-                width: 44, height: 44, borderRadius: "50%",
+                width: 54, height: 54, borderRadius: "50%",
                 background: `linear-gradient(135deg, ${leagueColor}, ${leagueColor}66)`,
                 display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: 15, fontWeight: 800, color: "#fff", border: `2px solid ${leagueColor}44`,
+                fontSize: 18, fontWeight: 800, color: "#fff", border: `2px solid ${leagueColor}44`,
               }}>{player.name.split(" ").map(w => w[0]).join("").slice(0, 2)}</div>
             )}
           </div>
 
           {/* Info + stats */}
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 2, flexWrap: "wrap" }}>
-              <div style={{ fontWeight: 800, fontSize: 14, color: C.text }}>{player.name}</div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4, flexWrap: "wrap" }}>
+              <div style={{ fontWeight: 800, fontSize: 17, color: C.text }}>{player.name}</div>
               {badge && (
-                <span style={{ fontSize: 9, fontWeight: 800, padding: "2px 7px", borderRadius: 5,
+                <span style={{ fontSize: 12, fontWeight: 800, padding: "3px 10px", borderRadius: 6,
                   background: `${badge.color}22`, color: badge.color, letterSpacing: 1.2, border: `1px solid ${badge.color}44` }}>
                   {badge.icon} {badge.label}
                 </span>
               )}
             </div>
-            <div style={{ fontSize: 11, color: C.muted, marginBottom: 10 }}>
+            <div style={{ fontSize: 13, color: C.muted, marginBottom: 12 }}>
               {player.pos} · {player.teamName} · {player.fgStr} FG · {player.min} min
             </div>
 
@@ -325,8 +325,8 @@ function PlayerCard({ player, leagueColor, rank, onAnalyze, isAnalyzing, isAnaly
               ].map(b => (
                 <div key={b.l}>
                   <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 2 }}>
-                    <span style={{ fontSize: 9, color: C.muted }}>{b.l}</span>
-                    <span style={{ fontSize: 9, color: b.c, fontWeight: 700 }}>{b.v}</span>
+                    <span style={{ fontSize: 11, color: C.muted }}>{b.l}</span>
+                    <span style={{ fontSize: 11, color: b.c, fontWeight: 700 }}>{b.v}</span>
                   </div>
                   <StatBar value={b.v} max={b.max} color={b.c} />
                 </div>
@@ -336,18 +336,18 @@ function PlayerCard({ player, leagueColor, rank, onAnalyze, isAnalyzing, isAnaly
 
           {/* JARVIS Score */}
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
-            <ScoreRing score={player.jarvis} size={54} />
-            <div style={{ fontSize: 8, color: col, fontWeight: 800, letterSpacing: 0.5, textTransform: "uppercase" }}>JARVIS</div>
+            <ScoreRing score={player.jarvis} size={66} />
+            <div style={{ fontSize: 10, color: col, fontWeight: 800, letterSpacing: 0.5, textTransform: "uppercase" }}>JARVIS</div>
           </div>
         </div>
 
         {/* Analyse button */}
         {!isAnalyzed && (
           <button onClick={() => onAnalyze(player)} disabled={isAnalyzing} style={{
-            marginTop: 6, width: "100%", padding: "7px", borderRadius: 8, border: "none",
+            marginTop: 8, width: "100%", padding: "10px", borderRadius: 10, border: "none",
             background: isAnalyzing ? "rgba(255,255,255,0.04)" : `${leagueColor}18`,
             color: isAnalyzing ? C.muted : leagueColor,
-            fontSize: 12, fontWeight: 700, cursor: isAnalyzing ? "default" : "pointer",
+            fontSize: 14, fontWeight: 700, cursor: isAnalyzing ? "default" : "pointer",
             fontFamily: "inherit", transition: "all .2s",
           }}>
             {isAnalyzing ? "⏳ Analyse JARVIS en cours..." : "🦾 Analyser avec JARVIS"}
@@ -367,30 +367,30 @@ function JarvisCard({ player, analysis, leagueColor }) {
       border: `1px solid ${badge ? badge.color + "33" : leagueColor + "22"}`,
       borderRadius: 14, padding: "14px 16px", marginBottom: 12,
     }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
         {player.headshot ? (
           <img src={player.headshot} alt={player.name}
-            style={{ width: 36, height: 36, borderRadius: "50%", objectFit: "cover", objectPosition: "top", border: `2px solid ${badge?.color || leagueColor}55` }} />
+            style={{ width: 46, height: 46, borderRadius: "50%", objectFit: "cover", objectPosition: "top", border: `2px solid ${badge?.color || leagueColor}55` }} />
         ) : (
-          <div style={{ width: 36, height: 36, borderRadius: "50%", background: leagueColor, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 800, color: "#fff" }}>
+          <div style={{ width: 46, height: 46, borderRadius: "50%", background: leagueColor, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, fontWeight: 800, color: "#fff" }}>
             {player.name.split(" ").map(w => w[0]).join("").slice(0, 2)}
           </div>
         )}
         <div style={{ flex: 1 }}>
-          <div style={{ fontWeight: 800, fontSize: 13, color: C.text }}>{player.name}</div>
-          <div style={{ fontSize: 10, color: C.muted }}>{player.pos} · {player.teamName}</div>
+          <div style={{ fontWeight: 800, fontSize: 16, color: C.text }}>{player.name}</div>
+          <div style={{ fontSize: 13, color: C.muted }}>{player.pos} · {player.teamName}</div>
         </div>
-        <ScoreRing score={player.jarvis} size={42} />
+        <ScoreRing score={player.jarvis} size={50} />
       </div>
-      <div style={{ fontSize: 12, lineHeight: 1.7, color: C.text, whiteSpace: "pre-wrap", fontFamily: "'DM Sans', sans-serif" }}>
+      <div style={{ fontSize: 16, lineHeight: 1.8, color: C.text, whiteSpace: "pre-wrap", fontFamily: "'DM Sans', sans-serif" }}>
         {analysis.split("\n").map((line, i) => {
           if (line.startsWith("**") || line.includes("**")) {
             const parts = line.replace(/\*\*/g, "|||").split("|||");
             return <div key={i}>{parts.map((p, j) => j % 2 === 1 ? <strong key={j} style={{ color: badge?.color || leagueColor }}>{p}</strong> : <span key={j}>{p}</span>)}</div>;
           }
-          if (line.startsWith("→") || line.startsWith("▸")) return <div key={i} style={{ color: C.green, paddingLeft: 8 }}>{line}</div>;
-          if (line.startsWith("⚠")) return <div key={i} style={{ color: C.gold }}>{line}</div>;
-          if (line.startsWith("🔮")) return <div key={i} style={{ color: C.cyan, marginTop: 4, fontStyle: "italic" }}>{line}</div>;
+          if (line.startsWith("→") || line.startsWith("▸")) return <div key={i} style={{ color: C.green, paddingLeft: 10, fontSize: 15 }}>{line}</div>;
+          if (line.startsWith("⚠")) return <div key={i} style={{ color: C.gold, fontSize: 15 }}>{line}</div>;
+          if (line.startsWith("🔮")) return <div key={i} style={{ color: C.cyan, marginTop: 6, fontStyle: "italic", fontSize: 15 }}>{line}</div>;
           return <div key={i}>{line}</div>;
         })}
       </div>
@@ -406,6 +406,7 @@ function JarvisPanel({ allPlayers }) {
   const [globalDone, setGlobalDone] = useState(false);
   const [globalAnalysis, setGlobalAnalysis] = useState("");
   const streamRef = useRef(null);
+  const autoFiredRef = useRef(false);
 
   const analyzePlayer = useCallback(async (player) => {
     if (analyses[player.name] || loading[player.name]) return;
@@ -514,6 +515,15 @@ Style : scout NBA pro, direct, data-driven, en français.`,
     }
   };
 
+  // Auto-trigger global analysis once players are loaded
+  useEffect(() => {
+    if (allPlayers.length > 0 && !autoFiredRef.current) {
+      autoFiredRef.current = true;
+      runGlobalAnalysis();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allPlayers.length]);
+
   const topPlayers = allPlayers.filter(p => p.jarvis >= 88);
 
   return (
@@ -527,10 +537,10 @@ Style : scout NBA pro, direct, data-driven, en français.`,
         }}>
           <span style={{ fontSize: 22, animation: "pulse 1.5s infinite" }}>💎</span>
           <div>
-            <div style={{ fontWeight: 800, fontSize: 13, color: C.gold }}>
+            <div style={{ fontWeight: 800, fontSize: 16, color: C.gold }}>
               {topPlayers.length} PÉPITE{topPlayers.length > 1 ? "S" : ""} DÉTECTÉE{topPlayers.length > 1 ? "S" : ""} !
             </div>
-            <div style={{ fontSize: 11, color: C.muted }}>
+            <div style={{ fontSize: 14, color: C.muted }}>
               {topPlayers.map(p => p.name).join(", ")} — score JARVIS ≥ 88
             </div>
           </div>
@@ -541,15 +551,15 @@ Style : scout NBA pro, direct, data-driven, en français.`,
       <div style={{ background: "rgba(168,85,247,0.07)", border: "1px solid rgba(168,85,247,0.25)", borderRadius: 16, padding: 18, marginBottom: 16 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
           <div>
-            <div style={{ fontSize: 10, fontWeight: 800, color: C.purple, letterSpacing: 2, textTransform: "uppercase" }}>🦾 JARVIS — Rapport Scout</div>
-            <div style={{ fontSize: 11, color: C.muted, marginTop: 2 }}>{allPlayers.length} joueurs analysés</div>
+            <div style={{ fontSize: 20, fontWeight: 800, color: C.purple, letterSpacing: 2, textTransform: "uppercase" }}>🦾 JARVIS — Rapport Scout</div>
+            <div style={{ fontSize: 14, color: C.muted, marginTop: 2 }}>{allPlayers.length} joueurs analysés</div>
           </div>
           {!globalDone && allPlayers.length > 0 && (
             <button onClick={runGlobalAnalysis} disabled={globalLoading} style={{
               padding: "8px 16px", borderRadius: 10, border: "none",
               cursor: globalLoading ? "default" : "pointer",
               background: globalLoading ? "rgba(255,255,255,0.06)" : `linear-gradient(135deg, ${C.purple}, #7c3aed)`,
-              color: "#fff", fontWeight: 700, fontSize: 12, fontFamily: "inherit",
+              color: "#fff", fontWeight: 700, fontSize: 14, fontFamily: "inherit",
               opacity: globalLoading ? 0.7 : 1,
             }}>
               {globalLoading ? "⏳ En cours..." : "Rapport complet"}
@@ -558,7 +568,7 @@ Style : scout NBA pro, direct, data-driven, en français.`,
         </div>
 
         {!globalAnalysis && !globalLoading && (
-          <div style={{ textAlign: "center", padding: "16px 0", color: C.muted, fontSize: 12 }}>
+          <div style={{ textAlign: "center", padding: "16px 0", color: C.muted, fontSize: 16 }}>
             {allPlayers.length === 0
               ? "Ouvre un match pour charger les joueurs."
               : `${allPlayers.length} joueur${allPlayers.length > 1 ? "s" : ""} prêt${allPlayers.length > 1 ? "s" : ""} — clique sur "Rapport complet"`
@@ -567,15 +577,15 @@ Style : scout NBA pro, direct, data-driven, en français.`,
         )}
 
         {globalAnalysis && (
-          <div style={{ fontSize: 12, lineHeight: 1.8, color: C.text, whiteSpace: "pre-wrap" }}>
+          <div style={{ fontSize: 16, lineHeight: 1.8, color: C.text, whiteSpace: "pre-wrap" }}>
             {globalAnalysis.split("\n").map((line, i) => {
-              if (line.startsWith("## ")) return <div key={i} style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 17, color: C.purple, letterSpacing: 1, marginTop: 12, marginBottom: 2 }}>{line.replace("## ", "")}</div>;
+              if (line.startsWith("## ")) return <div key={i} style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 22, color: C.purple, letterSpacing: 1, marginTop: 14, marginBottom: 4 }}>{line.replace("## ", "")}</div>;
               if (line.startsWith("• **") || line.match(/^\*\*.+\*\*/)) {
                 const parts = line.replace(/\*\*/g, "|||").split("|||");
-                return <div key={i} style={{ marginTop: 8 }}>{parts.map((p, j) => j % 2 === 1 ? <strong key={j} style={{ color: C.cyan }}>{p}</strong> : <span key={j}>{p}</span>)}</div>;
+                return <div key={i} style={{ marginTop: 10, fontSize: 16 }}>{parts.map((p, j) => j % 2 === 1 ? <strong key={j} style={{ color: C.cyan }}>{p}</strong> : <span key={j}>{p}</span>)}</div>;
               }
-              if (line.startsWith("  →") || line.startsWith("→")) return <div key={i} style={{ color: C.green, paddingLeft: 12, fontSize: 11 }}>{line}</div>;
-              if (line.startsWith("  🔮") || line.startsWith("🔮")) return <div key={i} style={{ color: C.cyan, paddingLeft: 12, fontSize: 11, fontStyle: "italic" }}>{line}</div>;
+              if (line.startsWith("  →") || line.startsWith("→")) return <div key={i} style={{ color: C.green, paddingLeft: 14, fontSize: 14 }}>{line}</div>;
+              if (line.startsWith("  🔮") || line.startsWith("🔮")) return <div key={i} style={{ color: C.cyan, paddingLeft: 14, fontSize: 14, fontStyle: "italic" }}>{line}</div>;
               return <div key={i}>{line}</div>;
             })}
             {!globalDone && <span style={{ animation: "blink 1s infinite", color: C.purple }}>▌</span>}
