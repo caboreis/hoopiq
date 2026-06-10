@@ -171,20 +171,24 @@ function SectionTitle({ children }) {
    HOOPIQ RADIO
 ───────────────────────────────────────── */
 const RADIO_STREAMS = [
-  { url: "https://ice9.somafm.com/groovesalad-128-mp3",      name: "Groove Salad",  emoji: "🎧" },
-  { url: "https://ice9.somafm.com/u80s-128-mp3",             name: "Underground 80s", emoji: "🔥" },
-  { url: "https://streams.radiomast.io/breakbeat-fm",        name: "Breakbeat FM",  emoji: "🏀" },
+  { url: "https://listen.shoutcast.com/top-40-rhythmic",                                          name: "Top 40 Rhythmic", emoji: "🔥" },
+  { url: "https://playerservices.streamtheworld.com/api/livestream-redirect/POWER1051.mp3",       name: "Power 105.1 NYC", emoji: "⚡" },
+  { url: "https://playerservices.streamtheworld.com/api/livestream-redirect/JAMN945.mp3",         name: "Jam'n 94.5",      emoji: "🏀" },
 ];
 
+const SPOTIFY_FALLBACK = "https://open.spotify.com/embed/playlist/37i9dQZF1DX0XUsuxWHRQd?utm_source=generator&theme=0";
+
 function HoopiqRadio() {
-  const [playing, setPlaying] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error,   setError]   = useState(false);
-  const [stIdx,   setStIdx]   = useState(0);
-  const [volume,  setVolume]  = useState(70);
-  const [muted,   setMuted]   = useState(false);
-  const audioRef  = useRef(null);
-  const playingRef = useRef(false); // ref stable pour useEffect
+  const [playing,      setPlaying]      = useState(false);
+  const [loading,      setLoading]      = useState(false);
+  const [error,        setError]        = useState(false);
+  const [stIdx,        setStIdx]        = useState(0);
+  const [volume,       setVolume]       = useState(70);
+  const [muted,        setMuted]        = useState(false);
+  const [spotifyMode,  setSpotifyMode]  = useState(false); // tous les streams ont échoué
+  const [failedCount,  setFailedCount]  = useState(0);
+  const audioRef   = useRef(null);
+  const playingRef = useRef(false);
 
   const station = RADIO_STREAMS[stIdx];
 
@@ -228,7 +232,11 @@ function HoopiqRadio() {
     }
   };
 
-  const nextStation = () => setStIdx(i => (i + 1) % RADIO_STREAMS.length);
+  const nextStation = () => {
+    setSpotifyMode(false);
+    setError(false);
+    setStIdx(i => (i + 1) % RADIO_STREAMS.length);
+  };
 
   const onVolume = (e) => {
     const v = +e.target.value;
@@ -255,8 +263,39 @@ function HoopiqRadio() {
         onPlaying={() => { setPlaying(true); setLoading(false); setError(false); }}
         onWaiting={() => setLoading(true)}
         onCanPlay={() => setLoading(false)}
-        onError={() => { setError(true); setPlaying(false); setLoading(false); }}
+        onError={() => {
+          setError(true); setPlaying(false); setLoading(false);
+          setFailedCount(prev => {
+            const next = prev + 1;
+            if (next >= RADIO_STREAMS.length) setSpotifyMode(true);
+            else setStIdx(i => (i + 1) % RADIO_STREAMS.length); // essaie la suivante auto
+            return next;
+          });
+        }}
       />
+
+      {/* Fallback Spotify — s'affiche si tous les streams ont échoué */}
+      {spotifyMode && (
+        <div style={{
+          position: "fixed", bottom: 52, right: 20, zIndex: 999,
+          borderRadius: "12px 12px 0 0", overflow: "hidden",
+          border: `1px solid rgba(30,215,96,0.4)`,
+          boxShadow: "0 -6px 24px rgba(0,0,0,0.7)",
+          animation: "fadeUp .3s ease",
+        }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "6px 10px", background: "#121212", borderBottom: "1px solid rgba(30,215,96,0.2)" }}>
+            <span style={{ fontSize: 10, color: "#1ed760", fontWeight: 800, letterSpacing: 1 }}>🎵 SPOTIFY · NBA Hype Hits</span>
+            <button onClick={() => setSpotifyMode(false)} style={{ background: "none", border: "none", color: "#666", fontSize: 12, cursor: "pointer", padding: 0, lineHeight: 1 }}>✕</button>
+          </div>
+          <iframe
+            src={SPOTIFY_FALLBACK}
+            width="300" height="152"
+            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+            loading="lazy"
+            style={{ display: "block", border: "none" }}
+          />
+        </div>
+      )}
 
       {/* Barre de contrôle */}
       <div style={{
@@ -278,11 +317,11 @@ function HoopiqRadio() {
 
         {/* Info station */}
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: playing ? C.text : C.muted, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", transition: "color .2s" }}>
-            {station.emoji} {station.name}
+          <div style={{ fontSize: 12, fontWeight: 700, color: (playing || spotifyMode) ? C.text : C.muted, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", transition: "color .2s" }}>
+            {spotifyMode ? "🎵 NBA Hype Hits · Spotify" : `${station.emoji} ${station.name}`}
           </div>
-          <div style={{ fontSize: 9, color: error ? C.red : C.muted, letterSpacing: 1, textTransform: "uppercase", marginTop: 1 }}>
-            {error ? "⚠ Stream indisponible — essaie l'autre →" : loading ? "Connexion…" : playing ? `${stIdx + 1} / ${RADIO_STREAMS.length} · En direct` : "Prêt"}
+          <div style={{ fontSize: 9, color: spotifyMode ? "#1ed760" : error ? C.red : C.muted, letterSpacing: 1, textTransform: "uppercase", marginTop: 1 }}>
+            {spotifyMode ? "🎵 Mode Spotify activé" : error ? "⚠ Stream indisponible — essaie la suivante →" : loading ? "Connexion…" : playing ? `${stIdx + 1} / ${RADIO_STREAMS.length} · En direct` : "Prêt"}
           </div>
         </div>
 
