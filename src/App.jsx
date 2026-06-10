@@ -758,6 +758,7 @@ function App({ user, onLogout }) {
   const [bullsPlayers, setBullsPlayers] = useState([]);
   const [playerSearch, setPlayerSearch] = useState("");
   const [showAnalysisModal, setShowAnalysisModal] = useState(false);
+  const [showNflTeaser, setShowNflTeaser] = useState(false);
   const [favoriteTeam, setFavoriteTeamState] = useState(() => {
     try { return JSON.parse(localStorage.getItem("hoopiq_fav_team")) || NBA_TEAMS[3]; } catch { return NBA_TEAMS[3]; }
   });
@@ -945,6 +946,7 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
     { sep: true },
     { id: "players",   label: "Joueurs",   icon: "🏀" },
     { id: "matches",   label: "Matchs",    icon: "📊" },
+    { id: "nfl-soon",  label: "NFL",       icon: "🏈", soon: true },
     { sep: true },
     { id: "vestiaire", label: "Vestiaire", icon: "💬" },
     { id: "cards",     label: "Cartes",    icon: "🎴" },
@@ -976,7 +978,54 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
         .kpi-card::after { content:''; position:absolute; top:0; left:0; right:0; height:2px; background: var(--kpi-color); opacity:.8; }
         .fade-in { animation: fadeUp .5s ease both; }
         .nav-sep { width: 1px; height: 20px; background: rgba(255,255,255,0.07); margin: 0 4px; align-self: center; flex-shrink: 0; }
+        @keyframes nflTabPulse { 0%,100%{box-shadow:0 0 0 0 rgba(200,16,46,0.3)} 50%{box-shadow:0 0 8px 2px rgba(200,16,46,0.2)} }
+        @keyframes nflModalIn { from{transform:scale(0.9) translateY(20px);opacity:0} to{transform:scale(1) translateY(0);opacity:1} }
       `}</style>
+
+      {/* NFL TEASER MODAL */}
+      {showNflTeaser && (
+        <div onClick={() => setShowNflTeaser(false)} style={{
+          position: "fixed", inset: 0, zIndex: 2000,
+          background: "rgba(0,0,0,0.88)", backdropFilter: "blur(16px)",
+          display: "flex", alignItems: "center", justifyContent: "center", padding: 24,
+        }}>
+          <div onClick={e => e.stopPropagation()} style={{
+            background: "linear-gradient(145deg, #0d0005, #06060f)",
+            border: "1px solid rgba(200,16,46,0.4)",
+            borderRadius: 24, padding: "40px 36px", maxWidth: 480, width: "100%", textAlign: "center",
+            boxShadow: "0 0 80px rgba(200,16,46,0.2)",
+            animation: "nflModalIn .35s cubic-bezier(.34,1.56,.64,1)",
+          }}>
+            <div style={{ fontSize: 64, marginBottom: 16 }}>🏈</div>
+            <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 48, letterSpacing: 3, margin: "0 0 8px",
+              background: "linear-gradient(135deg, #C8102E, #FFB612)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+              NFL ZONE
+            </h2>
+            <p style={{ fontSize: 15, color: "#f0f0ff", marginBottom: 8, fontWeight: 600 }}>Bientôt disponible sur HoopIQ</p>
+            <p style={{ fontSize: 13, color: "#6b6b88", lineHeight: 1.6, marginBottom: 28 }}>
+              32 équipes · Stats live · Scores ESPN · Analyse IA<br/>
+              Mahomes, Lamar Jackson, CeeDee Lamb et plus encore 🔥
+            </p>
+            <div style={{ display: "flex", gap: 8, justifyContent: "center", marginBottom: 24, flexWrap: "wrap" }}>
+              {["32 équipes NFL","Stars & Stats","Scores Live","Analyse IA"].map(tag => (
+                <span key={tag} style={{ fontSize: 11, fontWeight: 800, padding: "4px 12px", borderRadius: 20,
+                  background: "rgba(200,16,46,0.12)", border: "1px solid rgba(200,16,46,0.3)", color: "#ff6b6b" }}>
+                  {tag}
+                </span>
+              ))}
+            </div>
+            <button onClick={() => setShowNflTeaser(false)} style={{
+              width: "100%", padding: "14px", borderRadius: 14,
+              background: "linear-gradient(135deg, #C8102E, #a00d23)",
+              border: "none", color: "#fff", fontSize: 15, fontWeight: 800,
+              cursor: "pointer", fontFamily: "inherit",
+              boxShadow: "0 4px 24px rgba(200,16,46,0.4)",
+            }}>
+              J'attends avec impatience ! 🏈
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* TOP NAV */}
       <nav style={{ position: "sticky", top: 0, zIndex: 100, height: 62, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 20px", background: "rgba(6,6,15,0.96)", backdropFilter: "blur(24px)", borderBottom: `1px solid rgba(255,255,255,0.06)`, boxShadow: "0 4px 24px rgba(0,0,0,0.5)" }}>
@@ -986,6 +1035,17 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
         <div className="nav-tabs" style={{ display: "flex", gap: 1, flex: 1, minWidth: 0, overflowX: "auto", justifyContent: "center", margin: "0 8px", alignItems: "center" }}>
           {TABS.map((t, i) => t.sep ? (
             <div key={`sep-${i}`} className="nav-sep" />
+          ) : t.soon ? (
+            <button key={t.id} onClick={() => setShowNflTeaser(true)} style={{
+              position: "relative", padding: "7px 10px", borderRadius: 8, border: "1px solid rgba(200,16,46,0.3)",
+              cursor: "pointer", background: "rgba(200,16,46,0.07)", color: "#ff6b6b",
+              fontWeight: 700, fontSize: 12, transition: "all .2s", fontFamily: "'DM Sans', sans-serif",
+              flexShrink: 0, whiteSpace: "nowrap", borderBottom: "2px solid rgba(200,16,46,0.4)",
+              animation: "nflTabPulse 3s ease-in-out infinite",
+            }}>
+              {t.icon} {t.label}
+              <span style={{ position: "absolute", top: -6, right: -4, fontSize: 8, fontWeight: 900, background: "#C8102E", color: "#fff", padding: "1px 5px", borderRadius: 6, letterSpacing: 0.5 }}>SOON</span>
+            </button>
           ) : (
             <button key={t.id} className="nav-tab" onClick={() => setTab(t.id)} style={{
               position: "relative",
