@@ -73,11 +73,12 @@ const PLANS = [
 ];
 
 const PLAYERS = [
-  { id: 1, name: "Marcus Johnson", pos: "PG", team: "Paris Bulls", pts: 24.3, ast: 8.1, reb: 4.2, fg: 47, score: 92, trend: +3, hot: true },
-  { id: 2, name: "Léo Dubois", pos: "SF", team: "Lyon Hawks", pts: 19.8, ast: 3.4, reb: 7.6, fg: 51, score: 87, trend: +1, hot: false },
-  { id: 3, name: "Kevin Tran", pos: "C", team: "Paris Bulls", pts: 15.2, ast: 1.8, reb: 11.3, fg: 58, score: 84, trend: -2, hot: false },
-  { id: 4, name: "Antoine Moreau", pos: "SG", team: "Marseille Jets", pts: 22.1, ast: 4.9, reb: 3.1, fg: 44, score: 81, trend: +5, hot: true },
-  { id: 5, name: "Yann Forestier", pos: "PF", team: "Bordeaux Lions", pts: 17.6, ast: 2.2, reb: 9.8, fg: 53, score: 79, trend: +2, hot: false },
+  { id: 1,  name: "Caitlin Clark",     pos: "PG", team: "Indiana Fever",      pts: 19.2, ast: 8.4, reb: 5.7,  fg: 40, score: 97, trend: +5, hot: true,  league: "wnba", espnId: 4433403 },
+  { id: 2,  name: "A'ja Wilson",       pos: "C",  team: "Las Vegas Aces",     pts: 26.4, ast: 3.5, reb: 11.9, fg: 52, score: 98, trend: +3, hot: true,  league: "wnba", espnId: 3149391 },
+  { id: 3,  name: "Breanna Stewart",   pos: "PF", team: "New York Liberty",   pts: 19.3, ast: 3.3, reb: 9.3,  fg: 45, score: 94, trend: +2, hot: true,  league: "wnba", espnId: 2998928 },
+  { id: 4,  name: "Sabrina Ionescu",   pos: "PG", team: "New York Liberty",   pts: 17.4, ast: 8.1, reb: 4.5,  fg: 42, score: 92, trend: +1, hot: false, league: "wnba", espnId: 4066533 },
+  { id: 5,  name: "Napheesa Collier",  pos: "PF", team: "Minnesota Lynx",     pts: 20.1, ast: 3.1, reb: 9.8,  fg: 51, score: 91, trend: +4, hot: true,  league: "wnba", espnId: 3917450 },
+  { id: 6,  name: "Angel Reese",       pos: "PF", team: "Atlanta Dream",      pts: 13.1, ast: 2.2, reb: 13.1, fg: 44, score: 89, trend: +3, hot: true,  league: "wnba", espnId: 4433402 },
 ];
 
 const MATCHES = [
@@ -91,15 +92,29 @@ const MATCHES = [
    UTILS / ATOMS
 ───────────────────────────────────────── */
 
-function Avatar({ name, size = 44, glow }) {
+function Avatar({ name, size = 44, glow, espnId, headshot, league }) {
+  const [imgError, setImgError] = useState(false);
   const initials = name.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
+  const sport = league === "wnba" ? "wnba" : "nba";
+  const photoUrl = headshot || (espnId ? `https://a.espncdn.com/combiner/i?img=/i/headshots/${sport}/players/full/${espnId}.png&w=200&h=146` : null);
+  const showPhoto = photoUrl && !imgError;
+
   return (
     <div style={{
-      width: size, height: size, borderRadius: "50%", flexShrink: 0,
-      background: G.orange, display: "flex", alignItems: "center", justifyContent: "center",
+      width: size, height: size, borderRadius: "50%", flexShrink: 0, overflow: "hidden",
+      background: showPhoto ? "#111" : G.orange,
+      display: "flex", alignItems: "center", justifyContent: "center",
       fontFamily: "'Bebas Neue', cursive", fontSize: size * 0.36, color: "#fff", letterSpacing: 1,
       boxShadow: glow ? `0 0 24px rgba(255,92,0,0.55)` : `0 2px 10px rgba(0,0,0,0.5)`,
-    }}>{initials}</div>
+      position: "relative",
+    }}>
+      {showPhoto ? (
+        <img src={photoUrl} alt={name} onError={() => setImgError(true)}
+          style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top center" }} />
+      ) : (
+        <span>{initials}</span>
+      )}
+    </div>
   );
 }
 
@@ -1217,7 +1232,7 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
                     borderBottom: i < 3 ? `1px solid ${C.border}` : "none",
                   }}>
                     <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 18, color: i === 0 ? C.orange : C.muted, width: 20, textAlign: "center" }}>#{i + 1}</span>
-                    <Avatar name={p.name} size={38} glow={i === 0} />
+                    <Avatar name={p.name} size={38} glow={i === 0} espnId={p.espnId} headshot={p.headshot} league={p.league} />
                     <div style={{ flex: 1 }}>
                       <div style={{ fontWeight: 700, fontSize: 14 }}>{p.name} {p.hot && <span title="En feu">🔥</span>}</div>
                       <div style={{ fontSize: 12, color: C.muted }}>{p.team} · {p.pos}</div>
@@ -1293,7 +1308,7 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
                           cursor: 'pointer', transition: 'all .2s',
                         }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                            <Avatar name={p.name} size={42} glow={selectedPlayer?.id === p.id} />
+                            <Avatar name={p.name} size={42} glow={selectedPlayer?.id === p.id} espnId={p.espnId} headshot={p.headshot} league={p.league} />
                             <div style={{ flex: 1 }}>
                               <div style={{ fontWeight: 700, fontSize: 14 }}>{p.name}</div>
                               <div style={{ fontSize: 11, color: C.muted }}>{p.pos} · {p.team}</div>
@@ -1315,10 +1330,12 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
                     borderRadius: 16, padding: "18px 20px", cursor: "pointer", transition: "all .2s",
                   }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                      <Avatar name={p.name} size={50} glow={selectedPlayer?.id === p.id} />
+                      <Avatar name={p.name} size={50} glow={selectedPlayer?.id === p.id} espnId={p.espnId} headshot={p.headshot} league={p.league} />
                       <div style={{ flex: 1 }}>
                         <div style={{ fontWeight: 700, fontSize: 15 }}>{p.name} {p.hot && "🔥"}</div>
-                        <div style={{ fontSize: 12, color: C.muted, marginBottom: 8 }}>{p.team} · {p.pos}</div>
+                        <div style={{ fontSize: 12, color: C.muted, marginBottom: 8 }}>
+                          {p.league === "wnba" && <span style={{ color: "#c084fc", marginRight: 4 }}>🌸</span>}{p.team} · {p.pos}
+                        </div>
                         <div style={{ display: "flex", gap: 6 }}>
                           <Badge color={C.orange}>{p.pts} pts</Badge>
                           <Badge color={C.blue}>{p.ast} ast</Badge>
@@ -1433,7 +1450,7 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
                   <SectionTitle>🏀 Joueurs en forme</SectionTitle>
                   {PLAYERS.filter(p => p.hot).map(p => (
                     <div key={p.id} style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 10 }}>
-                      <Avatar name={p.name} size={32} />
+                      <Avatar name={p.name} size={32} espnId={p.espnId} headshot={p.headshot} league={p.league} />
                       <div>
                         <div style={{ fontSize: 13, fontWeight: 600 }}>{p.name} 🔥</div>
                         <div style={{ fontSize: 11, color: C.muted }}>{p.pts} pts · Score {p.score}</div>
