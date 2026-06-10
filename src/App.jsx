@@ -984,58 +984,7 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
 
       {/* NFL TEASER MODAL */}
       {showNflTeaser && (() => {
-        // Beat hype Web Audio — démarre à l'ouverture, s'arrête à la fermeture
-        const closeTeaser = () => {
-          setShowNflTeaser(false);
-          if (window._nflBeatStop) { window._nflBeatStop(); window._nflBeatStop = null; }
-        };
-        // Lance le beat une seule fois au mount via ref trick
-        if (!window._nflBeatStop) {
-          try {
-            const ctx = new (window.AudioContext || window.webkitAudioContext)();
-            let running = true;
-            const playKick = (t) => {
-              const osc = ctx.createOscillator(); const gain = ctx.createGain();
-              osc.connect(gain); gain.connect(ctx.destination);
-              osc.frequency.setValueAtTime(160, t); osc.frequency.exponentialRampToValueAtTime(30, t + 0.08);
-              gain.gain.setValueAtTime(1.2, t); gain.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
-              osc.start(t); osc.stop(t + 0.15);
-            };
-            const playSnare = (t) => {
-              const buf = ctx.createBuffer(1, ctx.sampleRate * 0.1, ctx.sampleRate);
-              const data = buf.getChannelData(0);
-              for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / data.length);
-              const src = ctx.createBufferSource(); const gain = ctx.createGain();
-              src.buffer = buf; gain.gain.setValueAtTime(0.5, t);
-              src.connect(gain); gain.connect(ctx.destination);
-              src.start(t);
-            };
-            const playBass = (t, freq) => {
-              const osc = ctx.createOscillator(); const gain = ctx.createGain();
-              osc.type = "sawtooth"; osc.frequency.value = freq;
-              gain.gain.setValueAtTime(0.25, t); gain.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
-              osc.connect(gain); gain.connect(ctx.destination);
-              osc.start(t); osc.stop(t + 0.35);
-            };
-            const bpm = 140, beat = 60 / bpm;
-            let step = 0;
-            const bassLine = [55, 55, 55, 73, 55, 55, 62, 55];
-            const schedule = () => {
-              if (!running) return;
-              const now = ctx.currentTime;
-              for (let i = 0; i < 4; i++) {
-                const t = now + i * beat;
-                playKick(t);
-                if (i === 1 || i === 3) playSnare(t);
-                playBass(t, bassLine[step % bassLine.length]);
-                step++;
-              }
-              setTimeout(schedule, beat * 4 * 1000 * 0.85);
-            };
-            schedule();
-            window._nflBeatStop = () => { running = false; ctx.close(); };
-          } catch {}
-        }
+        const closeTeaser = () => setShowNflTeaser(false);
         return (
           <div onClick={closeTeaser} style={{
             position: "fixed", inset: 0, zIndex: 2000,
