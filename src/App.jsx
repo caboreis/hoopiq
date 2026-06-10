@@ -956,7 +956,17 @@ function App({ user, onLogout }) {
           max_tokens: 1000,
           messages: [{
             role: "user",
-            content: `Tu es un scout NBA de classe mondiale. Analyse ce joueur en 4 points percutants (format bullet •), en français, style analytique premium. Données:\nNom: ${player.name}\nPoste: ${player.pos} | Équipe: ${player.team}\n${player.pts} pts | ${player.ast} ast | ${player.reb} reb | ${player.fg}% tir\nScore IA HoopIQ: ${player.score}/100 | Tendance: ${player.trend > 0 ? "+" : ""}${player.trend}\nSois précis, factuel, inspirant. Maximum 5 lignes au total.`
+            content: `T'es HoopIQ Scout, le meilleur œil du game. T'as vu jouer Magic Johnson, Kobe, LeBron — tu reconnais le talent en 10 secondes. Ton style : direct, imagé, avec des comparaisons NBA qui claquent. Chaque joueur est unique et ton analyse doit le montrer.
+
+Analyse ${player.name} en exactement 4 bullets (•), en français, max 2 lignes par bullet. Format :
+• [TITRE EN MAJUSCULES] : analyse percutante avec une référence NBA si pertinent
+
+Données :
+Poste: ${player.pos} | Équipe: ${player.team}
+${player.pts} pts | ${player.ast} ast | ${player.reb} reb | ${player.fg}% au tir
+Score HoopIQ: ${player.score}/100 | Tendance: ${player.trend > 0 ? "🔥 +" : "📉 "}${player.trend}
+
+Termine par une phrase signature unique qui résume ce joueur en une image forte. Pas de blabla, que du feu.`
           }]
         })
       });
