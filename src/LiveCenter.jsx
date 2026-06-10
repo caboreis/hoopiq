@@ -253,6 +253,99 @@ function BoxScore({ team, color }) {
   );
 }
 
+// Playlist YouTube NBA Hype — remplace l'ID par ta propre playlist si besoin
+const NBA_PLAYLIST_ID = "PLRBp0Fe2GpgmsW46rJyudVFlY6IYjFBIm";
+
+function NBAMusicPlayer({ visible }) {
+  const [playing, setPlaying] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const iframeKey = useRef(0);
+
+  const embedSrc = `https://www.youtube.com/embed/videoseries?list=${NBA_PLAYLIST_ID}&autoplay=1&rel=0&modestbranding=1`;
+
+  const togglePlay = () => {
+    if (!playing) iframeKey.current += 1;
+    setPlaying(p => !p);
+  };
+
+  if (!visible) return null;
+
+  return (
+    <div style={{
+      position: "sticky", bottom: 0, zIndex: 50,
+      background: "rgba(10,10,22,0.97)", backdropFilter: "blur(16px)",
+      borderTop: `1px solid rgba(255,215,0,0.2)`,
+      boxShadow: "0 -8px 32px rgba(0,0,0,0.5)",
+    }}>
+      {/* Iframe visible uniquement si expanded + playing */}
+      {expanded && playing && (
+        <div style={{ width: "100%", background: "#000", overflow: "hidden" }}>
+          <iframe
+            key={iframeKey.current}
+            title="NBA Hype Music"
+            src={embedSrc}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            style={{ display: "block", width: "100%", height: 220, border: "none" }}
+          />
+        </div>
+      )}
+
+      {/* Iframe audio-only quand playing mais pas expanded */}
+      {!expanded && playing && (
+        <iframe
+          key={`audio-${iframeKey.current}`}
+          title="NBA Hype Music (audio)"
+          src={embedSrc}
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          style={{ display: "none" }}
+        />
+      )}
+
+      {/* Barre de contrôle */}
+      <div style={{ display: "flex", alignItems: "center", gap: 14, padding: "10px 20px" }}>
+        {/* Badge */}
+        <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "3px 10px", background: "rgba(255,215,0,0.1)", border: "1px solid rgba(255,215,0,0.25)", borderRadius: 20, flexShrink: 0 }}>
+          {playing && <span style={{ width: 6, height: 6, borderRadius: "50%", background: C.gold, animation: "pulse 1s infinite", display: "inline-block" }} />}
+          <span style={{ fontSize: 14 }}>🎵</span>
+          <span style={{ fontSize: 10, fontWeight: 800, color: C.gold, letterSpacing: 1.5, textTransform: "uppercase" }}>NBA Hype</span>
+        </div>
+
+        {/* Info */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: playing ? C.text : C.muted, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", transition: "color .2s" }}>
+            {playing ? "🏀 NBA Hype Playlist — en cours" : "Ambient NBA music en attente du match…"}
+          </div>
+          <div style={{ fontSize: 10, color: C.muted, marginTop: 1 }}>HoopIQ Radio · YouTube</div>
+        </div>
+
+        {/* Bouton Play / Pause */}
+        <button onClick={togglePlay} style={{
+          padding: "8px 20px", borderRadius: 20, cursor: "pointer", fontFamily: "inherit",
+          fontWeight: 800, fontSize: 12, display: "flex", alignItems: "center", gap: 7,
+          border: playing ? "1px solid rgba(255,77,109,0.35)" : "none",
+          background: playing
+            ? "rgba(255,77,109,0.14)"
+            : `linear-gradient(135deg,${C.gold},#ffb300)`,
+          color: playing ? C.red : "#000",
+          transition: "all .2s",
+        }}>
+          {playing ? "⏸ Pause" : "▶ Lancer la musique"}
+        </button>
+
+        {/* Bouton voir la vidéo */}
+        <button onClick={() => setExpanded(e => !e)} style={{
+          background: "none", border: `1px solid ${C.border}`, color: expanded ? C.orange : C.muted,
+          fontSize: 11, cursor: "pointer", padding: "6px 12px", borderRadius: 8, fontFamily: "inherit",
+          transition: "color .15s",
+        }}>
+          {expanded ? "▾ Réduire" : "▸ Vidéo"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function LiveCenter() {
   const [games, setGames] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
@@ -634,6 +727,8 @@ export default function LiveCenter() {
         </div>
       </div>
       )}
+
+      <NBAMusicPlayer visible={!loading && !error && upcomingCount > 0} />
 
       {watchGame && <WatchLiveModal game={watchGame} onClose={() => setWatchGame(null)} />}
     </div>

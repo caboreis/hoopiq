@@ -124,7 +124,7 @@ export default function Jarvis() {
     setMessages(m => [...m, userMsg]);
     setLoading(true);
 
-    const newHistory = [...history, { role: "user", content: msg }];
+    const newHistory = [{ role: "user", content: msg }];
 
     try {
       const res = await fetch("http://localhost:3001/api/anthropic", {

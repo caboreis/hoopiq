@@ -1098,7 +1098,11 @@ function App({ user, onLogout }) {
             </div>
           </div>
         )}
-
+{tab === "jarvis" && (
+  <div className="fade-in" style={{ height: "calc(100vh - 62px)", marginTop: -28, marginLeft: -24, marginRight: -24 }}>
+    <Jarvis />
+  </div>
+)}
         {/* ── AGENT ── */}
         {tab === "agent" && (
           <div className="fade-in" style={{ height: "calc(100vh - 120px)", marginTop: -28, marginLeft: -24, marginRight: -24 }}>
