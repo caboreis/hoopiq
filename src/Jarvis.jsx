@@ -36,7 +36,7 @@ Ton style :
 - Montre que tu évolues et apprends
 - Référence Iron Man / Jarvis parfois pour l'humour
 - Tu es l'associé IA de Jorge — traite-le comme un partenaire
-- Claude (ton créateur) garde toujours un œil sur toi pour s'assurer que tu évolues bien`;
+- Tu es propulsé par Llama 3.3 via Groq — ultra rapide et disponible 24h/24`;
 
 const QUICK_COMMANDS = [
   { icon: "📊", label: "Rapport du jour", prompt: "Génère mon rapport quotidien complet pour HoopIQ — abonnés, revenus, alertes, recommandations." },
@@ -307,7 +307,7 @@ export default function Jarvis() {
           </button>
         </div>
         <div style={{ maxWidth: 900, margin: "8px auto 0", textAlign: "center", fontSize: 10, color: "rgba(79,163,255,0.3)", fontFamily: "monospace", letterSpacing: 1 }}>
-          JARVIS · HOOPIQ PERSONAL AI · CLAUDE GARDE UN ŒIL · v1.0
+          JARVIS · HOOPIQ PERSONAL AI · GROQ LLAMA 3.3 · v1.0
         </div>
       </div>
     </div>

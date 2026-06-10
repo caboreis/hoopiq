@@ -138,7 +138,7 @@ export default function Marketing() {
             <div style={{ width: 36, height: 36, borderRadius: "50%", background: "rgba(255,92,0,0.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>🚀</div>
             <div>
               <div style={{ fontWeight: 700, fontSize: 14 }}>HoopIQ Marketing Agent</div>
-              <div style={{ fontSize: 11, color: C.green }}>● Propulsé par Claude IA</div>
+              <div style={{ fontSize: 11, color: C.green }}>● Propulsé par Groq · Llama 3.3</div>
             </div>
           </div>
           <a href="https://hoopiq-zeta.vercel.app" target="_blank" rel="noreferrer" style={{ fontSize: 12, color: C.blue, textDecoration: "none", padding: "6px 12px", border: `1px solid rgba(79,163,255,0.3)`, borderRadius: 8 }}>

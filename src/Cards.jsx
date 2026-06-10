@@ -138,14 +138,47 @@ const PACKS = [
   { id: "legend", name: "Pack Légende", price: "89€", cards: 5, desc: "5 cartes · 1 OR garanti 🏆", emoji: "✨", color: "#ffd700" },
 ];
 
+const WNBA_PLAYERS = [
+  {
+    id: 901, espnId: 4433403, league: "wnba",
+    name: "Caitlin Clark", pos: "PG", team: "Indiana Fever", teamColor: "#C8102E",
+    pts: 19.2, ast: 8.4, reb: 5.7, fg: 40, score: 97,
+    rarity: "legendary", trait: "ROY 2024",
+  },
+  {
+    id: 902, espnId: 4572126, league: "wnba",
+    name: "Angel Reese", pos: "PF", team: "Chicago Sky", teamColor: "#418FDE",
+    pts: 13.1, ast: 2.2, reb: 13.1, fg: 44, score: 89,
+    rarity: "epic", trait: "DOUBLE-DOUBLE QUEEN",
+  },
+  {
+    id: 903, espnId: 3149391, league: "wnba",
+    name: "Breanna Stewart", pos: "PF", team: "New York Liberty", teamColor: "#86CEBC",
+    pts: 19.3, ast: 3.3, reb: 9.3, fg: 45, score: 94,
+    rarity: "epic", trait: "STEWIE",
+  },
+  {
+    id: 904, espnId: 3149557, league: "wnba",
+    name: "A'ja Wilson", pos: "C", team: "Las Vegas Aces", teamColor: "#C8102E",
+    pts: 26.4, ast: 3.5, reb: 11.9, fg: 52, score: 98,
+    rarity: "epic", trait: "MVP 2024",
+  },
+  {
+    id: 905, espnId: 4066670, league: "wnba",
+    name: "Sabrina Ionescu", pos: "PG", team: "New York Liberty", teamColor: "#86CEBC",
+    pts: 17.4, ast: 8.1, reb: 4.5, fg: 42, score: 92,
+    rarity: "epic", trait: "TRIPLE-DOUBLE",
+  },
+];
+
 const ALL_PLAYERS = NBA_TEAMS.flatMap(t => t.players.map(p => ({ ...p, team: t.name, teamId: t.id, teamColor: t.color })));
 
-function PlayerPhoto({ espnId, photo, name, size }) {
+function PlayerPhoto({ espnId, photo, name, size, league }) {
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
   const initials = name.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
-  // photo override (ex: légendes via NBA.com), sinon headshot ESPN
-  const url = photo || `https://a.espncdn.com/combiner/i?img=/i/headshots/nba/players/full/${espnId}.png&w=350&h=254`;
+  const sport = league === "wnba" ? "wnba" : "nba";
+  const url = photo || `https://a.espncdn.com/combiner/i?img=/i/headshots/${sport}/players/full/${espnId}.png&w=350&h=254`;
   return (
     <div style={{ width: size, height: size * 0.85, position: "relative", overflow: "hidden" }}>
       {!loaded && !error && <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: size * 0.28, fontWeight: 900, color: "rgba(255,255,255,0.2)" }}>{initials}</div>}
@@ -193,7 +226,7 @@ function HoloCard({ card, size = "normal", onClick }) {
             <div style={{ position: "absolute", inset: 0, background: `radial-gradient(ellipse at 50% 110%,${r.color}15 0%,transparent 60%)` }} />
             <div style={{ position: "absolute", top: 5, right: 5, width: size === "small" ? 20 : 28, height: size === "small" ? 20 : 28, borderRadius: "50%", background: isGold ? "linear-gradient(135deg,#ffd700,#ff8c00)" : r.color, display: "flex", alignItems: "center", justifyContent: "center", fontSize: size === "small" ? 7 : 10, fontWeight: 900, color: isGold ? "#1a0800" : "#fff", fontFamily: "monospace" }}>{card.score}</div>
             {card.titles > 0 && <div style={{ position: "absolute", bottom: 4, left: 4, fontSize: size === "small" ? 5 : 8, color: "#ffd700", fontWeight: 800, background: "rgba(0,0,0,0.8)", padding: "1px 5px", borderRadius: 3 }}>🏆×{card.titles}</div>}
-            <PlayerPhoto espnId={card.espnId} photo={card.photo} name={card.name} size={w - (size === "small" ? 14 : 22)} />
+            <PlayerPhoto espnId={card.espnId} photo={card.photo} name={card.name} size={w - (size === "small" ? 14 : 22)} league={card.league} />
           </div>
           <div style={{ textAlign: "center", marginBottom: size === "small" ? 3 : 5 }}>
             <div style={{ fontSize: size === "small" ? 8 : 11, fontWeight: 900, color: "#fff", lineHeight: 1.2, textShadow: isGold ? "0 0 20px #ffd700" : `0 0 15px ${r.color}` }}>{card.name}</div>
@@ -288,6 +321,7 @@ export default function Cards() {
   const [filter, setFilter] = useState("all");
   const [notif, setNotif] = useState(null);
   const [confFilter, setConfFilter] = useState("all");
+  const [wnbaFilter, setWnbaFilter] = useState("all");
 
   const showNotif = (msg) => { setNotif(msg); setTimeout(() => setNotif(null), 4000); };
 
@@ -300,12 +334,14 @@ export default function Cards() {
   };
 
   const filteredTeams = NBA_TEAMS.filter(t => confFilter === "all" || t.conf === confFilter);
-  const filteredCollection = filter === "all" ? collection : filter === "gold" ? collection.filter(c => c.rarity === "gold") : collection.filter(c => c.rarity === filter);
+  const filteredCollection = collection
+    .filter(c => filter === "all" ? true : filter === "gold" ? c.rarity === "gold" : filter === "wnba" ? c.league === "wnba" : c.rarity === filter);
 
   const TABS = [
-    { id: "teams", label: "🌍 Équipes NBA" },
+    { id: "teams",      label: "🌍 Équipes NBA" },
+    { id: "wnba",       label: "🌸 WNBA" },
     { id: "collection", label: "🎴 Collection" },
-    { id: "packs", label: "📦 Packs" },
+    { id: "packs",      label: "📦 Packs" },
   ];
 
   return (
@@ -395,12 +431,107 @@ export default function Cards() {
           </div>
         )}
 
+        {/* WNBA */}
+        {view === "wnba" && (
+          <div>
+            <style>{`
+              @keyframes wnbaGlow { 0%,100%{box-shadow:0 0 24px rgba(192,132,252,0.3)} 50%{box-shadow:0 0 48px rgba(192,132,252,0.6),0 0 80px rgba(255,92,0,0.2)} }
+              .wnba-card:hover { transform: translateY(-6px) !important; }
+            `}</style>
+
+            {/* Hero WNBA */}
+            <div style={{ position: "relative", borderRadius: 20, overflow: "hidden", marginBottom: 28, padding: "28px 32px", background: "linear-gradient(135deg,#12002a,#1a0050,#0d0020)", border: "1px solid rgba(192,132,252,0.25)" }}>
+              <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 60% 80% at 80% 50%, rgba(192,132,252,0.12) 0%, transparent 70%)", pointerEvents: "none" }} />
+              <div style={{ position: "relative", zIndex: 1 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 6 }}>
+                  <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: 2, color: "#c084fc", textTransform: "uppercase", fontFamily: "monospace" }}>🌸 ÉDITION WNBA</span>
+                  <div style={{ height: 1, flex: 1, background: "rgba(192,132,252,0.2)" }} />
+                </div>
+                <h1 style={{ fontFamily: "'Bebas Neue',cursive", fontSize: 48, letterSpacing: 2, lineHeight: 1, margin: 0, background: "linear-gradient(135deg,#fff,#c084fc)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>STARS DE LA WNBA</h1>
+                <p style={{ color: "rgba(192,132,252,0.7)", fontSize: 13, marginTop: 6 }}>Les 5 joueuses les plus dominantes de la ligue · Saison 2024</p>
+              </div>
+            </div>
+
+            {/* Filtre par équipe */}
+            <div style={{ display: "flex", gap: 8, marginBottom: 24, flexWrap: "wrap" }}>
+              {[
+                ["all", "Toutes"],
+                ["Indiana Fever", "🔴 Indiana Fever"],
+                ["Chicago Sky", "🔵 Chicago Sky"],
+                ["New York Liberty", "🩵 New York Liberty"],
+                ["Las Vegas Aces", "♠ Las Vegas Aces"],
+              ].map(([id, label]) => (
+                <button key={id} onClick={() => setWnbaFilter(id)} style={{
+                  padding: "6px 16px", borderRadius: 20, fontFamily: "inherit", cursor: "pointer", fontSize: 12,
+                  border: `1px solid ${wnbaFilter === id ? "#c084fc" : "rgba(192,132,252,0.2)"}`,
+                  background: wnbaFilter === id ? "rgba(192,132,252,0.14)" : "transparent",
+                  color: wnbaFilter === id ? "#c084fc" : "#6b7280",
+                  transition: "all .2s",
+                }}>{label}</button>
+              ))}
+            </div>
+
+            {/* Grille cartes */}
+            <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
+              {WNBA_PLAYERS
+                .filter(p => wnbaFilter === "all" || p.team === wnbaFilter)
+                .map((player, i) => {
+                  const isCC = player.id === 901;
+                  return (
+                    <div key={player.id} className="wnba-card" style={{ transition: "transform .2s", animation: `float ${3 + i * 0.5}s ease-in-out infinite` }}>
+                      {/* Badge spécial Caitlin Clark */}
+                      {isCC && (
+                        <div style={{ textAlign: "center", marginBottom: 6 }}>
+                          <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: 2, color: "#ffd700", background: "rgba(255,215,0,0.1)", padding: "3px 10px", borderRadius: 10, border: "1px solid rgba(255,215,0,0.3)", fontFamily: "monospace" }}>⭐ FRANCHISE PLAYER</span>
+                        </div>
+                      )}
+                      <HoloCard
+                        card={player}
+                        size="normal"
+                        onClick={() => setSelectedCard(player)}
+                      />
+                      {/* Info équipe sous la carte */}
+                      <div style={{ marginTop: 8, textAlign: "center" }}>
+                        <div style={{ fontSize: 11, fontWeight: 700, color: player.teamColor }}>{player.team}</div>
+                        <div style={{ fontSize: 10, color: "#6b7280", marginTop: 2 }}>
+                          {player.pts} pts · {player.ast} ast · {player.reb} reb
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
+
+            {/* Stats comparatives */}
+            <div style={{ marginTop: 36, background: "rgba(192,132,252,0.04)", border: "1px solid rgba(192,132,252,0.15)", borderRadius: 16, padding: 24 }}>
+              <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: 2, color: "#c084fc", textTransform: "uppercase", marginBottom: 16, fontFamily: "monospace" }}>📊 CLASSEMENT SAISON 2024</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                {[...WNBA_PLAYERS].sort((a, b) => b.score - a.score).map((p, i) => (
+                  <div key={p.id} style={{ display: "flex", alignItems: "center", gap: 14, padding: "10px 14px", borderRadius: 10, background: i === 0 ? "rgba(255,215,0,0.06)" : "rgba(255,255,255,0.02)", border: `1px solid ${i === 0 ? "rgba(255,215,0,0.2)" : "rgba(255,255,255,0.05)"}`, cursor: "pointer" }} onClick={() => setSelectedCard(p)}>
+                    <span style={{ fontFamily: "'Bebas Neue',cursive", fontSize: 20, color: i === 0 ? "#ffd700" : "#6b7280", width: 22, textAlign: "center" }}>#{i + 1}</span>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: 700, fontSize: 13 }}>{p.name} <span style={{ fontSize: 10, color: "#c084fc", background: "rgba(192,132,252,0.1)", padding: "1px 6px", borderRadius: 4, marginLeft: 4 }}>{p.trait}</span></div>
+                      <div style={{ fontSize: 11, color: p.teamColor }}>{p.team} · {p.pos}</div>
+                    </div>
+                    <div style={{ display: "flex", gap: 20, fontSize: 12 }}>
+                      <div style={{ textAlign: "center" }}><div style={{ fontFamily: "'Bebas Neue',cursive", fontSize: 18, color: "#ff5c00" }}>{p.pts}</div><div style={{ fontSize: 9, color: "#6b7280" }}>PTS</div></div>
+                      <div style={{ textAlign: "center" }}><div style={{ fontFamily: "'Bebas Neue',cursive", fontSize: 18, color: "#22d37a" }}>{p.reb}</div><div style={{ fontSize: 9, color: "#6b7280" }}>REB</div></div>
+                      <div style={{ textAlign: "center" }}><div style={{ fontFamily: "'Bebas Neue',cursive", fontSize: 18, color: "#4fa3ff" }}>{p.ast}</div><div style={{ fontSize: 9, color: "#6b7280" }}>AST</div></div>
+                    </div>
+                    <div style={{ width: 36, height: 36, borderRadius: "50%", background: `${RARITY[p.rarity].color}20`, border: `2px solid ${RARITY[p.rarity].color}60`, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Bebas Neue',cursive", fontSize: 14, color: RARITY[p.rarity].color }}>{p.score}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* COLLECTION */}
         {view === "collection" && (
           <div>
             <h1 style={{ fontFamily: "'Bebas Neue',cursive", fontSize: 40, letterSpacing: 2, marginBottom: 20 }}>MA <span style={{ color: "#ff5c00" }}>COLLECTION</span></h1>
             <div style={{ display: "flex", gap: 8, marginBottom: 24, flexWrap: "wrap" }}>
-              {[["all","Toutes"],["gold","✦ OR"],["legendary","🔥 Légendaires"],["epic","💜 Épiques"],["rare","💙 Rares"],["common","⬜ Communes"]].map(([id,label]) => (
+              {[["all","Toutes"],["gold","✦ OR"],["legendary","🔥 Légendaires"],["epic","💜 Épiques"],["rare","💙 Rares"],["common","⬜ Communes"],["wnba","🌸 WNBA"]].map(([id,label]) => (
                 <button key={id} onClick={() => setFilter(id)} style={{ padding: "5px 14px", borderRadius: 20, border: `1px solid ${filter === id ? (id === "gold" ? "#ffd700" : "#ff5c00") : "rgba(255,255,255,0.1)"}`, background: filter === id ? (id === "gold" ? "rgba(255,215,0,0.12)" : "rgba(255,92,0,0.12)") : "transparent", color: filter === id ? (id === "gold" ? "#ffd700" : "#ff5c00") : "#6b7280", fontSize: 12, cursor: "pointer", fontFamily: "inherit" }}>{label}</button>
               ))}
             </div>
