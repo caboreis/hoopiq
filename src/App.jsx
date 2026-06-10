@@ -708,6 +708,7 @@ function App({ user, onLogout }) {
   const [chatLoading, setChatLoading] = useState(false);
   const [bullsPlayers, setBullsPlayers] = useState([]);
   const [liveScores, setLiveScores] = useState([]);
+  const [wnbaScores, setWnbaScores] = useState([]);
   const [wnbaLiveCount, setWnbaLiveCount] = useState(0);
   const [nbaLoading, setNbaLoading] = useState(true);
   const [nbaError, setNbaError] = useState(null);
@@ -746,10 +747,27 @@ function App({ user, onLogout }) {
         setBullsPlayers(loadedPlayers)
         setSelectedPlayer(prev => (prev && prev.team === 'Chicago Bulls' ? prev : (loadedPlayers[0] || prev)))
         setLiveScores(scoresData.games || [])
-        // Fetch WNBA live count en parallèle
+        // Fetch WNBA games en parallèle
         fetch("https://site.api.espn.com/apis/site/v2/sports/basketball/wnba/scoreboard")
           .then(r => r.json())
-          .then(d => setWnbaLiveCount((d.events || []).filter(e => e.status?.type?.id === "2").length))
+          .then(d => {
+            const events = d.events || [];
+            setWnbaLiveCount(events.filter(e => e.status?.type?.id === "2").length);
+            setWnbaScores(events.map(ev => {
+              const comp = ev.competitions?.[0] || {};
+              const home = comp.competitors?.find(c => c.homeAway === "home") || {};
+              const away = comp.competitors?.find(c => c.homeAway === "away") || {};
+              const stateId = ev.status?.type?.id;
+              return {
+                id: ev.id,
+                league: "wnba",
+                status: stateId === "2" ? "live" : stateId === "3" ? "Final" : ev.status?.type?.shortDetail || "À venir",
+                clock: ev.status?.displayClock || "",
+                home: { name: home.team?.displayName || "", abbreviation: home.team?.abbreviation || "", score: home.score || "0" },
+                away: { name: away.team?.displayName || "", abbreviation: away.team?.abbreviation || "", score: away.score || "0" },
+              };
+            }));
+          })
           .catch(() => {});
       } catch (err) {
         console.error('NBA fetch error:', err)
@@ -1201,76 +1219,66 @@ function App({ user, onLogout }) {
         {/* ── MATCHES ── */}
         {tab === "matches" && (
           <div className="fade-in">
-            <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 46, letterSpacing: 2, marginBottom: 24 }}>ANALYSE <span style={{ color: C.orange }}>MATCHS</span></h1>
+            <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 46, letterSpacing: 2, marginBottom: 8 }}>
+              ANALYSE <span style={{ color: C.orange }}>MATCHS</span>
+            </h1>
+            <p style={{ color: C.muted, fontSize: 13, marginBottom: 24 }}>
+              🏀 NBA · 🌸 WNBA — {liveScores.length + wnbaScores.length} matchs aujourd'hui
+            </p>
             {nbaLoading ? (
-              <div style={{ color: C.muted, fontSize: 14 }}>⏳ Chargement des matchs NBA...</div>
+              <div style={{ color: C.muted, fontSize: 14 }}>⏳ Chargement des matchs...</div>
             ) : nbaError ? (
               <div style={{ color: C.red, fontSize: 14 }}>❌ {nbaError}</div>
-            ) : liveScores.length === 0 ? (
+            ) : liveScores.length === 0 && wnbaScores.length === 0 ? (
               <div style={{ color: C.muted, fontSize: 14 }}>Aucun match disponible pour le moment.</div>
             ) : (
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: 20 }}>
-                {liveScores.map(game => {
-                  const isBullsInvolved = game.home.abbreviation === "CHI" || game.away.abbreviation === "CHI";
+                {[...liveScores, ...wnbaScores].map(game => {
+                  const isWnba = game.league === "wnba";
+                  const isLive = game.status === "live" || (!isWnba && game.clock && !game.status?.includes("Final"));
                   const isFinished = game.status === "Final" || game.status?.includes("Final");
-                  
+                  const isBullsInvolved = !isWnba && (game.home.abbreviation === "CHI" || game.away.abbreviation === "CHI");
+                  const accentColor = isWnba ? "#c084fc" : C.orange;
+
                   return (
                     <Card key={game.id}>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
                         <div>
+                          {isWnba && (
+                            <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: 1.5, color: "#c084fc", background: "rgba(192,132,252,0.12)", padding: "2px 8px", borderRadius: 5, border: "1px solid rgba(192,132,252,0.25)", display: "inline-block", marginBottom: 6 }}>🌸 WNBA</span>
+                          )}
                           <div style={{ fontWeight: 700, fontSize: 15 }}>{game.home.name}</div>
                           <div style={{ fontSize: 12, color: C.muted }}>vs {game.away.name}</div>
                           <div style={{ fontSize: 11, color: C.muted, marginTop: 2 }}>📅 {game.status}</div>
                         </div>
                         <div style={{ textAlign: "right" }}>
-                          {isFinished ? (
-                            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 30, color: C.orange }}>{game.home.score}–{game.away.score}</div>
-                          ) : (
-                            <div>
-                              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 28, color: C.blue }}>{game.home.score}–{game.away.score}</div>
-                              <div style={{ fontSize: 10, color: C.orange, marginTop: 2 }}>{game.clock}</div>
-                            </div>
-                          )}
+                          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 30, color: isLive ? C.blue : accentColor }}>
+                            {game.home.score}–{game.away.score}
+                          </div>
+                          {isLive && game.clock && <div style={{ fontSize: 10, color: accentColor, marginTop: 2 }}>{game.clock}</div>}
                         </div>
                       </div>
 
-                      {/* Status badge */}
-                      <div style={{ marginBottom: 14, display: "flex", gap: 8 }}>
-                        {isBullsInvolved && (
-                          <Badge color={C.orange}>🏀 CHICAGO BULLS</Badge>
-                        )}
-                        {isFinished ? (
-                          <Badge color={C.green}>✓ TERMINÉ</Badge>
-                        ) : (
-                          <Badge color={C.blue}>⏱ EN DIRECT</Badge>
-                        )}
+                      <div style={{ marginBottom: 12, display: "flex", gap: 8, flexWrap: "wrap" }}>
+                        {isBullsInvolved && <Badge color={C.orange}>🏀 CHICAGO BULLS</Badge>}
+                        {isLive && <Badge color={C.blue}>⏱ EN DIRECT</Badge>}
+                        {isFinished && <Badge color={C.green}>✓ TERMINÉ</Badge>}
+                        {!isLive && !isFinished && <Badge color={C.muted}>📅 À VENIR</Badge>}
                       </div>
 
-                      {/* Score display */}
-                      <div style={{ padding: 12, background: "rgba(255,255,255,0.03)", borderRadius: 8, marginBottom: 12 }}>
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 50px 1fr", gap: 8, alignItems: "center", textAlign: "center" }}>
+                      <div style={{ padding: 12, background: "rgba(255,255,255,0.03)", borderRadius: 8 }}>
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 40px 1fr", gap: 8, alignItems: "center", textAlign: "center" }}>
                           <div>
-                            <div style={{ fontSize: 12, color: C.muted, marginBottom: 4 }}>{game.home.abbreviation}</div>
-                            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 22, fontWeight: 700 }}>{game.home.score}</div>
+                            <div style={{ fontSize: 11, color: C.muted, marginBottom: 4 }}>{game.home.abbreviation}</div>
+                            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 24 }}>{game.home.score}</div>
                           </div>
                           <div style={{ fontSize: 11, color: C.muted }}>vs</div>
                           <div>
-                            <div style={{ fontSize: 12, color: C.muted, marginBottom: 4 }}>{game.away.abbreviation}</div>
-                            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 22, fontWeight: 700 }}>{game.away.score}</div>
+                            <div style={{ fontSize: 11, color: C.muted, marginBottom: 4 }}>{game.away.abbreviation}</div>
+                            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 24 }}>{game.away.score}</div>
                           </div>
                         </div>
                       </div>
-
-                      {!isFinished && (
-                        <div style={{ fontSize: 12, padding: "8px 12px", background: "rgba(100,150,255,0.1)", borderRadius: 8, borderLeft: `3px solid ${C.blue}` }}>
-                          ⏱ Match en cours · {game.clock}
-                        </div>
-                      )}
-                      {isFinished && (
-                        <div style={{ fontSize: 12, padding: "8px 12px", background: "rgba(100,200,100,0.1)", borderRadius: 8, borderLeft: `3px solid ${C.green}` }}>
-                          ✓ Match terminé
-                        </div>
-                      )}
                     </Card>
                   );
                 })}
