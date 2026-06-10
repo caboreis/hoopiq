@@ -168,6 +168,146 @@ function SectionTitle({ children }) {
 }
 
 /* ─────────────────────────────────────────
+   HOOPIQ RADIO
+───────────────────────────────────────── */
+const RADIO_PLAYLISTS = [
+  { id: "PLH-gkHn0OFBFuEd_JjG9MR7A7JUBxfyWF", name: "Hip Hop Old School", emoji: "🎤" },
+  { id: "PLx6M7K_-_8LZ8Jw7oT5J9pXJvxSQWH2Gw", name: "NBA Hype 2024", emoji: "🏀" },
+];
+
+function HoopiqRadio() {
+  const [playing, setPlaying] = useState(false);
+  const [plIdx, setPlIdx] = useState(0);
+  const [volume, setVolume] = useState(70);
+  const [muted, setMuted] = useState(false);
+  const [iframeKey, setIframeKey] = useState(0);
+  const iframeRef = useRef(null);
+
+  const pl = RADIO_PLAYLISTS[plIdx];
+  const src = `https://www.youtube.com/embed/videoseries?list=${pl.id}&autoplay=1&enablejsapi=1&rel=0&modestbranding=1`;
+
+  const sendYT = (func, args = []) =>
+    iframeRef.current?.contentWindow?.postMessage(JSON.stringify({ event: "command", func, args }), "*");
+
+  // Apply volume once the player has time to initialise
+  useEffect(() => {
+    if (!playing) return;
+    const t = setTimeout(() => sendYT("setVolume", [muted ? 0 : volume]), 1800);
+    return () => clearTimeout(t);
+  }, [playing, iframeKey]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const togglePlay = () => {
+    if (!playing) { setIframeKey(k => k + 1); setPlaying(true); }
+    else { sendYT("pauseVideo"); setPlaying(false); }
+  };
+
+  const nextPl = () => {
+    setPlIdx(i => (i + 1) % RADIO_PLAYLISTS.length);
+    setIframeKey(k => k + 1);
+    setPlaying(true);
+  };
+
+  const onVolume = (e) => {
+    const v = +e.target.value;
+    setVolume(v);
+    setMuted(v === 0);
+    sendYT("setVolume", [v]);
+  };
+
+  const onMute = () => {
+    const next = !muted;
+    setMuted(next);
+    sendYT(next ? "mute" : "unMute");
+  };
+
+  const volIcon = (muted || volume === 0) ? "🔇" : volume < 40 ? "🔉" : "🔊";
+
+  return (
+    <>
+      {/* Hidden iframe — audio only */}
+      {playing && (
+        <iframe
+          key={iframeKey}
+          ref={iframeRef}
+          title="HoopIQ Radio"
+          src={src}
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media"
+          style={{ position: "fixed", left: -9999, top: 0, width: 1, height: 1, opacity: 0, pointerEvents: "none" }}
+        />
+      )}
+
+      {/* Control bar */}
+      <div style={{
+        position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 998,
+        height: 52, background: "rgba(4,4,12,0.97)", backdropFilter: "blur(20px)",
+        borderTop: `1px solid rgba(255,92,0,0.22)`,
+        boxShadow: "0 -4px 28px rgba(0,0,0,0.7)",
+        display: "flex", alignItems: "center", gap: 14, padding: "0 20px",
+        fontFamily: "'DM Sans', sans-serif",
+      }}>
+
+        {/* Brand badge */}
+        <div style={{ display: "flex", alignItems: "center", gap: 7, padding: "3px 12px", background: "rgba(255,92,0,0.09)", border: "1px solid rgba(255,92,0,0.28)", borderRadius: 20, flexShrink: 0 }}>
+          {playing && <span style={{ width: 6, height: 6, borderRadius: "50%", background: C.orange, animation: "pulse 1s infinite", display: "inline-block" }} />}
+          <span style={{ fontSize: 13 }}>📻</span>
+          <span style={{ fontSize: 10, fontWeight: 800, color: C.orange, letterSpacing: 2, textTransform: "uppercase" }}>HOOPIQ RADIO</span>
+        </div>
+
+        {/* Playlist info */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: playing ? C.text : C.muted, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", transition: "color .2s" }}>
+            {pl.emoji} {pl.name}
+          </div>
+          <div style={{ fontSize: 9, color: C.muted, letterSpacing: 1, textTransform: "uppercase", marginTop: 1 }}>
+            {plIdx + 1} / {RADIO_PLAYLISTS.length} · YouTube
+          </div>
+        </div>
+
+        {/* Play / Pause */}
+        <button onClick={togglePlay} style={{
+          width: 36, height: 36, borderRadius: "50%", cursor: "pointer", flexShrink: 0,
+          background: playing ? "rgba(255,92,0,0.14)" : `linear-gradient(135deg,${C.orange},#ff8c42)`,
+          color: playing ? C.orange : "#fff", fontSize: 15,
+          border: playing ? `1px solid rgba(255,92,0,0.38)` : "none",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          transition: "all .2s",
+        }}>
+          {playing ? "⏸" : "▶"}
+        </button>
+
+        {/* Next playlist */}
+        <button onClick={nextPl} title="Playlist suivante" style={{
+          background: "none", border: `1px solid ${C.border}`, color: C.muted,
+          fontSize: 11, cursor: "pointer", padding: "5px 11px", borderRadius: 8,
+          fontFamily: "inherit", display: "flex", alignItems: "center", gap: 5,
+          flexShrink: 0, transition: "color .15s, border-color .15s",
+        }}
+          onMouseEnter={e => { e.currentTarget.style.color = C.orange; e.currentTarget.style.borderColor = "rgba(255,92,0,0.4)"; }}
+          onMouseLeave={e => { e.currentTarget.style.color = C.muted; e.currentTarget.style.borderColor = C.border; }}
+        >
+          ⏭ <span>Playlist suiv.</span>
+        </button>
+
+        {/* Volume */}
+        <div style={{ display: "flex", alignItems: "center", gap: 7, flexShrink: 0 }}>
+          <button onClick={onMute} style={{ background: "none", border: "none", color: (muted || volume === 0) ? C.muted : C.orange, fontSize: 15, cursor: "pointer", padding: 2, lineHeight: 1 }}>
+            {volIcon}
+          </button>
+          <input
+            type="range" min={0} max={100} value={muted ? 0 : volume}
+            onChange={onVolume}
+            style={{ width: 76, accentColor: C.orange, cursor: "pointer", opacity: playing ? 1 : 0.4 }}
+          />
+          <span style={{ fontSize: 10, color: C.muted, width: 22, textAlign: "right", fontFamily: "monospace" }}>
+            {muted ? 0 : volume}
+          </span>
+        </div>
+      </div>
+    </>
+  );
+}
+
+/* ─────────────────────────────────────────
    LANDING PAGE
 ───────────────────────────────────────── */
 // Mix extérieurs + intérieurs (parquet/tribunes) d'arénas NBA — Wikimedia
@@ -648,6 +788,7 @@ function App({ user, onLogout }) {
         ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-thumb { background: ${C.orange}; border-radius: 4px; }
         @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
         @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
         .nav-tab:hover { color: ${C.orange} !important; }
         .nav-tabs::-webkit-scrollbar { height: 0; display: none; }
         .player-row:hover { background: rgba(255,92,0,0.06) !important; cursor:pointer; }
@@ -681,7 +822,7 @@ function App({ user, onLogout }) {
       </nav>
 
       {/* CONTENT */}
-      <div style={{ maxWidth: 1140, margin: "0 auto", padding: "28px 24px" }}>
+      <div style={{ maxWidth: 1140, margin: "0 auto", padding: "28px 24px 80px" }}>
 
         {/* ── DASHBOARD ── */}
         {tab === "dashboard" && (
@@ -1099,7 +1240,7 @@ function App({ user, onLogout }) {
           </div>
         )}
 {tab === "jarvis" && (
-  <div className="fade-in" style={{ height: "calc(100vh - 62px)", marginTop: -28, marginLeft: -24, marginRight: -24 }}>
+  <div className="fade-in" style={{ height: "calc(100vh - 114px)", marginTop: -28, marginLeft: -24, marginRight: -24 }}>
     <Jarvis />
   </div>
 )}
@@ -1113,18 +1254,18 @@ function App({ user, onLogout }) {
         {/* ── MARKETING ── */}
         {tab === "marketing" && <Marketing />}
 {tab === "cards" && (
-  <div className="fade-in" style={{ height: "calc(100vh - 62px)", marginTop: -28, marginLeft: -24, marginRight: -24 }}>
+  <div className="fade-in" style={{ height: "calc(100vh - 114px)", marginTop: -28, marginLeft: -24, marginRight: -24 }}>
     <Cards />
   </div>
 )}
 {tab === "live" && (
-  <div className="fade-in" style={{ height: "calc(100vh - 62px)", marginTop: -28, marginLeft: -24, marginRight: -24 }}>
+  <div className="fade-in" style={{ height: "calc(100vh - 114px)", marginTop: -28, marginLeft: -24, marginRight: -24 }}>
     <LiveCenter />
   </div>
 )}
 {tab === "oracle" && <Oracle />}
 {tab === "vestiaire" && (
-  <div className="fade-in" style={{ height: "calc(100vh - 62px)", marginTop: -28, marginLeft: -24, marginRight: -24 }}>
+  <div className="fade-in" style={{ height: "calc(100vh - 114px)", marginTop: -28, marginLeft: -24, marginRight: -24 }}>
     <Vestiaire user={user} />
   </div>
 )}
@@ -1204,6 +1345,8 @@ function App({ user, onLogout }) {
           </div>
         )}
       </div>
+
+      <HoopiqRadio />
     </div>
   );
 }
