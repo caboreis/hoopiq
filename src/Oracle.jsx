@@ -37,8 +37,12 @@ export default function Oracle() {
         if (!res.ok) throw new Error();
         const data = await res.json();
         if (!active) return;
-        setGames(data.games || []);
+        const list = data.games || [];
+        setGames(list);
         setLoading(false);
+        // Auto-select: live game first, otherwise first game
+        const autoGame = list.find(g => g.status === "live") || list[0];
+        if (autoGame) runPrediction(autoGame);
       } catch {
         if (active) { setError(true); setLoading(false); }
       }
