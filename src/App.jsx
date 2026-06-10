@@ -931,7 +931,9 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
     setChatLoading(false);
   };
 
-  const TABS = [
+  const isAdmin = user.email === "admin@hoopiq.com";
+
+  const ALL_TABS = [
     { id: "dashboard",   label: "Dashboard",  icon: "⚡" },
     { id: "live",        label: "Live",       icon: "🔴", badge: (liveScores.filter(g => g.status === "live" || g.status?.toLowerCase().includes("live")).length + wnbaLiveCount) || null },
     { id: "oracle",      label: "Oracle",     icon: "🔮" },
@@ -947,12 +949,13 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
     { id: "cards",     label: "Cartes",    icon: "🎴" },
     { sep: true },
     { id: "chat",      label: "IA Chat",   icon: "🤖" },
-    { id: "jarvis",    label: "JARVIS",    icon: "🦾" },
+    ...(isAdmin ? [{ id: "jarvis", label: "JARVIS", icon: "🦾" }] : []),
     { id: "agent",     label: "Agent IA",  icon: "🧠" },
-    { id: "marketing", label: "Marketing", icon: "🚀" },
+    ...(isAdmin ? [{ id: "marketing", label: "Marketing", icon: "🚀" }] : []),
     { sep: true },
     { id: "account",   label: "Compte",    icon: "👤" },
   ];
+  const TABS = ALL_TABS;
   return (
     <div style={{ minHeight: "100vh", background: C.bg, color: C.text, fontFamily: "'DM Sans', sans-serif" }}>
       <style>{`
@@ -1707,7 +1710,7 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
             </div>
           </div>
         )}
-{tab === "jarvis" && (
+{tab === "jarvis" && isAdmin && (
   <div className="fade-in" style={{ height: "calc(100vh - 114px)", marginTop: -28, marginLeft: -24, marginRight: -24 }}>
     <Jarvis />
   </div>
@@ -1720,7 +1723,7 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
         )}
 
         {/* ── MARKETING ── */}
-        {tab === "marketing" && <Marketing />}
+        {tab === "marketing" && isAdmin && <Marketing />}
 {tab === "cards" && (
   <div className="fade-in" style={{ height: "calc(100vh - 114px)", marginTop: -28, marginLeft: -24, marginRight: -24 }}>
     <Cards />
