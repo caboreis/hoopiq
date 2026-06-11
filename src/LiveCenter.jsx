@@ -544,7 +544,8 @@ export default function LiveCenter() {
   // Sync selectedLeague quand le jeu sélectionné change (ex: WNBA charge avant NBA)
   useEffect(() => {
     if (selectedGame) setSelectedLeague(selectedGame.league || "nba");
-  }, [selectedGame?.id]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedId]);
 
   // ---- Fetch WNBA games + poll ----
   useEffect(() => {
