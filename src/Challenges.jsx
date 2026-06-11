@@ -1,5 +1,12 @@
 import { useState, useEffect } from "react";
 
+const ARENA_PHOTOS = [
+  "/jc-gellidon-XmYSlYrupL8-unsplash.jpg",
+  "/edgar-chaparro-kB5DnieBLtM-unsplash.jpg",
+  "/logan-weaver-lgnwvr-XcBPc0Q_2h8-unsplash.jpg",
+  "/kylie-osullivan-BfaBLVCBTI8-unsplash.jpg",
+];
+
 const C = {
   bg: "#06060f", surface: "rgba(255,255,255,0.04)", border: "rgba(255,255,255,0.07)",
   orange: "#ff5c00", gold: "#ffd700", green: "#22d37a", red: "#ff4d6d",
@@ -135,6 +142,11 @@ export default function Challenges() {
   const [progress, setProgress] = useState(loadProgress);
   const [revealed, setRevealed] = useState(false);
   const [showBonus, setShowBonus] = useState(false);
+  const [arenaIdx, setArenaIdx] = useState(0);
+  useEffect(() => {
+    const t = setInterval(() => setArenaIdx(i => (i + 1) % ARENA_PHOTOS.length), 8000);
+    return () => clearInterval(t);
+  }, []);
 
   const allChallenges = [...DAILY_CHALLENGES, ...(showBonus ? [BONUS_CHALLENGE] : [])];
   const answeredCount = Object.keys(progress).length;
@@ -168,13 +180,15 @@ export default function Challenges() {
         @keyframes shimmer { 0%,100%{opacity:1} 50%{opacity:0.6} }
       `}</style>
 
-      {/* Arena hero banner */}
-      <div style={{
-        position: "relative", borderRadius: 20, overflow: "hidden",
-        marginBottom: 24, height: 160,
-        backgroundImage: "url(/edgar-chaparro-kB5DnieBLtM-unsplash.jpg)",
-        backgroundSize: "cover", backgroundPosition: "center 40%",
-      }}>
+      {/* Arena hero banner — slideshow */}
+      <div style={{ position: "relative", borderRadius: 20, overflow: "hidden", marginBottom: 24, height: 160 }}>
+        {ARENA_PHOTOS.map((src, i) => (
+          <div key={src} style={{
+            position: "absolute", inset: 0,
+            backgroundImage: `url(${src})`, backgroundSize: "cover", backgroundPosition: "center 40%",
+            opacity: i === arenaIdx ? 1 : 0, transition: "opacity 2s ease-in-out",
+          }} />
+        ))}
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to right, rgba(6,6,15,0.85) 0%, rgba(6,6,15,0.4) 100%)" }} />
         <div style={{ position: "relative", zIndex: 1, padding: "28px 32px", height: "100%", display: "flex", flexDirection: "column", justifyContent: "center" }}>
           <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 46, letterSpacing: 2, lineHeight: 1, margin: 0 }}>

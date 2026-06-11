@@ -1,4 +1,11 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+
+const ARENA_PHOTOS = [
+  "/jc-gellidon-XmYSlYrupL8-unsplash.jpg",
+  "/edgar-chaparro-kB5DnieBLtM-unsplash.jpg",
+  "/logan-weaver-lgnwvr-XcBPc0Q_2h8-unsplash.jpg",
+  "/kylie-osullivan-BfaBLVCBTI8-unsplash.jpg",
+];
 
 const RARITY = {
   gold: { label: "OR LÉGENDAIRE", color: "#ffd700", glow: "rgba(255,215,0,0.9)", bg: "linear-gradient(160deg,#1a1000,#3d2800,#1a1000)", border: "#ffd700", stars: 5 },
@@ -338,6 +345,11 @@ export default function Cards() {
   const [notif, setNotif] = useState(null);
   const [confFilter, setConfFilter] = useState("all");
   const [wnbaFilter, setWnbaFilter] = useState("all");
+  const [arenaIdx, setArenaIdx] = useState(0);
+  useEffect(() => {
+    const t = setInterval(() => setArenaIdx(i => (i + 1) % ARENA_PHOTOS.length), 8000);
+    return () => clearInterval(t);
+  }, []);
 
   const showNotif = (msg) => { setNotif(msg); setTimeout(() => setNotif(null), 4000); };
 
@@ -389,6 +401,26 @@ export default function Cards() {
           ))}
         </div>
         <div style={{ fontSize: 12, color: "#6b7280" }}>🃏 {collection.length} · {collection.filter(c => c.rarity === "gold").length > 0 && <span style={{ color: "#ffd700" }}>✦ {collection.filter(c => c.rarity === "gold").length} OR</span>}</div>
+      </div>
+
+      {/* Arena hero banner */}
+      <div style={{ position: "relative", height: 160, overflow: "hidden" }}>
+        {ARENA_PHOTOS.map((src, i) => (
+          <div key={src} style={{
+            position: "absolute", inset: 0,
+            backgroundImage: `url(${src})`, backgroundSize: "cover", backgroundPosition: "center 30%",
+            opacity: i === arenaIdx ? 1 : 0, transition: "opacity 2s ease-in-out",
+          }} />
+        ))}
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to right, rgba(6,6,15,0.88) 0%, rgba(6,6,15,0.45) 100%)" }} />
+        <div style={{ position: "relative", zIndex: 1, padding: "28px 32px", height: "100%", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+          <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 46, letterSpacing: 2, lineHeight: 1, margin: 0, color: "#f0f0ff" }}>
+            CARTES <span style={{ color: "#ff5c00" }}>NBA</span>
+          </h1>
+          <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 13, marginTop: 6 }}>
+            {collection.length} carte{collection.length > 1 ? "s" : ""} dans ta collection · 30 équipes · Légendes & Stars
+          </p>
+        </div>
       </div>
 
       <div style={{ maxWidth: 1140, margin: "0 auto", padding: "24px" }}>
