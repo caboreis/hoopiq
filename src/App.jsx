@@ -268,12 +268,12 @@ function HoopiqRadio() {
 ───────────────────────────────────────── */
 // Mix extérieurs + intérieurs (parquet/tribunes) d'arénas NBA — Wikimedia
 const HERO_ARENAS = [
-  "https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/United_Center_1.jpg/1280px-United_Center_1.jpg",
-  "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/United_Center_Interior.jpg/1280px-United_Center_Interior.jpg",
+  "/jc-gellidon-XmYSlYrupL8-unsplash.jpg",
+  "/edgar-chaparro-kB5DnieBLtM-unsplash.jpg",
+  "/logan-weaver-lgnwvr-XcBPc0Q_2h8-unsplash.jpg",
+  "/kylie-osullivan-BfaBLVCBTI8-unsplash.jpg",
   "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/Crypto.com_Arena_interior_-_Lakers_2022.jpg/1280px-Crypto.com_Arena_interior_-_Lakers_2022.jpg",
   "https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Madison_Square_Garden_court.jpg/1280px-Madison_Square_Garden_court.jpg",
-  "https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Celtics_game_versus_the_Timberwolves%2C_February%2C_1_2009.jpg/1280px-Celtics_game_versus_the_Timberwolves%2C_February%2C_1_2009.jpg",
-  "https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/Chase_Center.jpg/1280px-Chase_Center.jpg",
 ];
 
 function Landing({ onAuth }) {
