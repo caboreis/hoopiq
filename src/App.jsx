@@ -11,6 +11,7 @@ import Challenges from "./Challenges.jsx";
 import Leaderboard from "./Leaderboard.jsx";
 import Duel from "./Duel.jsx";
 import Scout from "./Scout.jsx";
+import TradeSimulator from "./TradeSimulator.jsx";
 /* ─────────────────────────────────────────
    DESIGN SYSTEM
 ───────────────────────────────────────── */
@@ -943,6 +944,7 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
     { id: "players",   label: "Joueurs",   icon: "🏀" },
     { id: "matches",   label: "Matchs",    icon: "📊" },
     { id: "scout",     label: "Scout",     icon: "🔍" },
+    { id: "trade",     label: "Trade IA",  icon: "🔀" },
     { id: "nfl-soon",  label: "NFL",       icon: "🏈", soon: true },
     { sep: true },
     { id: "vestiaire", label: "Vestiaire", icon: "💬" },
@@ -1769,6 +1771,7 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
 
         {/* ── SCOUT ── */}
         {tab === "scout" && <Scout />}
+        {tab === "trade" && <TradeSimulator />}
 
         {/* ── MARKETING ── */}
         {tab === "marketing" && isAdmin && <Marketing />}
