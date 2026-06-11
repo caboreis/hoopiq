@@ -168,15 +168,31 @@ export default function Challenges() {
         @keyframes shimmer { 0%,100%{opacity:1} 50%{opacity:0.6} }
       `}</style>
 
-      {/* Header */}
-      <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: 8, flexWrap: "wrap", gap: 12 }}>
-        <div>
+      {/* Arena hero banner */}
+      <div style={{
+        position: "relative", borderRadius: 20, overflow: "hidden",
+        marginBottom: 24, height: 160,
+        backgroundImage: "url(/edgar-chaparro-kB5DnieBLtM-unsplash.jpg)",
+        backgroundSize: "cover", backgroundPosition: "center 40%",
+      }}>
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to right, rgba(6,6,15,0.85) 0%, rgba(6,6,15,0.4) 100%)" }} />
+        <div style={{ position: "relative", zIndex: 1, padding: "28px 32px", height: "100%", display: "flex", flexDirection: "column", justifyContent: "center" }}>
           <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 46, letterSpacing: 2, lineHeight: 1, margin: 0 }}>
             DÉFIS <span style={{ color: C.orange }}>QUOTIDIENS</span>
           </h1>
-          <p style={{ color: C.muted, fontSize: 13, marginTop: 4 }}>
+          <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 13, marginTop: 6 }}>
             3 défis · Réinitialisés chaque jour à minuit · {new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })}
           </p>
+        </div>
+      </div>
+
+      {/* Header */}
+      <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: 8, flexWrap: "wrap", gap: 12 }}>
+        <div>
+          <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 46, letterSpacing: 2, lineHeight: 1, margin: 0, display: "none" }}>
+            DÉFIS <span style={{ color: C.orange }}>QUOTIDIENS</span>
+          </h1>
+          <p style={{ display: "none" }} />
         </div>
         <button onClick={resetDay} style={{
           background: "none", border: `1px solid ${C.border}`, color: C.muted,
