@@ -217,27 +217,52 @@ function SectionTitle({ children }) {
 }
 
 function BallLogo({ size = 40, fontSize = 26 }) {
+  const lw = Math.max(1.5, size * 0.048);
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 10, userSelect: "none" }}>
       <style>{`
         @keyframes ballSpin3D {
-          from { transform: perspective(120px) rotateY(0deg) rotateX(8deg); }
-          to   { transform: perspective(120px) rotateY(360deg) rotateX(8deg); }
+          from { transform: rotateY(0deg); }
+          to   { transform: rotateY(360deg); }
         }
       `}</style>
-      <div style={{
-        width: size, height: size, borderRadius: "50%", overflow: "hidden", flexShrink: 0,
-        boxShadow: "0 2px 14px rgba(0,0,0,0.6), inset 0 0 8px rgba(0,0,0,0.3)",
-      }}>
-        <img
-          src="/images/ball.jpg"
-          alt="HoopIQ"
-          style={{
-            width: "100%", height: "100%", objectFit: "cover",
-            animation: "ballSpin3D 2.8s linear infinite",
-            display: "block",
-          }}
-        />
+      {/* Perspective wrapper — donne l'effet 3D */}
+      <div style={{ perspective: `${size * 5}px`, flexShrink: 0 }}>
+        <div style={{
+          position: "relative", width: size, height: size,
+          borderRadius: "50%",
+          background: `radial-gradient(circle at 36% 32%, #f8a255, #e86818, #c04510)`,
+          boxShadow: `inset -${size*.12}px -${size*.1}px ${size*.2}px rgba(0,0,0,0.4),
+                      inset ${size*.06}px ${size*.05}px ${size*.12}px rgba(255,200,120,0.2),
+                      0 2px 14px rgba(0,0,0,0.55)`,
+          overflow: "hidden",
+          animation: "ballSpin3D 2.5s linear infinite",
+        }}>
+          {/* Ligne horizontale centrale */}
+          <div style={{
+            position: "absolute", left: 0, right: 0,
+            top: `calc(50% - ${lw/2}px)`, height: lw,
+            background: "#1c0500",
+          }} />
+          {/* Couture gauche — ellipse décalée à gauche, on voit son arc droit */}
+          <div style={{
+            position: "absolute",
+            width: "82%", height: "200%",
+            left: "-18%", top: "-50%",
+            borderRadius: "50%",
+            border: `${lw}px solid #1c0500`,
+            background: "transparent",
+          }} />
+          {/* Couture droite — ellipse décalée à droite, on voit son arc gauche */}
+          <div style={{
+            position: "absolute",
+            width: "82%", height: "200%",
+            right: "-18%", top: "-50%",
+            borderRadius: "50%",
+            border: `${lw}px solid #1c0500`,
+            background: "transparent",
+          }} />
+        </div>
       </div>
       <span style={{
         fontFamily: "'Bebas Neue', cursive", fontSize,
