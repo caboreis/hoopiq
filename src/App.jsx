@@ -493,8 +493,7 @@ function AuthModal({ mode, onClose, onSuccess }) {
   const selectedPlan = PLANS.find(p => p.id === form.plan);
 
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,0.75)", backdropFilter: "blur(10px)" }}
-      onClick={(e) => e.target === e.currentTarget && onClose()}>
+    <div style={{ position: "fixed", inset: 0, zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,0.75)", backdropFilter: "blur(10px)" }}>
       <div style={{ background: C.bg2, border: `1px solid ${C.border}`, borderRadius: 22, padding: 36, width: "100%", maxWidth: 440, position: "relative", boxShadow: "0 30px 100px rgba(0,0,0,0.7)" }}>
         <button onClick={onClose} style={{ position: "absolute", top: 16, right: 16, background: "none", border: "none", color: C.muted, fontSize: 22, cursor: "pointer" }}>×</button>
 
@@ -2003,7 +2002,11 @@ const USER_STORAGE_KEY = "hoopiq_user";
 function loadStoredUser() {
   try {
     const raw = localStorage.getItem(USER_STORAGE_KEY);
-    return raw ? JSON.parse(raw) : null;
+    if (!raw) return null;
+    const u = JSON.parse(raw);
+    if (!u?.email || !u?.name || !u?._s) return null;
+    if (u._s !== btoa(`hiq:${u.email}:2025`)) return null;
+    return u;
   } catch {
     return null;
   }
@@ -2016,13 +2019,19 @@ export default function Root() {
 
   const handleAuth = (mode) => setAuthMode(mode);
   const handleSuccess = (u) => {
-    try { localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(u)); } catch { /* storage unavailable */ }
-    setUser(u); setAuthMode(null); setScreen("app");
+    const signed = { ...u, _s: btoa(`hiq:${u.email}:2025`) };
+    try { localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(signed)); } catch { /* storage unavailable */ }
+    setUser(signed); setAuthMode(null); setScreen("app");
   };
   const handleLogout = () => {
     try { localStorage.removeItem(USER_STORAGE_KEY); } catch { /* storage unavailable */ }
-    setUser(null); setScreen("landing");
+    setUser(null); setAuthMode(null); setScreen("landing");
   };
+
+  // Hard guard — si user devient null alors qu'on est dans l'app, retour à landing
+  useEffect(() => {
+    if (!user && screen === "app") setScreen("landing");
+  }, [user, screen]);
 
   return (
     <>
