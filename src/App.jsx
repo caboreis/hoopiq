@@ -765,6 +765,35 @@ function App({ user, onLogout }) {
   const [showNflTeaser, setShowNflTeaser] = useState(false);
   const [nflVideoIdx, setNflVideoIdx] = useState(0);
   const NFL_VIDEOS = ["/videos/nfl.mp4", "/videos/nfl2.mp4"];
+  const NFL_BEATS = [
+    { src: "/music/beat1.mp3", label: "AWARDING" },
+    { src: "/music/beat5.mp3", label: "TONY" },
+    { src: "/music/beat6.mp3", label: "APPEAR" },
+    { src: "/music/beat3.mp3", label: "DRILL FR" },
+    { src: "/music/beat4.mp3", label: "ARGENT" },
+    { src: "/music/beat2.mp3", label: "CLASH DRILL" },
+  ];
+  const [nflBeatIdx, setNflBeatIdx] = useState(0);
+  const [nflBeatPlaying, setNflBeatPlaying] = useState(false);
+  const nflAudioRef = useRef(null);
+
+  useEffect(() => {
+    if (showNflTeaser) {
+      setNflBeatIdx(0);
+      setNflBeatPlaying(true);
+    } else {
+      setNflBeatPlaying(false);
+      if (nflAudioRef.current) { nflAudioRef.current.pause(); nflAudioRef.current.currentTime = 0; }
+    }
+  }, [showNflTeaser]);
+
+  useEffect(() => {
+    const a = nflAudioRef.current;
+    if (!a) return;
+    a.src = NFL_BEATS[nflBeatIdx].src;
+    if (nflBeatPlaying) a.play().catch(() => {});
+    else a.pause();
+  }, [nflBeatIdx, nflBeatPlaying]);
   const [favoriteTeam, setFavoriteTeamState] = useState(() => {
     try { return JSON.parse(localStorage.getItem("hoopiq_fav_team")) || NBA_TEAMS[3]; } catch { return NBA_TEAMS[3]; }
   });
@@ -1090,6 +1119,69 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
               }}>
                 J'attends avec impatience ! 🏈
               </button>
+            </div>
+
+            {/* ── BEAT PLAYER ── */}
+            <audio
+              ref={nflAudioRef}
+              onEnded={() => setNflBeatIdx(i => (i + 1) % NFL_BEATS.length)}
+            />
+            <div style={{
+              position: "absolute", bottom: 0, left: 0, right: 0, zIndex: 2,
+              background: "linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(10,0,2,0.85) 100%)",
+              backdropFilter: "blur(12px)",
+              borderTop: "1px solid rgba(200,16,46,0.3)",
+              padding: "14px 20px",
+              display: "flex", alignItems: "center", gap: 14,
+            }}>
+              {/* Icône NFL */}
+              <div style={{ fontSize: 22, flexShrink: 0 }}>🏈</div>
+
+              {/* Beat name + barre de progression simulée */}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{
+                  fontFamily: "'Bebas Neue', cursive", fontSize: 13, letterSpacing: 2,
+                  color: "#C8102E", marginBottom: 3,
+                }}>NFL BEATS</div>
+                <div style={{
+                  fontSize: 11, fontWeight: 700, color: "#fff", letterSpacing: 1,
+                  overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                }}>{NFL_BEATS[nflBeatIdx].label}</div>
+                {/* Dots indicateur */}
+                <div style={{ display: "flex", gap: 4, marginTop: 5 }}>
+                  {NFL_BEATS.map((_, i) => (
+                    <div key={i} onClick={() => { setNflBeatIdx(i); setNflBeatPlaying(true); }} style={{
+                      width: i === nflBeatIdx ? 14 : 5, height: 4, borderRadius: 2,
+                      background: i === nflBeatIdx ? "#C8102E" : "rgba(255,255,255,0.25)",
+                      cursor: "pointer", transition: "all .3s",
+                    }} />
+                  ))}
+                </div>
+              </div>
+
+              {/* Contrôles */}
+              <div style={{ display: "flex", gap: 8, alignItems: "center", flexShrink: 0 }}>
+                <button onClick={() => setNflBeatIdx(i => (i - 1 + NFL_BEATS.length) % NFL_BEATS.length)} style={{
+                  background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)",
+                  color: "#fff", width: 34, height: 34, borderRadius: "50%",
+                  cursor: "pointer", fontSize: 13, display: "flex", alignItems: "center", justifyContent: "center",
+                }}>◀</button>
+
+                <button onClick={() => setNflBeatPlaying(p => !p)} style={{
+                  background: nflBeatPlaying ? "#C8102E" : "rgba(200,16,46,0.3)",
+                  border: `1px solid #C8102E`,
+                  color: "#fff", width: 42, height: 42, borderRadius: "50%",
+                  cursor: "pointer", fontSize: 16, display: "flex", alignItems: "center", justifyContent: "center",
+                  boxShadow: nflBeatPlaying ? "0 0 16px rgba(200,16,46,0.6)" : "none",
+                  transition: "all .2s",
+                }}>{nflBeatPlaying ? "⏸" : "▶"}</button>
+
+                <button onClick={() => setNflBeatIdx(i => (i + 1) % NFL_BEATS.length)} style={{
+                  background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)",
+                  color: "#fff", width: 34, height: 34, borderRadius: "50%",
+                  cursor: "pointer", fontSize: 13, display: "flex", alignItems: "center", justifyContent: "center",
+                }}>▶</button>
+              </div>
             </div>
           </div>
         );
