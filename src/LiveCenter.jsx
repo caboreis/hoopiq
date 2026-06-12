@@ -483,6 +483,8 @@ export default function LiveCenter() {
   const [feedTab, setFeedTab] = useState("ia"); // ia | plays
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
+  const [mobilePanel, setMobilePanel] = useState("list"); // list | detail | chat
   const [watchGame, setWatchGame] = useState(null);
   const [aiMessages, setAiMessages] = useState([
     { id: 1, text: "🏀 HoopIQ Live Center activé ! Données NBA en direct via ESPN.", time: "--:--", type: "system" },
@@ -494,6 +496,12 @@ export default function LiveCenter() {
   const seeded = useRef(false);
 
   const now = () => new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+
+  useEffect(() => {
+    const h = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", h);
+    return () => window.removeEventListener("resize", h);
+  }, []);
 
   // ---- Fetch NBA game list + poll ----
   useEffect(() => {
@@ -690,6 +698,12 @@ export default function LiveCenter() {
         @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
         @keyframes spin { to { transform: rotate(360deg); } }
         .game-card:hover { border-color: rgba(255,92,0,0.4) !important; transform: translateY(-2px); }
+        @media (max-width: 767px) {
+          .live-grid { display: flex !important; flex-direction: column !important; height: auto !important; }
+          .live-panel { height: auto !important; min-height: 0 !important; }
+          button, a { min-height: 44px; }
+          input { font-size: 16px !important; }
+        }
       `}</style>
 
       {/* Header */}
@@ -724,10 +738,23 @@ export default function LiveCenter() {
           <div style={{ fontSize: 12 }}>Reviens un soir de match pour le suivi en direct !</div>
         </div>
       ) : (
-      <div style={{ display: "grid", gridTemplateColumns: "340px 1fr 320px", gap: 0, height: "calc(100vh - 60px)" }}>
+      <>
+      {isMobile && (
+        <div style={{ display: "flex", gap: 0, borderBottom: "1px solid rgba(255,255,255,0.07)", background: C.bg2 }}>
+          {[["list","🏀 Matchs"],["detail","📊 Stats"],["chat","🤖 IA"]].map(([id, label]) => (
+            <button key={id} onClick={() => setMobilePanel(id)} style={{
+              flex: 1, padding: "12px 4px", border: "none", background: "transparent", cursor: "pointer",
+              color: mobilePanel === id ? C.orange : C.muted, fontWeight: mobilePanel === id ? 700 : 500,
+              fontSize: 12, borderBottom: mobilePanel === id ? `2px solid ${C.orange}` : "2px solid transparent",
+              fontFamily: "'DM Sans', sans-serif", minHeight: 44,
+            }}>{label}</button>
+          ))}
+        </div>
+      )}
+      <div className="live-grid" style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "340px 1fr 320px", gap: 0, height: isMobile ? "auto" : "calc(100vh - 60px)" }}>
 
         {/* LEFT — Game list */}
-        <div style={{ background: C.bg2, borderRight: `1px solid ${C.border}`, overflowY: "auto", padding: 16, display: "flex", flexDirection: "column" }}>
+        <div className="live-panel" style={{ background: C.bg2, borderRight: isMobile ? "none" : `1px solid ${C.border}`, borderBottom: isMobile ? `1px solid ${C.border}` : "none", overflowY: "auto", padding: 16, display: isMobile && mobilePanel !== "list" ? "none" : "flex", flexDirection: "column", minHeight: isMobile ? "60vh" : "auto" }}>
           {/* League toggle */}
           <div style={{ display: "flex", gap: 4, marginBottom: 14, background: "rgba(255,255,255,0.04)", padding: 3, borderRadius: 10, border: `1px solid ${C.border}` }}>
             {[
@@ -759,7 +786,7 @@ export default function LiveCenter() {
             const isSelected = selectedGame && selectedGame.id === game.id;
             const accentColor = isWnba ? C.purple : isNfl ? C.red : C.orange;
             return (
-              <div key={game.id} className="game-card" onClick={() => { setSelectedId(game.id); setSelectedLeague(isWnba ? "wnba" : isNfl ? "nfl" : "nba"); setDetail(null); }} style={{
+              <div key={game.id} className="game-card" onClick={() => { setSelectedId(game.id); setSelectedLeague(isWnba ? "wnba" : isNfl ? "nfl" : "nba"); setDetail(null); if (isMobile) setMobilePanel("detail"); }} style={{
                 background: isSelected ? (isWnba ? "rgba(192,132,252,0.07)" : isNfl ? "rgba(200,16,46,0.07)" : "rgba(255,92,0,0.07)") : C.surface,
                 border: `1px solid ${isSelected ? (isWnba ? "rgba(192,132,252,0.35)" : isNfl ? "rgba(200,16,46,0.35)" : "rgba(255,92,0,0.35)") : C.border}`,
                 borderRadius: 14, padding: "12px 14px", marginBottom: 10, cursor: "pointer", transition: "all .2s",
@@ -810,7 +837,7 @@ export default function LiveCenter() {
         </div>
 
         {/* CENTER — Match detail */}
-        <div style={{ overflowY: "auto", padding: 24 }}>
+        <div className="live-panel" style={{ overflowY: "auto", padding: isMobile ? 14 : 24, display: isMobile && mobilePanel !== "detail" ? "none" : "block", minHeight: isMobile ? "60vh" : "auto" }}>
           {selectedGame && (
             <div style={{ animation: "fadeUp .3s ease" }} key={selectedGame.id}>
               {/* Scoreboard */}
@@ -915,7 +942,7 @@ export default function LiveCenter() {
         </div>
 
         {/* RIGHT — AI feed / Play-by-play */}
-        <div style={{ background: C.bg2, borderLeft: `1px solid ${C.border}`, display: "flex", flexDirection: "column" }}>
+        <div className="live-panel" style={{ background: C.bg2, borderLeft: isMobile ? "none" : `1px solid ${C.border}`, borderTop: isMobile ? `1px solid ${C.border}` : "none", display: isMobile && mobilePanel !== "chat" ? "none" : "flex", flexDirection: "column", minHeight: isMobile ? "60vh" : "auto" }}>
           <div style={{ padding: "10px 12px", borderBottom: `1px solid ${C.border}`, display: "flex", gap: 6 }}>
             <button onClick={() => setFeedTab("ia")} style={tabBtn(feedTab === "ia")}>🤖 Fil IA</button>
             <button onClick={() => setFeedTab("plays")} style={tabBtn(feedTab === "plays")}>📋 Play-by-Play</button>
@@ -979,6 +1006,7 @@ export default function LiveCenter() {
           )}
         </div>
       </div>
+      </>
       )}
 
       <NBAMusicPlayer visible={!loading && !error && upcomingCount > 0} />

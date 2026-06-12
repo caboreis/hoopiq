@@ -167,6 +167,7 @@ export default function Jarvis() {
         @keyframes typing { 0%,100%{opacity:1} 50%{opacity:0.3} }
         .msg-in { animation: fadeUp 0.3s ease; }
         .cmd-btn:hover { background: rgba(79,163,255,0.15) !important; border-color: rgba(79,163,255,0.5) !important; }
+        @media(max-width:767px){ .jarvis-cmds{grid-template-columns:1fr 1fr !important;} .jarvis-header-title{font-size:18px !important;} button{min-height:44px;} input{font-size:16px !important;} }
       `}</style>
 
       {/* Header */}

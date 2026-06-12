@@ -741,6 +741,8 @@ function MatchesTab({ liveScores, wnbaScores, nbaLoading, nbaError, setTab }) {
 ───────────────────────────────────────── */
 function App({ user, onLogout }) {
   const [tab, setTab] = useState("dashboard");
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState(null);
   const [aiAnalysis, setAiAnalysis] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
@@ -770,6 +772,12 @@ function App({ user, onLogout }) {
   const chatEndRef = useRef(null);
   const streamIntervalRef = useRef(null);
   const plan = PLANS.find(p => p.id === user.plan) || PLANS[1];
+
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
 
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [chatHistory]);
 
@@ -981,6 +989,19 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
         .nav-sep { width: 1px; height: 20px; background: rgba(255,255,255,0.07); margin: 0 4px; align-self: center; flex-shrink: 0; }
         @keyframes nflTabPulse { 0%,100%{box-shadow:0 0 0 0 rgba(200,16,46,0.3)} 50%{box-shadow:0 0 8px 2px rgba(200,16,46,0.2)} }
         @keyframes nflModalIn { from{transform:scale(0.9) translateY(20px);opacity:0} to{transform:scale(1) translateY(0);opacity:1} }
+        @keyframes slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
+        @media (max-width: 767px) {
+          * { -webkit-tap-highlight-color: transparent; }
+          .kpi-grid { grid-template-columns: repeat(2,1fr) !important; }
+          .dash-grid { grid-template-columns: 1fr !important; }
+          .account-grid { grid-template-columns: 1fr !important; }
+          .players-grid { grid-template-columns: 1fr !important; }
+          h1 { font-size: 32px !important; }
+          h2 { font-size: 24px !important; }
+          .bebas-title { font-size: 28px !important; }
+          button, a { min-height: 44px; }
+          input, textarea { font-size: 16px !important; min-height: 44px; }
+        }
       `}</style>
 
       {/* NFL TEASER MODAL */}
@@ -1110,7 +1131,7 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
       <nav style={{
         width: 220, flexShrink: 0, position: "fixed", top: 0, left: 0, bottom: 0, zIndex: 100,
         background: "#0d0d1f", borderRight: `1px solid rgba(255,255,255,0.06)`,
-        display: "flex", flexDirection: "column", overflowY: "auto", overflowX: "hidden",
+        display: isMobile ? "none" : "flex", flexDirection: "column", overflowY: "auto", overflowX: "hidden",
       }}>
         {/* Logo */}
         <div style={{ padding: "20px 20px 16px", borderBottom: `1px solid rgba(255,255,255,0.06)` }}>
@@ -1165,9 +1186,95 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
         </div>
       </nav>
 
+      {/* MOBILE BOTTOM NAV */}
+      {isMobile && (() => {
+        const BOTTOM_TABS = [
+          { id: "dashboard", label: "Accueil", icon: "⚡" },
+          { id: "live",      label: "Live",    icon: "🔴" },
+          { id: "oracle",    label: "Oracle",  icon: "🔮" },
+          { id: "cards",     label: "Cartes",  icon: "🎴" },
+          { id: "__more__",  label: "Plus",    icon: "☰"  },
+        ];
+        return (
+          <>
+            {/* Bottom bar */}
+            <div style={{
+              position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 200,
+              background: "#0d0d1f", borderTop: "1px solid rgba(255,255,255,0.08)",
+              display: "flex", paddingBottom: "env(safe-area-inset-bottom, 0px)",
+            }}>
+              {BOTTOM_TABS.map(t => {
+                const isActive = t.id === "__more__" ? showMobileMenu : tab === t.id;
+                return (
+                  <button key={t.id} onClick={() => {
+                    if (t.id === "__more__") { setShowMobileMenu(m => !m); }
+                    else { setTab(t.id); setShowMobileMenu(false); }
+                  }} style={{
+                    flex: 1, display: "flex", flexDirection: "column", alignItems: "center",
+                    justifyContent: "center", padding: "8px 4px", border: "none",
+                    background: "transparent", cursor: "pointer", color: isActive ? C.orange : C.muted,
+                    fontSize: 10, fontWeight: isActive ? 700 : 500, gap: 3, fontFamily: "'DM Sans', sans-serif",
+                    minHeight: 56,
+                  }}>
+                    <span style={{ fontSize: 20 }}>{t.icon}</span>
+                    <span>{t.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Full menu overlay */}
+            {showMobileMenu && (
+              <div style={{
+                position: "fixed", inset: 0, zIndex: 199,
+                background: "rgba(0,0,0,0.7)", backdropFilter: "blur(6px)",
+              }} onClick={() => setShowMobileMenu(false)}>
+                <div onClick={e => e.stopPropagation()} style={{
+                  position: "absolute", bottom: 64, left: 0, right: 0,
+                  background: "#0d0d1f", borderTop: "1px solid rgba(255,255,255,0.08)",
+                  borderRadius: "20px 20px 0 0", padding: "16px 16px 8px",
+                  animation: "slideUp .25s ease",
+                  maxHeight: "70vh", overflowY: "auto",
+                }}>
+                  <div style={{ width: 36, height: 4, background: "rgba(255,255,255,0.15)", borderRadius: 2, margin: "0 auto 16px" }} />
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 }}>
+                    {TABS.filter(t => !t.sep).map(t => {
+                      const isActive = tab === t.id;
+                      return (
+                        <button key={t.id} onClick={() => { setTab(t.id); setShowMobileMenu(false); }} style={{
+                          display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+                          padding: "12px 4px", borderRadius: 12, border: "none", cursor: "pointer",
+                          background: isActive ? "rgba(255,92,0,0.15)" : "rgba(255,255,255,0.04)",
+                          color: isActive ? C.orange : C.text,
+                          fontSize: 11, fontWeight: isActive ? 700 : 400, gap: 4, fontFamily: "'DM Sans', sans-serif",
+                          minHeight: 64,
+                        }}>
+                          <span style={{ fontSize: 22 }}>{t.icon}</span>
+                          <span style={{ textAlign: "center", lineHeight: 1.2 }}>{t.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div style={{ padding: "12px 0 4px", borderTop: "1px solid rgba(255,255,255,0.06)", marginTop: 12, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <Avatar name={user.name} size={28} />
+                      <div>
+                        <div style={{ fontSize: 12, fontWeight: 700, color: C.text }}>{user.name}</div>
+                        <Badge color={plan.color} style={{ fontSize: 9 }}>{plan.icon} {plan.name}</Badge>
+                      </div>
+                    </div>
+                    <button onClick={onLogout} style={{ background: "none", border: "none", color: C.muted, cursor: "pointer", fontSize: 14, padding: 8 }}>⎋ Déco</button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </>
+        );
+      })()}
+
       {/* CONTENT */}
-      <div style={{ marginLeft: 220, flex: 1, minWidth: 0 }}>
-      <div style={{ maxWidth: 1140, margin: "0 auto", padding: "28px 24px 80px" }}>
+      <div style={{ marginLeft: isMobile ? 0 : 220, flex: 1, minWidth: 0 }}>
+      <div style={{ maxWidth: 1140, margin: "0 auto", padding: isMobile ? "16px 14px 90px" : "28px 24px 80px" }}>
 
         {/* ── DASHBOARD ── */}
         {tab === "dashboard" && (
@@ -1175,7 +1282,7 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
             <div style={{ marginBottom: 28, display: "flex", alignItems: "flex-end", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
               <div>
                 <div style={{ fontSize: 13, color: C.muted, marginBottom: 4 }}>Bienvenue, {user.name} 👋</div>
-                <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 46, letterSpacing: 2, lineHeight: 1 }}>
+                <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: isMobile ? 32 : 46, letterSpacing: 2, lineHeight: 1 }}>
                   TABLEAU DE <span style={{ background: G.orange, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>BORD</span>
                 </h1>
               </div>
@@ -1194,7 +1301,7 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
             </div>
 
             {/* KPI Row */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginBottom: 24 }}>
+            <div className="kpi-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: isMobile ? 10 : 16, marginBottom: 24 }}>
               {[
                 { label: "Matchs analysés", val: "248", icon: "📊", sub: "+12 ce mois", color: C.blue },
                 { label: "Joueurs suivis", val: "94", icon: "🏀", sub: "5 ligues actives", color: C.green },
@@ -1218,7 +1325,7 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
               ))}
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1.3fr 0.7fr", gap: 20, marginBottom: 20 }}>
+            <div className="dash-grid" style={{ display: "grid", gridTemplateColumns: "1.3fr 0.7fr", gap: 20, marginBottom: 20 }}>
               <Card>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
                   <SectionTitle style={{ margin: 0 }}>🏀 NBA · WNBA Live</SectionTitle>
@@ -1339,7 +1446,7 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
               </Card>
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 20 }}>
+            <div className="dash-grid" style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 20 }}>
               {/* Top performers */}
               <Card>
                 <SectionTitle>🏆 Top Performers IA</SectionTitle>
@@ -1575,7 +1682,7 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
                 )}
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
+              <div className="players-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
                 <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                   {filteredPlayers.length === 0 && (
                     <div style={{ textAlign: "center", padding: 40, color: C.muted, fontSize: 14 }}>
@@ -1685,7 +1792,7 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
           <div className="fade-in">
             <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 46, letterSpacing: 2, marginBottom: 6 }}>ASSISTANT <span style={{ color: C.orange }}>IA</span></h1>
             <p style={{ color: C.muted, fontSize: 14, marginBottom: 20 }}>Pose n'importe quelle question basket — powered by Claude</p>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 280px", gap: 20, alignItems: "start" }}>
+            <div className="dash-grid" style={{ display: "grid", gridTemplateColumns: "1fr 280px", gap: 20, alignItems: "start" }}>
               <div>
                 <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 18, padding: 20, height: 440, overflowY: "auto", display: "flex", flexDirection: "column", gap: 14, marginBottom: 14 }}>
                   {chatHistory.map((m, i) => (
@@ -1802,7 +1909,7 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
         {tab === "account" && (
           <div className="fade-in">
             <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 46, letterSpacing: 2, marginBottom: 24 }}>MON <span style={{ color: C.orange }}>COMPTE</span></h1>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
+            <div className="account-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
               {/* Profile */}
               <Card>
                 <SectionTitle>👤 Profil</SectionTitle>

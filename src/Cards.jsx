@@ -130,12 +130,15 @@ const NBA_TEAMS = [
 ];
 
 const LEGEND_CARDS = [
-  { id: 101, espnId: 1035, photo: "https://cdn.nba.com/headshots/nba/latest/1040x760/893.png", name: "Michael Jordan", pos: "SG", team: "Chicago Bulls", era: "1984-1998", pts: 30.1, ast: 5.3, reb: 6.2, fg: 49.7, score: 100, rarity: "gold", trait: "LE PLUS GRAND", titles: 6 },
-  { id: 102, espnId: 2334, photo: "https://cdn.nba.com/headshots/nba/latest/1040x760/77142.png", name: "Magic Johnson", pos: "PG", team: "L.A. Lakers", era: "1979-1996", pts: 19.5, ast: 11.2, reb: 7.2, fg: 52, score: 99, rarity: "gold", trait: "SHOWTIME", titles: 5 },
-  { id: 103, espnId: 2335, photo: "https://cdn.nba.com/headshots/nba/latest/1040x760/1449.png", name: "Larry Bird", pos: "SF", team: "Boston Celtics", era: "1979-1992", pts: 24.3, ast: 6.3, reb: 10.0, fg: 49.6, score: 98, rarity: "gold", trait: "THE HICK", titles: 3 },
-  { id: 104, espnId: 110, name: "Kobe Bryant", pos: "SG", team: "L.A. Lakers", era: "1996-2016", pts: 25.0, ast: 4.7, reb: 5.2, fg: 44.7, score: 98, rarity: "gold", trait: "MAMBA", titles: 5 },
-  { id: 105, espnId: 614, name: "Shaquille O'Neal", pos: "C", team: "L.A. Lakers", era: "1992-2011", pts: 23.7, ast: 2.5, reb: 10.9, fg: 58.2, score: 97, rarity: "gold", trait: "SUPERMAN", titles: 4 },
-  { id: 106, espnId: 4145, photo: "https://cdn.nba.com/headshots/nba/latest/1040x760/76003.png", name: "Kareem Abdul-Jabbar", pos: "C", team: "L.A. Lakers", era: "1969-1989", pts: 24.6, ast: 3.6, reb: 11.2, fg: 55.9, score: 99, rarity: "gold", trait: "SKYHOOK", titles: 6 },
+  { id: 101, espnId: 1035, photo: "/players/jordan.jpg",  name: "Michael Jordan",      pos: "SG", team: "Chicago Bulls",   era: "1984-1998", pts: 30.1, ast: 5.3, reb: 6.2,  fg: 49.7, score: 100, rarity: "gold", trait: "LE PLUS GRAND",        titles: 6 },
+  { id: 107, espnId: null,  photo: "/players/pippen.jpg",  name: "Scottie Pippen",      pos: "SF", team: "Chicago Bulls",   era: "1987-2004", pts: 16.1, ast: 5.2, reb: 6.4,  fg: 47.8, score: 96,  rarity: "gold", trait: "NO BULLS WITHOUT PIP", titles: 6 },
+  { id: 108, espnId: null,  photo: "/players/rodman.jpg",  name: "Dennis Rodman",       pos: "PF", team: "Chicago Bulls",   era: "1986-2000", pts: 7.3,  ast: 1.8, reb: 13.1, fg: 52.0, score: 94,  rarity: "gold", trait: "THE WORM",             titles: 5 },
+  { id: 102, espnId: 2334,  photo: "/players/magic.jpg",   name: "Magic Johnson",       pos: "PG", team: "L.A. Lakers",    era: "1979-1996", pts: 19.5, ast: 11.2,reb: 7.2,  fg: 52.0, score: 99,  rarity: "gold", trait: "SHOWTIME",             titles: 5 },
+  { id: 103, espnId: 2335,  photo: "/players/bird.jpg",    name: "Larry Bird",          pos: "SF", team: "Boston Celtics", era: "1979-1992", pts: 24.3, ast: 6.3, reb: 10.0, fg: 49.6, score: 98,  rarity: "gold", trait: "THE HICK",              titles: 3 },
+  { id: 104, espnId: 110,   photo: "/players/kobe.jpg",    name: "Kobe Bryant",         pos: "SG", team: "L.A. Lakers",    era: "1996-2016", pts: 25.0, ast: 4.7, reb: 5.2,  fg: 44.7, score: 98,  rarity: "gold", trait: "MAMBA",                titles: 5 },
+  { id: 105, espnId: 614,   photo: "/players/shaq.jpg",    name: "Shaquille O'Neal",    pos: "C",  team: "L.A. Lakers",    era: "1992-2011", pts: 23.7, ast: 2.5, reb: 10.9, fg: 58.2, score: 97,  rarity: "gold", trait: "SUPERMAN",             titles: 4 },
+  { id: 106, espnId: 4145,  photo: "/players/kareem.jpg",  name: "Kareem Abdul-Jabbar", pos: "C",  team: "L.A. Lakers",    era: "1969-1989", pts: 24.6, ast: 3.6, reb: 11.2, fg: 55.9, score: 99,  rarity: "gold", trait: "SKYHOOK",              titles: 6 },
+  { id: 109, espnId: null,  photo: "/players/duncan.jpg",  name: "Tim Duncan",          pos: "PF", team: "San Antonio",    era: "1997-2016", pts: 19.0, ast: 3.0, reb: 10.8, fg: 50.6, score: 97,  rarity: "gold", trait: "THE BIG FUNDAMENTAL",  titles: 5 },
 ];
 
 const PACKS = [
@@ -374,7 +377,7 @@ export default function Cards() {
 
   return (
     <div style={{ minHeight: "100vh", background: "#06060f", color: "#f0f0ff", fontFamily: "'DM Sans',sans-serif" }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;600;700;900&display=swap'); *{box-sizing:border-box} ::-webkit-scrollbar{width:4px} ::-webkit-scrollbar-thumb{background:#ff5c00;border-radius:4px} @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}} @keyframes ni{from{opacity:0;transform:translateX(100px)}to{opacity:1;transform:translateX(0)}} @keyframes gp{0%,100%{box-shadow:0 0 20px rgba(255,215,0,.3)}50%{box-shadow:0 0 50px rgba(255,215,0,.7)}} .team-card:hover{transform:translateY(-4px) !important;border-color:rgba(255,92,0,0.4) !important;} .pack-h:hover{transform:translateY(-8px) scale(1.02) !important;}`}</style>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;600;700;900&display=swap'); *{box-sizing:border-box} ::-webkit-scrollbar{width:4px} ::-webkit-scrollbar-thumb{background:#ff5c00;border-radius:4px} @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}} @keyframes ni{from{opacity:0;transform:translateX(100px)}to{opacity:1;transform:translateX(0)}} @keyframes gp{0%,100%{box-shadow:0 0 20px rgba(255,215,0,.3)}50%{box-shadow:0 0 50px rgba(255,215,0,.7)}} .team-card:hover{transform:translateY(-4px) !important;border-color:rgba(255,92,0,0.4) !important;} .pack-h:hover{transform:translateY(-8px) scale(1.02) !important;} @media(max-width:767px){.cards-teams-grid{grid-template-columns:1fr 1fr !important;} .cards-packs-grid{grid-template-columns:1fr !important;} .cards-header{font-size:28px !important;} button,a{min-height:44px;} input{font-size:16px !important;} .holo-legend-row{justify-content:center !important;}}`}</style>
 
       {notif && <div style={{ position: "fixed", top: 80, right: 24, zIndex: 500, background: notif.includes("OR") ? "linear-gradient(135deg,#ffd700,#ff8c00)" : "linear-gradient(135deg,#ff5c00,#ff8c42)", color: notif.includes("OR") ? "#1a0800" : "#fff", padding: "13px 22px", borderRadius: 14, fontWeight: 900, fontSize: 14, animation: "ni .4s ease", boxShadow: "0 8px 40px rgba(255,92,0,0.5)" }}>{notif}</div>}
 
@@ -456,7 +459,7 @@ export default function Cards() {
                 </div>
               </div>
             ) : (
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(200px,1fr))", gap: 14 }}>
+              <div className="cards-teams-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(200px,1fr))", gap: 14 }}>
                 {filteredTeams.map(team => (
                   <div key={team.id} className="team-card" onClick={() => setSelectedTeam(team)} style={{ background: `${team.color}10`, border: `1px solid ${team.color}30`, borderRadius: 14, padding: "16px 18px", cursor: "pointer", transition: "all .2s" }}>
                     <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 10 }}>
@@ -630,7 +633,7 @@ export default function Cards() {
           <div>
             <h1 style={{ fontFamily: "'Bebas Neue',cursive", fontSize: 40, letterSpacing: 2, marginBottom: 8 }}>OUVRIR DES <span style={{ color: "#ff5c00" }}>PACKS</span></h1>
             <p style={{ color: "#6b7280", fontSize: 13, marginBottom: 32 }}>Obtiens les stars NBA · les joueuses WNBA · et les légendes OR 🏆</p>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(260px,1fr))", gap: 20, marginBottom: 36 }}>
+            <div className="cards-packs-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(260px,1fr))", gap: 20, marginBottom: 36 }}>
               {PACKS.map(pack => (
                 <div key={pack.id} className="pack-h" onClick={() => setOpenPack(pack)} style={{ background: pack.id === "legend" ? "linear-gradient(160deg,#1a1000,#3d2800)" : `linear-gradient(160deg,rgba(0,0,0,0.9),${pack.color}20)`, border: `2px solid ${pack.color}${pack.id === "legend" ? "cc" : "50"}`, borderRadius: 20, padding: 28, textAlign: "center", cursor: "pointer", transition: "all .3s", animation: pack.id === "legend" ? "gp 3s ease-in-out infinite" : "none" }}>
                   {pack.id === "legend" && <div style={{ fontSize: 11, color: "#ffd700", fontWeight: 800, letterSpacing: 2, marginBottom: 8 }}>✦ ÉDITION LIMITÉE ✦</div>}
@@ -645,7 +648,7 @@ export default function Cards() {
             <div style={{ background: "rgba(255,215,0,0.05)", border: "1px solid rgba(255,215,0,0.2)", borderRadius: 16, padding: 20 }}>
               <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 2, color: "#ffd700", textTransform: "uppercase", marginBottom: 6, fontFamily: "monospace" }}>✦ Légendes disponibles</div>
               <p style={{ fontSize: 12, color: "#888", marginBottom: 14, marginTop: 0 }}>NBA · Les Grands du jeu</p>
-              <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 20 }}>
+              <div className="holo-legend-row" style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 20 }}>
                 {LEGEND_CARDS.map(card => (
                   <HoloCard key={card.id} card={card} size="small" onClick={() => setSelectedCard(card)} />
                 ))}
