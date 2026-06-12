@@ -821,7 +821,7 @@ function App({ user, onLogout }) {
   const [showAnalysisModal, setShowAnalysisModal] = useState(false);
   const [showNflTeaser, setShowNflTeaser] = useState(false);
   const [nflVideoIdx, setNflVideoIdx] = useState(0);
-  const NFL_VIDEOS = ["/videos/nfl.mp4", "/videos/nfl2.mp4"];
+  const NFL_VIDEOS = ["/videos/nfl.mp4", "/videos/nfl_girls.mp4", "/videos/nfl2.mp4"];
   const NFL_BEATS = [
     { src: "/music/beat1.mp3", label: "AWARDING" },
     { src: "/music/beat5.mp3", label: "TONY" },
