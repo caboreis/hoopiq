@@ -235,7 +235,7 @@ function HoopiqRadio() {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        position: "fixed", bottom: isMobile ? 80 : 20, right: 20, zIndex: 1000,
+        position: "fixed", bottom: isMobile ? 80 : 20, right: 20, zIndex: 2100,
         width: hovered ? 300 : 52, height: hovered ? 232 : 52,
         borderRadius: hovered ? 16 : "50%",
         overflow: "hidden",
@@ -1013,117 +1013,77 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
       {showNflTeaser && (() => {
         const closeTeaser = () => setShowNflTeaser(false);
         return (
-          <div onClick={closeTeaser} style={{
-            position: "fixed", inset: 0, zIndex: 2000,
-            background: "rgba(0,0,0,0.92)", backdropFilter: "blur(20px)",
-            display: "flex", alignItems: "center", justifyContent: "center", padding: 20,
+          <div style={{
+            position: "fixed", inset: 0, zIndex: 2000, overflow: "hidden",
+            display: "flex", alignItems: "center", justifyContent: "center",
           }}>
-            <div onClick={e => e.stopPropagation()} style={{
-              background: "linear-gradient(145deg, #0d0005, #06060f)",
-              border: "1px solid rgba(200,16,46,0.45)",
-              borderRadius: 24, overflow: "hidden", maxWidth: 560, width: "100%",
-              boxShadow: "0 0 100px rgba(200,16,46,0.25)",
-              animation: "nflModalIn .35s cubic-bezier(.34,1.56,.64,1)",
-            }}>
-              {/* Cinematic NFL Hero Animation */}
-              <div style={{ position: "relative", width: "100%", height: 260, background: "#000", overflow: "hidden" }}>
-                <style>{`
-                  @keyframes nflParticle { 0%{transform:translateY(0) translateX(0) scale(1);opacity:1} 100%{transform:translateY(-280px) translateX(var(--dx)) scale(0);opacity:0} }
-                  @keyframes nflShieldPulse { 0%,100%{transform:scale(1);filter:drop-shadow(0 0 20px #C8102E)} 50%{transform:scale(1.06);filter:drop-shadow(0 0 40px #FFB612)} }
-                  @keyframes nflScanline { 0%{transform:translateY(-100%)} 100%{transform:translateY(400%)} }
-                  @keyframes nflTextReveal { 0%{opacity:0;letter-spacing:20px} 100%{opacity:1;letter-spacing:6px} }
-                  @keyframes nflGlitch { 0%,94%,100%{transform:translateX(0)} 95%{transform:translateX(-4px)} 97%{transform:translateX(4px)} }
-                  @keyframes nflLineGrow { from{width:0} to{width:140px} }
-                  @keyframes nflVignette { 0%,100%{opacity:0.6} 50%{opacity:0.3} }
-                `}</style>
+            {/* Vidéo NFL plein écran */}
+            <video
+              autoPlay muted loop playsInline
+              style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
+              src="/videos/nfl.mp4"
+            />
 
-                {/* Fond dégradé animé */}
-                <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 50% 60%, #3a0008 0%, #1a0003 40%, #000 100%)" }} />
+            {/* Overlay sombre pour lisibilité */}
+            <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.55) 50%, rgba(0,0,0,0.8) 100%)" }} />
 
-                {/* Grille de terrain */}
-                <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", opacity: 0.08 }} viewBox="0 0 560 260">
-                  {[0,56,112,168,224,280,336,392,448,504,560].map(x => (
-                    <line key={x} x1={x} y1="0" x2={x} y2="260" stroke="#fff" strokeWidth="0.5"/>
-                  ))}
-                  {[0,52,104,156,208,260].map(y => (
-                    <line key={y} x1="0" y1={y} x2="560" y2={y} stroke="#fff" strokeWidth="0.5"/>
-                  ))}
-                </svg>
+            {/* Bouton fermer */}
+            <button onClick={closeTeaser} style={{
+              position: "absolute", top: 20, right: 20, zIndex: 1,
+              background: "rgba(0,0,0,0.6)", border: "1px solid rgba(255,255,255,0.2)",
+              color: "#fff", fontSize: 22, width: 44, height: 44, borderRadius: "50%",
+              cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+              backdropFilter: "blur(8px)",
+            }}>×</button>
 
-                {/* Particles 🏈 */}
-                {[...Array(14)].map((_, i) => (
-                  <div key={i} style={{
-                    position: "absolute",
-                    left: `${8 + i * 6.5}%`,
-                    bottom: `${10 + (i % 4) * 8}%`,
-                    fontSize: i % 3 === 0 ? 18 : 13,
-                    animation: `nflParticle ${2.2 + (i % 4) * 0.6}s ease-out ${i * 0.28}s infinite`,
-                    "--dx": `${(i % 2 === 0 ? 1 : -1) * (20 + i * 5)}px`,
-                    opacity: 0,
-                  }}>🏈</div>
+            {/* Texte overlay centré */}
+            <div style={{ position: "relative", zIndex: 1, textAlign: "center", padding: "0 24px", maxWidth: 560 }}>
+              <style>{`
+                @keyframes nflTextReveal { 0%{opacity:0;letter-spacing:20px} 100%{opacity:1;letter-spacing:6px} }
+                @keyframes nflLineGrow { from{width:0} to{width:120px} }
+                @keyframes nflPulse { 0%,100%{opacity:1} 50%{opacity:0.7} }
+              `}</style>
+
+              <div style={{
+                fontFamily: "'Bebas Neue', cursive", fontSize: "clamp(52px,12vw,96px)",
+                letterSpacing: 6, lineHeight: 1, color: "#fff",
+                textShadow: "0 0 40px rgba(200,16,46,0.9), 0 4px 24px rgba(0,0,0,0.8)",
+                animation: "nflTextReveal 0.9s ease both",
+              }}>NFL</div>
+
+              <div style={{
+                fontFamily: "'Bebas Neue', cursive", fontSize: "clamp(28px,6vw,48px)",
+                letterSpacing: 10, color: "#FFB612",
+                textShadow: "0 0 20px rgba(255,182,18,0.7)",
+                animation: "nflTextReveal 0.9s ease 0.2s both",
+              }}>COMING SOON</div>
+
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 12, margin: "18px 0" }}>
+                <div style={{ height: 1, background: "#C8102E", animation: "nflLineGrow 1s ease 0.5s both" }} />
+                <span style={{ fontSize: 11, fontWeight: 800, color: "rgba(255,255,255,0.7)", letterSpacing: 3, whiteSpace: "nowrap" }}>BIENTÔT SUR HOOPIQ</span>
+                <div style={{ height: 1, background: "#C8102E", animation: "nflLineGrow 1s ease 0.5s both" }} />
+              </div>
+
+              <div style={{ display: "flex", gap: 8, justifyContent: "center", marginBottom: 32, flexWrap: "wrap" }}>
+                {["Mahomes","Lamar Jackson","CeeDee Lamb","Micah Parsons"].map(tag => (
+                  <span key={tag} style={{
+                    fontSize: 12, fontWeight: 800, padding: "5px 14px", borderRadius: 20,
+                    background: "rgba(200,16,46,0.25)", border: "1px solid rgba(200,16,46,0.5)",
+                    color: "#fff", backdropFilter: "blur(6px)",
+                  }}>{tag}</span>
                 ))}
-
-                {/* Scanline cinéma */}
-                <div style={{
-                  position: "absolute", left: 0, right: 0, height: 2,
-                  background: "linear-gradient(90deg, transparent, rgba(200,16,46,0.6), transparent)",
-                  animation: "nflScanline 2.4s linear infinite",
-                }} />
-
-                {/* Bouclier central */}
-                <div style={{
-                  position: "absolute", inset: 0,
-                  display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10,
-                }}>
-                  <div style={{ fontSize: 64, animation: "nflShieldPulse 2s ease-in-out infinite" }}>🏈</div>
-                  <div style={{
-                    fontFamily: "'Bebas Neue', cursive", fontSize: 42, letterSpacing: 6, lineHeight: 1,
-                    background: "linear-gradient(135deg, #C8102E, #FFB612, #C8102E)",
-                    backgroundSize: "200%",
-                    WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
-                    animation: "nflTextReveal 1s ease both, nflGlitch 4s ease-in-out infinite",
-                  }}>NFL ZONE</div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    <div style={{ height: 1, width: 0, background: "#C8102E", animation: "nflLineGrow 1.2s ease .4s both" }} />
-                    <span style={{ fontSize: 11, fontWeight: 800, color: "#FFB612", letterSpacing: 3, textTransform: "uppercase" }}>Bientôt sur HoopIQ</span>
-                    <div style={{ height: 1, width: 0, background: "#C8102E", animation: "nflLineGrow 1.2s ease .4s both" }} />
-                  </div>
-                </div>
-
-                {/* Vignette overlay */}
-                <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 50% 50%, transparent 40%, rgba(0,0,0,0.7) 100%)", animation: "nflVignette 3s ease-in-out infinite" }} />
-                {/* Gradient bas */}
-                <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 60, background: "linear-gradient(transparent, #0d0005)" }} />
               </div>
 
-              {/* Contenu */}
-              <div style={{ padding: "24px 28px 28px", textAlign: "center" }}>
-                <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 44, letterSpacing: 3, margin: "0 0 6px",
-                  background: "linear-gradient(135deg, #C8102E, #FFB612)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-                  NFL ZONE
-                </h2>
-                <p style={{ fontSize: 14, color: "#f0f0ff", marginBottom: 6, fontWeight: 600 }}>Bientôt disponible sur HoopIQ 🔥</p>
-                <p style={{ fontSize: 12, color: "#6b6b88", lineHeight: 1.6, marginBottom: 20 }}>
-                  32 équipes · Stars · Scores ESPN live · Analyse IA
-                </p>
-                <div style={{ display: "flex", gap: 8, justifyContent: "center", marginBottom: 20, flexWrap: "wrap" }}>
-                  {["Mahomes","Lamar Jackson","CeeDee Lamb","Micah Parsons"].map(tag => (
-                    <span key={tag} style={{ fontSize: 11, fontWeight: 800, padding: "3px 10px", borderRadius: 20,
-                      background: "rgba(200,16,46,0.12)", border: "1px solid rgba(200,16,46,0.3)", color: "#ff6b6b" }}>
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-                <button onClick={closeTeaser} style={{
-                  width: "100%", padding: "13px", borderRadius: 14,
-                  background: "linear-gradient(135deg, #C8102E, #a00d23)",
-                  border: "none", color: "#fff", fontSize: 14, fontWeight: 800,
-                  cursor: "pointer", fontFamily: "inherit",
-                  boxShadow: "0 4px 24px rgba(200,16,46,0.4)",
-                }}>
-                  J'attends avec impatience ! 🏈
-                </button>
-              </div>
+              <button onClick={closeTeaser} style={{
+                padding: "14px 40px", borderRadius: 50,
+                background: "linear-gradient(135deg, #C8102E, #a00d23)",
+                border: "none", color: "#fff", fontSize: 15, fontWeight: 800,
+                cursor: "pointer", fontFamily: "inherit",
+                boxShadow: "0 4px 32px rgba(200,16,46,0.6)",
+                animation: "nflPulse 2s ease-in-out infinite",
+              }}>
+                J'attends avec impatience ! 🏈
+              </button>
             </div>
           </div>
         );
