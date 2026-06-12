@@ -761,6 +761,8 @@ function App({ user, onLogout }) {
   const [playerSearch, setPlayerSearch] = useState("");
   const [showAnalysisModal, setShowAnalysisModal] = useState(false);
   const [showNflTeaser, setShowNflTeaser] = useState(false);
+  const [nflVideoIdx, setNflVideoIdx] = useState(0);
+  const NFL_VIDEOS = ["/videos/nfl.mp4", "/videos/nfl2.mp4"];
   const [favoriteTeam, setFavoriteTeamState] = useState(() => {
     try { return JSON.parse(localStorage.getItem("hoopiq_fav_team")) || NBA_TEAMS[3]; } catch { return NBA_TEAMS[3]; }
   });
@@ -1017,11 +1019,13 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
             position: "fixed", inset: 0, zIndex: 2000, overflow: "hidden",
             display: "flex", alignItems: "center", justifyContent: "center",
           }}>
-            {/* Vidéo NFL plein écran */}
+            {/* Vidéo NFL plein écran — alterne nfl.mp4 / nfl2.mp4 */}
             <video
-              autoPlay muted loop playsInline
+              key={nflVideoIdx}
+              autoPlay muted playsInline
+              onEnded={() => setNflVideoIdx(i => (i + 1) % NFL_VIDEOS.length)}
               style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
-              src="/videos/nfl.mp4"
+              src={NFL_VIDEOS[nflVideoIdx]}
             />
 
             {/* Overlay sombre pour lisibilité */}
