@@ -30,3 +30,7 @@ dist-ssr
 .env.*.local
 .env
 .env*
+
+# Large media files — servis via Vercel CLI (vercel --prod), pas via git
+public/videos/
+public/music/
