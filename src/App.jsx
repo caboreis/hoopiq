@@ -223,13 +223,19 @@ const SPOTIFY_SRC = "https://open.spotify.com/embed/playlist/37i9dQZF1DX0XUsuxWH
 
 function HoopiqRadio() {
   const [hovered, setHovered] = useState(false);
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", handler);
+    return () => window.removeEventListener("resize", handler);
+  }, []);
 
   return (
     <div
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        position: "fixed", bottom: 20, right: 20, zIndex: 1000,
+        position: "fixed", bottom: isMobile ? 80 : 20, right: 20, zIndex: 1000,
         width: hovered ? 300 : 52, height: hovered ? 232 : 52,
         borderRadius: hovered ? 16 : "50%",
         overflow: "hidden",
