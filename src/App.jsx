@@ -275,18 +275,20 @@ function HoopiqRadio() {
 ───────────────────────────────────────── */
 // Mix extérieurs + intérieurs (parquet/tribunes) d'arénas NBA — Wikimedia
 const HERO_ARENAS = [
+  "/images/hero1.jpg",
+  "/images/hero2.jpg",
+  "/images/hero3.jpg",
+  "/images/hero4.jpg",
   "/jc-gellidon-XmYSlYrupL8-unsplash.jpg",
   "/edgar-chaparro-kB5DnieBLtM-unsplash.jpg",
   "/logan-weaver-lgnwvr-XcBPc0Q_2h8-unsplash.jpg",
   "/kylie-osullivan-BfaBLVCBTI8-unsplash.jpg",
-  "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/Crypto.com_Arena_interior_-_Lakers_2022.jpg/1280px-Crypto.com_Arena_interior_-_Lakers_2022.jpg",
-  "https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Madison_Square_Garden_court.jpg/1280px-Madison_Square_Garden_court.jpg",
 ];
 
 function Landing({ onAuth }) {
   const [arenaIdx, setArenaIdx] = useState(0);
   useEffect(() => {
-    const id = setInterval(() => setArenaIdx(i => (i + 1) % HERO_ARENAS.length), 8000);
+    const id = setInterval(() => setArenaIdx(i => (i + 1) % HERO_ARENAS.length), 5000);
     return () => clearInterval(id);
   }, []);
 
