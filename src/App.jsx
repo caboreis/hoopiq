@@ -216,6 +216,38 @@ function SectionTitle({ children }) {
   return <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 2.5, color: C.orange, textTransform: "uppercase", marginBottom: 18, fontFamily: "monospace" }}>{children}</div>;
 }
 
+function BallLogo({ size = 40, fontSize = 26 }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 10, userSelect: "none" }}>
+      <style>{`
+        @keyframes ballSpin3D {
+          from { transform: perspective(120px) rotateY(0deg) rotateX(8deg); }
+          to   { transform: perspective(120px) rotateY(360deg) rotateX(8deg); }
+        }
+      `}</style>
+      <div style={{
+        width: size, height: size, borderRadius: "50%", overflow: "hidden", flexShrink: 0,
+        boxShadow: "0 2px 14px rgba(0,0,0,0.6), inset 0 0 8px rgba(0,0,0,0.3)",
+      }}>
+        <img
+          src="/images/ball.jpg"
+          alt="HoopIQ"
+          style={{
+            width: "100%", height: "100%", objectFit: "cover",
+            animation: "ballSpin3D 2.8s linear infinite",
+            display: "block",
+          }}
+        />
+      </div>
+      <span style={{
+        fontFamily: "'Bebas Neue', cursive", fontSize,
+        background: G.orange, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+        letterSpacing: 3, lineHeight: 1,
+      }}>HOOP IQ</span>
+    </div>
+  );
+}
+
 /* ─────────────────────────────────────────
    HOOPIQ RADIO
 ───────────────────────────────────────── */
@@ -311,7 +343,7 @@ function Landing({ onAuth }) {
 
       {/* NAV */}
       <nav style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 200, padding: "0 40px", height: 66, display: "flex", alignItems: "center", justifyContent: "space-between", background: "rgba(6,6,15,0.85)", backdropFilter: "blur(24px)", borderBottom: `1px solid ${C.border}` }}>
-        <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 26, background: G.orange, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", letterSpacing: 3 }}>HOOP IQ</div>
+        <BallLogo size={36} fontSize={26} />
         <div style={{ display: "flex", gap: 8 }}>
           <Btn variant="ghost" small onClick={() => onAuth("login")}>Connexion</Btn>
           <Btn small onClick={() => onAuth("signup")} style={{ boxShadow: "0 4px 20px rgba(255,92,0,0.4)" }}>Commencer →</Btn>
@@ -1197,9 +1229,9 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
         display: isMobile ? "none" : "flex", flexDirection: "column", overflowY: "auto", overflowX: "hidden",
       }}>
         {/* Logo */}
-        <div style={{ padding: "20px 20px 16px", borderBottom: `1px solid rgba(255,255,255,0.06)` }}>
-          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 26, background: G.orange, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", letterSpacing: 3 }}>HOOP IQ</div>
-          <div style={{ fontSize: 10, color: C.muted, letterSpacing: 1, marginTop: 2 }}>Intelligence Basket IA</div>
+        <div style={{ padding: "16px 16px 14px", borderBottom: `1px solid rgba(255,255,255,0.06)` }}>
+          <BallLogo size={34} fontSize={22} />
+          <div style={{ fontSize: 10, color: C.muted, letterSpacing: 1, marginTop: 4 }}>Intelligence Basket IA</div>
         </div>
 
         {/* Nav items */}
