@@ -13,6 +13,7 @@ import Duel from "./Duel.jsx";
 import Scout from "./Scout.jsx";
 import TradeSimulator from "./TradeSimulator.jsx";
 import Calendrier from "./Calendrier.jsx";
+import PlanAssistant, { ASSISTANTS } from "./PlanAssistant.jsx";
 import { supabase, isSupabaseConfigured } from "./supabaseClient";
 /* ─────────────────────────────────────────
    DESIGN SYSTEM
@@ -1210,6 +1211,9 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
     if (isTabLocked(tab)) { setTab("dashboard"); setPaywallTab(tab); }
   }, [tab, user.plan]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Assistant IA personnel selon le plan de l'utilisateur (Rookie / Coach Pro / JARVIS Elite)
+  const myAssistant = ASSISTANTS[user.plan] || ASSISTANTS.scout;
+
   const ALL_TABS = [
     { id: "dashboard",   label: "Dashboard",  icon: "⚡" },
     { id: "live",        label: "Live",       icon: "🔴", badge: (liveScores.filter(g => g.status === "live" || g.status?.toLowerCase().includes("live")).length + wnbaLiveCount) || null },
@@ -1229,6 +1233,8 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
     { id: "vestiaire", label: "Vestiaire", icon: "💬" },
     { id: "cards",     label: "Cartes",    icon: "🎴" },
     { sep: true },
+    // Assistant client par plan (Rookie/Coach Pro/JARVIS Elite). L'admin garde son JARVIS ops à la place.
+    ...(isAdmin ? [] : [{ id: "assistant", label: myAssistant.name, icon: myAssistant.icon }]),
     { id: "chat",      label: "IA Chat",   icon: "🤖" },
     ...(isAdmin ? [{ id: "jarvis", label: "JARVIS", icon: "🦾" }] : []),
     ...(isAdmin ? [{ id: "agent", label: "Agent IA", icon: "🧠" }] : []),
@@ -2091,6 +2097,8 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
 
 
         {/* ── CHAT ── */}
+        {tab === "assistant" && <PlanAssistant plan={user.plan} />}
+
         {tab === "chat" && (
           <div className="fade-in">
             <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 46, letterSpacing: 2, marginBottom: 6 }}>ASSISTANT <span style={{ color: C.orange }}>IA</span></h1>
