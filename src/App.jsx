@@ -13,6 +13,7 @@ import Duel from "./Duel.jsx";
 import Scout from "./Scout.jsx";
 import TradeSimulator from "./TradeSimulator.jsx";
 import Calendrier from "./Calendrier.jsx";
+import { supabase, isSupabaseConfigured } from "./supabaseClient";
 /* ─────────────────────────────────────────
    DESIGN SYSTEM
 ───────────────────────────────────────── */
@@ -77,6 +78,42 @@ const PLANS = [
     locked: [],
   },
 ];
+
+const API_BASE = import.meta.env.DEV ? "http://localhost:3001" : "";
+
+// Lance un vrai paiement Stripe Checkout (redirige vers la page Stripe sécurisée)
+async function startCheckout(planId, email) {
+  const r = await fetch(`${API_BASE}/api/plans`);
+  const { plans } = await r.json();
+  const p = (plans || []).find(x => x.id === planId);
+  if (!p?.priceId) throw new Error("Paiement indisponible pour le moment — réessaie dans un instant.");
+  const res = await fetch(`${API_BASE}/api/create-checkout-session`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      priceId: p.priceId,
+      plan: planId,
+      successUrl: `${window.location.origin}/?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
+      cancelUrl: `${window.location.origin}/?checkout=cancel&plan=${encodeURIComponent(planId)}`,
+      customerEmail: email || undefined,
+    }),
+  });
+  const data = await res.json();
+  if (!data.url) throw new Error(data.error || "Erreur Stripe — réessaie.");
+  window.location.href = data.url;
+}
+
+// Hiérarchie des plans + plan minimum requis par onglet (les onglets absents = accès libre)
+const PLAN_RANK = { scout: 1, pro: 2, elite: 3 };
+const TAB_MIN_PLAN = {
+  oracle: "pro",
+  duel: "pro",
+  prematch: "pro",
+  scout: "pro",
+  trade: "pro",
+  chat: "pro",
+  agent: "pro",
+};
 
 const PLAYERS = [
   { id: 1,  name: "Caitlin Clark",     pos: "PG", team: "Indiana Fever",      pts: 19.2, ast: 8.4, reb: 5.7,  fg: 40, score: 97, trend: +5, hot: true,  league: "wnba", espnId: 4433403 },
@@ -342,7 +379,7 @@ const HERO_ARENAS = [
   "/kylie-osullivan-BfaBLVCBTI8-unsplash.jpg",
 ];
 
-function Landing({ onAuth }) {
+function Landing({ onAuth, onChoosePlan }) {
   const [arenaIdx, setArenaIdx] = useState(0);
   useEffect(() => {
     const id = setInterval(() => setArenaIdx(i => (i + 1) % HERO_ARENAS.length), 5000);
@@ -469,7 +506,7 @@ function Landing({ onAuth }) {
               border: `1px solid ${plan.popular ? "rgba(255,92,0,0.4)" : C.border}`,
               borderRadius: 20, padding: 28, transition: "all .3s", cursor: "pointer", position: "relative",
               boxShadow: plan.popular ? `0 0 50px rgba(255,92,0,0.12)` : "none",
-            }} onClick={() => onAuth("signup")}>
+            }} onClick={() => onChoosePlan(plan.id)}>
               {plan.popular && <div style={{ position: "absolute", top: -14, left: "50%", transform: "translateX(-50%)", background: G.orange, color: "#fff", fontSize: 11, fontWeight: 800, padding: "4px 16px", borderRadius: 20, letterSpacing: 1.5, whiteSpace: "nowrap" }}>⚡ PLUS POPULAIRE</div>}
               <div style={{ fontSize: 40, marginBottom: 12 }}>{plan.icon}</div>
               <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 28, letterSpacing: 2, color: plan.color }}>{plan.name}</div>
@@ -510,10 +547,58 @@ function Landing({ onAuth }) {
 /* ─────────────────────────────────────────
    AUTH MODAL
 ───────────────────────────────────────── */
-function AuthModal({ mode, onClose, onSuccess }) {
+/* Paywall — s'affiche quand un onglet nécessite un plan supérieur */
+function PaywallModal({ tabId, user, onClose }) {
+  const needed = TAB_MIN_PLAN[tabId] || "pro";
+  const [busy, setBusy] = useState(null);
+  const [err, setErr] = useState(null);
+  const candidates = PLANS.filter(p => PLAN_RANK[p.id] >= PLAN_RANK[needed]);
+  const pay = async (planId) => {
+    setBusy(planId); setErr(null);
+    try { await startCheckout(planId, user.email); }
+    catch (e) { setErr(e.message); setBusy(null); }
+  };
+  return (
+    <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 3500, background: "rgba(0,0,0,0.78)", backdropFilter: "blur(10px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
+      <div onClick={e => e.stopPropagation()} style={{ background: C.bg2, border: `1px solid ${C.border}`, borderRadius: 22, padding: 32, maxWidth: 420, width: "100%", position: "relative", boxShadow: "0 30px 100px rgba(0,0,0,0.7)" }}>
+        <button onClick={onClose} style={{ position: "absolute", top: 14, right: 16, background: "none", border: "none", color: C.muted, fontSize: 22, cursor: "pointer" }}>×</button>
+        <div style={{ fontSize: 44, textAlign: "center", marginBottom: 8 }}>🔒</div>
+        <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 30, letterSpacing: 1, textAlign: "center", marginBottom: 8 }}>
+          FONCTIONNALITÉ <span style={{ color: C.orange }}>{needed.toUpperCase()}</span>
+        </h2>
+        <p style={{ color: C.muted, fontSize: 13, textAlign: "center", marginBottom: 22, fontFamily: "'DM Sans', sans-serif", lineHeight: 1.5 }}>
+          Cette section est réservée au plan {needed === "pro" ? "Pro et au-delà" : "Elite"}.<br />
+          Débloque-la en quelques secondes — paiement sécurisé Stripe.
+        </p>
+        {err && <div style={{ color: C.red, fontSize: 13, textAlign: "center", marginBottom: 12 }}>{err}</div>}
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {candidates.map(p => (
+            <button key={p.id} onClick={() => pay(p.id)} disabled={!!busy} style={{
+              display: "flex", alignItems: "center", justifyContent: "space-between",
+              padding: "14px 18px", borderRadius: 12, cursor: busy ? "wait" : "pointer",
+              border: `1px solid ${p.color}55`, background: `${p.color}11`,
+              color: C.text, fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 700,
+              opacity: busy && busy !== p.id ? 0.5 : 1, transition: "all .2s",
+            }}>
+              <span>{p.icon} {p.name}{p.popular ? " · ⚡ populaire" : ""}</span>
+              <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 20, color: p.color }}>
+                {busy === p.id ? "⏳" : `${p.price}€/m`}
+              </span>
+            </button>
+          ))}
+        </div>
+        <div style={{ textAlign: "center", marginTop: 14, fontSize: 11, color: C.muted, fontFamily: "'DM Sans', sans-serif" }}>
+          🔒 Paiement sécurisé Stripe · Annulation à tout moment
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AuthModal({ mode, onClose, onSuccess, initialPlan }) {
   const [m, setM] = useState(mode);
-  const [step, setStep] = useState(m === "signup" ? 1 : 0); // 0=login, 1=info, 2=plan, 3=payment
-  const [form, setForm] = useState({ name: "", email: "", password: "", plan: "pro" });
+  const [step, setStep] = useState(m === "signup" ? 1 : 0); // 0=login, 1=info, 2=plan, 3=recap, 4=email à confirmer
+  const [form, setForm] = useState({ name: "", email: "", password: "", plan: initialPlan || "pro" });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
 
@@ -536,17 +621,57 @@ function AuthModal({ mode, onClose, onSuccess }) {
       onSuccess({ name: "Jorge", email: "admin@hoopiq.com", plan: "elite" });
       return;
     }
-    setLoading(true);
-    await new Promise(r => setTimeout(r, 900));
+    if (!isSupabaseConfigured) { setErrors({ general: "Connexion indisponible — réessaie plus tard." }); return; }
+    setLoading(true); setErrors({});
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: form.email.trim(),
+      password: form.password,
+    });
     setLoading(false);
-    onSuccess({ name: form.email.split("@")[0], email: form.email, plan: "pro" });
+    if (error) {
+      setErrors({
+        general: /confirm/i.test(error.message)
+          ? "Confirme d'abord ton email — regarde ta boîte mail 📬"
+          : "Email ou mot de passe incorrect.",
+      });
+      return;
+    }
+    const u = data.user;
+    onSuccess({
+      name: u.user_metadata?.name || u.email.split("@")[0],
+      email: u.email,
+      plan: u.user_metadata?.plan || "scout",
+    });
   };
 
-  const handleSignup = async () => {
-    setLoading(true);
-    await new Promise(r => setTimeout(r, 1200));
+  const handleSignup = async (goToCheckout = false) => {
+    const email = form.email.trim();
+    if (!email || !form.password) { setErrors({ general: "Email et mot de passe requis." }); setStep(1); return; }
+    if (form.password.length < 6) { setErrors({ general: "Mot de passe : 6 caractères minimum." }); setStep(1); return; }
+    if (!isSupabaseConfigured) { setErrors({ general: "Inscription indisponible — réessaie plus tard." }); return; }
+    setLoading(true); setErrors({});
+    const name = form.name || email.split("@")[0];
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password: form.password,
+      options: { data: { name, plan: form.plan } },
+    });
+    if (error) {
+      setLoading(false);
+      setErrors({
+        general: /already|registered/i.test(error.message)
+          ? "Un compte existe déjà avec cet email — connecte-toi !"
+          : error.message,
+      });
+      return;
+    }
+    if (goToCheckout) {
+      try { await startCheckout(form.plan, email); return; } // redirige vers Stripe
+      catch (e) { setErrors({ general: e.message }); }
+    }
     setLoading(false);
-    onSuccess({ name: form.name || form.email.split("@")[0], email: form.email, plan: form.plan });
+    if (!data.session) { setStep(4); return; } // confirmation email requise
+    onSuccess({ name, email, plan: form.plan });
   };
 
   const selectedPlan = PLANS.find(p => p.id === form.plan);
@@ -585,7 +710,8 @@ function AuthModal({ mode, onClose, onSuccess }) {
               <input style={inputStyle} placeholder="Prénom ou pseudo" {...field("name")} />
               <input style={inputStyle} placeholder="Email" type="email" {...field("email")} />
               <input style={inputStyle} placeholder="Mot de passe" type="password" {...field("password")} />
-              <Btn full onClick={() => setStep(2)}>Suivant : Choix du plan →</Btn>
+              {errors.general && <div style={{ color: C.red, fontSize: 13 }}>{errors.general}</div>}
+              <Btn full onClick={() => { setErrors({}); setStep(2); }}>Suivant : Choix du plan →</Btn>
             </div>
             <div style={{ textAlign: "center", marginTop: 20, fontSize: 13, color: C.muted, fontFamily: "'DM Sans', sans-serif" }}>
               Déjà membre ?{" "}
@@ -623,29 +749,44 @@ function AuthModal({ mode, onClose, onSuccess }) {
           </div>
         )}
 
-        {/* SIGNUP STEP 3 — PAYMENT (simulated) */}
+        {/* SIGNUP STEP 3 — RECAP + vrai paiement Stripe */}
         {m === "signup" && step === 3 && (
           <div>
-            <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 34, letterSpacing: 1, marginBottom: 6 }}>Paiement</h2>
-            <div style={{ background: `${selectedPlan.color}11`, border: `1px solid ${selectedPlan.color}33`, borderRadius: 10, padding: "10px 14px", marginBottom: 20, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13 }}>{selectedPlan.icon} Plan {selectedPlan.name} · 14j gratuit</span>
+            <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 34, letterSpacing: 1, marginBottom: 6 }}>C'est presque bon !</h2>
+            <div style={{ background: `${selectedPlan.color}11`, border: `1px solid ${selectedPlan.color}33`, borderRadius: 10, padding: "10px 14px", marginBottom: 16, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13 }}>{selectedPlan.icon} Plan {selectedPlan.name} · 14j gratuits</span>
               <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 20, color: selectedPlan.color }}>{selectedPlan.price}€/mois</span>
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              <input style={inputStyle} placeholder="Numéro de carte  •••• •••• •••• ••••" />
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                <input style={inputStyle} placeholder="MM / AA" />
-                <input style={inputStyle} placeholder="CVC" />
-              </div>
-              <input style={inputStyle} placeholder="Nom sur la carte" />
-              <Btn full onClick={handleSignup} disabled={loading} style={{ marginTop: 4 }}>
-                {loading ? "⏳ Traitement..." : `Démarrer l'essai gratuit →`}
+            <p style={{ color: C.muted, fontSize: 13, marginBottom: 18, fontFamily: "'DM Sans', sans-serif", lineHeight: 1.5 }}>
+              Démarre gratuitement sans carte bancaire, ou active ton abonnement tout de suite — paiement 100% sécurisé via Stripe.
+            </p>
+            {errors.general && <div style={{ color: C.red, fontSize: 13, marginBottom: 12 }}>{errors.general}</div>}
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <Btn full onClick={() => handleSignup(false)} disabled={loading}>
+                {loading ? "⏳ Création du compte..." : "Démarrer l'essai gratuit →"}
+              </Btn>
+              <Btn variant="gold" full onClick={() => handleSignup(true)} disabled={loading}>
+                💳 S'abonner maintenant via Stripe
               </Btn>
             </div>
             <div style={{ textAlign: "center", marginTop: 14, fontSize: 11, color: C.muted, fontFamily: "'DM Sans', sans-serif" }}>
-              🔒 Paiement sécurisé · Annulation à tout moment · Aucun débit pendant 14 jours
+              🔒 Paiement sécurisé Stripe · Annulation à tout moment
             </div>
             <Btn variant="ghost" full onClick={() => setStep(2)} style={{ marginTop: 10 }}>← Retour</Btn>
+          </div>
+        )}
+
+        {/* SIGNUP STEP 4 — confirmation email requise */}
+        {m === "signup" && step === 4 && (
+          <div style={{ textAlign: "center" }}>
+            <div style={{ fontSize: 52, marginBottom: 12 }}>📬</div>
+            <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 34, letterSpacing: 1, marginBottom: 10 }}>Confirme ton email</h2>
+            <p style={{ color: C.muted, fontSize: 14, marginBottom: 24, fontFamily: "'DM Sans', sans-serif", lineHeight: 1.6 }}>
+              On t'a envoyé un lien de confirmation à<br />
+              <b style={{ color: C.orange }}>{form.email}</b><br />
+              Clique dessus, puis connecte-toi.
+            </p>
+            <Btn full onClick={() => { setM("login"); setStep(0); setErrors({}); }}>J'ai confirmé — Se connecter →</Btn>
           </div>
         )}
       </div>
@@ -1036,6 +1177,15 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
 
   const isAdmin = user.email === "admin@hoopiq.com";
 
+  // Gating par plan — un onglet verrouillé ouvre le paywall au lieu de changer d'onglet
+  const [paywallTab, setPaywallTab] = useState(null);
+  const planRank = PLAN_RANK[user.plan] || 1;
+  const isTabLocked = (id) => !isAdmin && (PLAN_RANK[TAB_MIN_PLAN[id]] || 0) > planRank;
+  const openTab = (id) => { if (isTabLocked(id)) setPaywallTab(id); else setTab(id); };
+  useEffect(() => {
+    if (isTabLocked(tab)) { setTab("dashboard"); setPaywallTab(tab); }
+  }, [tab, user.plan]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const ALL_TABS = [
     { id: "dashboard",   label: "Dashboard",  icon: "⚡" },
     { id: "live",        label: "Live",       icon: "🔴", badge: (liveScores.filter(g => g.status === "live" || g.status?.toLowerCase().includes("live")).length + wnbaLiveCount) || null },
@@ -1277,7 +1427,7 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
               <span style={{ fontSize: 8, fontWeight: 900, background: "#C8102E", color: "#fff", padding: "2px 5px", borderRadius: 5, letterSpacing: 0.5 }}>SOON</span>
             </button>
           ) : (
-            <button key={t.id} className="nav-tab" onClick={() => setTab(t.id)} style={{
+            <button key={t.id} className="nav-tab" onClick={() => openTab(t.id)} style={{
               position: "relative", width: "100%", padding: "9px 12px", borderRadius: 10, border: "none",
               cursor: "pointer", display: "flex", alignItems: "center", gap: 10, marginBottom: 2,
               background: tab === t.id ? "rgba(255,92,0,0.13)" : "transparent",
@@ -1285,10 +1435,12 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
               fontWeight: tab === t.id ? 700 : 500,
               fontSize: 13, transition: "all .2s", fontFamily: "'DM Sans', sans-serif", textAlign: "left",
               borderLeft: tab === t.id ? `3px solid ${C.orange}` : "3px solid transparent",
+              opacity: isTabLocked(t.id) ? 0.55 : 1,
             }}>
               <span style={{ fontSize: 16, flexShrink: 0 }}>{t.icon}</span>
               <span style={{ flex: 1 }}>{t.label}</span>
-              {t.badge > 0 && (
+              {isTabLocked(t.id) && <span style={{ fontSize: 11, flexShrink: 0 }}>🔒</span>}
+              {!isTabLocked(t.id) && t.badge > 0 && (
                 <span style={{ width: 18, height: 18, borderRadius: "50%", background: C.red, color: "#fff", fontSize: 9, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center", lineHeight: 1, animation: "glow-pulse 2s infinite", flexShrink: 0 }}>{t.badge}</span>
               )}
             </button>
@@ -1328,7 +1480,7 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
                 return (
                   <button key={t.id} onClick={() => {
                     if (t.id === "__more__") { setShowMobileMenu(m => !m); }
-                    else { setTab(t.id); setShowMobileMenu(false); }
+                    else { openTab(t.id); setShowMobileMenu(false); }
                   }} style={{
                     flex: 1, display: "flex", flexDirection: "column", alignItems: "center",
                     justifyContent: "center", padding: "8px 4px", border: "none",
@@ -1361,16 +1513,16 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
                     {TABS.filter(t => !t.sep).map(t => {
                       const isActive = tab === t.id;
                       return (
-                        <button key={t.id} onClick={() => { setTab(t.id); setShowMobileMenu(false); }} style={{
+                        <button key={t.id} onClick={() => { openTab(t.id); setShowMobileMenu(false); }} style={{
                           display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
                           padding: "12px 4px", borderRadius: 12, border: "none", cursor: "pointer",
                           background: isActive ? "rgba(255,92,0,0.15)" : "rgba(255,255,255,0.04)",
                           color: isActive ? C.orange : C.text,
                           fontSize: 11, fontWeight: isActive ? 700 : 400, gap: 4, fontFamily: "'DM Sans', sans-serif",
-                          minHeight: 64,
+                          minHeight: 64, opacity: isTabLocked(t.id) ? 0.55 : 1, position: "relative",
                         }}>
                           <span style={{ fontSize: 22 }}>{t.icon}</span>
-                          <span style={{ textAlign: "center", lineHeight: 1.2 }}>{t.label}</span>
+                          <span style={{ textAlign: "center", lineHeight: 1.2 }}>{t.label}{isTabLocked(t.id) ? " 🔒" : ""}</span>
                         </button>
                       );
                     })}
@@ -2105,6 +2257,7 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
       </div>{/* /flex layout */}
 
       <HoopiqRadio />
+      {paywallTab && <PaywallModal tabId={paywallTab} user={user} onClose={() => setPaywallTab(null)} />}
     </div>
   );
 }
@@ -2121,27 +2274,181 @@ function loadStoredUser() {
     const u = JSON.parse(raw);
     if (!u?.email || !u?.name || !u?._s) return null;
     if (u._s !== btoa(`hiq:${u.email}:2025`)) return null;
+    // v2 = compte réel Supabase (ou accès admin) — les anciennes sessions simulées sont invalidées
+    if (u._v !== 2 && u.email !== "admin@hoopiq.com") return null;
     return u;
   } catch {
     return null;
   }
 }
 
+const PENDING_PLAN_KEY = "hoopiq_pending_plan";
+
+/* Page plein écran de retour Stripe — succès ou annulation */
+function CheckoutResultPage({ result, onClose, onRetry }) {
+  const ok = result.type === "success";
+  const plan = PLANS.find(p => p.id === result.plan);
+  return (
+    <div style={{ position: "fixed", inset: 0, zIndex: 4000, background: "rgba(4,4,12,0.96)", backdropFilter: "blur(14px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
+      <div style={{ textAlign: "center", maxWidth: 460, width: "100%", background: C.bg2, border: `1px solid ${ok ? "rgba(34,197,94,0.35)" : C.border}`, borderRadius: 24, padding: "48px 36px", boxShadow: ok ? "0 0 80px rgba(34,197,94,0.15)" : "0 30px 100px rgba(0,0,0,0.7)" }}>
+        <div style={{ fontSize: 64, marginBottom: 16 }}>{ok ? "🎉" : "😕"}</div>
+        <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 42, letterSpacing: 2, marginBottom: 10, color: ok ? C.green : C.text }}>
+          {ok ? "PAIEMENT CONFIRMÉ" : "PAIEMENT ANNULÉ"}
+        </h1>
+        {ok ? (
+          <>
+            {plan && (
+              <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: `${plan.color}15`, border: `1px solid ${plan.color}44`, borderRadius: 30, padding: "8px 20px", marginBottom: 18 }}>
+                <span style={{ fontSize: 20 }}>{plan.icon}</span>
+                <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 20, letterSpacing: 1, color: plan.color }}>PLAN {plan.name.toUpperCase()} ACTIVÉ</span>
+              </div>
+            )}
+            <p style={{ color: C.muted, fontSize: 14, marginBottom: 28, fontFamily: "'DM Sans', sans-serif", lineHeight: 1.6 }}>
+              Ton abonnement est actif. Un reçu t'a été envoyé par email.<br />Bienvenue dans le game 🏀
+            </p>
+            <Btn full onClick={onClose}>C'est parti →</Btn>
+          </>
+        ) : (
+          <>
+            <p style={{ color: C.muted, fontSize: 14, marginBottom: 28, fontFamily: "'DM Sans', sans-serif", lineHeight: 1.6 }}>
+              Aucun débit n'a été effectué.<br />Ton compte reste actif, tu peux réessayer quand tu veux.
+            </p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {result.plan && <Btn full onClick={onRetry}>💳 Réessayer le paiement →</Btn>}
+              <Btn variant="ghost" full onClick={onClose}>Continuer sans abonnement</Btn>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function Root() {
   const [user, setUser] = useState(loadStoredUser);
   const [screen, setScreen] = useState(user ? "app" : "landing"); // landing | app
   const [authMode, setAuthMode] = useState(null);  // login | signup | null
+  const [planPick, setPlanPick] = useState(null);  // plan présélectionné depuis la landing
+  const [notice, setNotice] = useState(null);      // bannière info/succès
+  const [checkoutResult, setCheckoutResult] = useState(null); // page succès/échec après Stripe
 
   const handleAuth = (mode) => setAuthMode(mode);
   const handleSuccess = (u) => {
-    const signed = { ...u, _s: btoa(`hiq:${u.email}:2025`) };
+    let plan = u.plan;
+    // Un paiement Stripe effectué avant la connexion ? On applique le plan en attente.
+    try {
+      const pending = JSON.parse(localStorage.getItem(PENDING_PLAN_KEY) || "null");
+      if (pending?.email === u.email && pending.plan) {
+        plan = pending.plan;
+        localStorage.removeItem(PENDING_PLAN_KEY);
+        if (isSupabaseConfigured) supabase.auth.updateUser({ data: { plan } }).catch(() => {});
+      }
+    } catch { /* ignore */ }
+    const signed = { ...u, plan, _v: 2, _s: btoa(`hiq:${u.email}:2025`) };
     try { localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(signed)); } catch { /* storage unavailable */ }
     setUser(signed); setAuthMode(null); setScreen("app");
   };
   const handleLogout = () => {
     try { localStorage.removeItem(USER_STORAGE_KEY); } catch { /* storage unavailable */ }
+    if (isSupabaseConfigured) supabase.auth.signOut().catch(() => {});
     setUser(null); setAuthMode(null); setScreen("landing");
   };
+
+  // Choix d'un plan depuis la landing : connecté → Stripe direct, sinon inscription
+  const handleChoosePlan = (planId) => {
+    if (user) {
+      startCheckout(planId, user.email).catch(e => setNotice({ type: "info", text: e.message }));
+    } else {
+      setPlanPick(planId);
+      setAuthMode("signup");
+    }
+  };
+
+  // Session Supabase = source de vérité (restaure la session au chargement + login auto après confirmation email)
+  useEffect(() => {
+    if (!isSupabaseConfigured) return;
+    const sync = (sUser) => {
+      if (!sUser?.email) return;
+      handleSuccess({
+        name: sUser.user_metadata?.name || sUser.email.split("@")[0],
+        email: sUser.email,
+        plan: sUser.user_metadata?.plan || "scout",
+      });
+    };
+    supabase.auth.getSession().then(({ data }) => sync(data?.session?.user));
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) sync(session.user);
+    });
+    return () => sub?.subscription?.unsubscribe?.();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Retour de Stripe Checkout — vérifie le paiement côté serveur et active le plan
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const status = params.get("checkout");
+    if (!status) return;
+    const sessionId = params.get("session_id");
+    const cancelPlan = params.get("plan");
+    window.history.replaceState({}, "", window.location.pathname);
+    if (status === "cancel") {
+      setCheckoutResult({ type: "cancel", plan: cancelPlan || null });
+      return;
+    }
+    if (status !== "success" || !sessionId) return;
+    (async () => {
+      try {
+        const r = await fetch(`${API_BASE}/api/checkout/verify?session_id=${encodeURIComponent(sessionId)}`);
+        const d = await r.json();
+        if (d.paid && d.plan) {
+          setUser(prev => {
+            if (!prev) {
+              // Pas encore connecté (ex: email à confirmer) — le plan sera appliqué au prochain login
+              if (d.email) {
+                try { localStorage.setItem(PENDING_PLAN_KEY, JSON.stringify({ email: d.email, plan: d.plan })); } catch { /* ignore */ }
+              }
+              return prev;
+            }
+            const upd = { ...prev, plan: d.plan, planPaid: true };
+            try { localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(upd)); } catch { /* ignore */ }
+            return upd;
+          });
+          if (isSupabaseConfigured) supabase.auth.updateUser({ data: { plan: d.plan } }).catch(() => {});
+          setCheckoutResult({ type: "success", plan: d.plan });
+        } else {
+          setNotice({ type: "info", text: "Paiement en cours de validation — réessaie dans un instant." });
+        }
+      } catch {
+        setNotice({ type: "info", text: "Impossible de vérifier le paiement — contacte le support." });
+      }
+    })();
+  }, []);
+
+  // Plan payé vérifié depuis Supabase (table subscriptions) — prime sur le plan choisi à l'inscription
+  useEffect(() => {
+    if (!user?.email || user.email === "admin@hoopiq.com") return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const r = await fetch(`${API_BASE}/api/subscription?email=${encodeURIComponent(user.email)}`);
+        const d = await r.json();
+        if (cancelled || !d?.plan || d.status !== "active") return;
+        setUser(prev => {
+          if (!prev || (prev.plan === d.plan && prev.planPaid)) return prev;
+          const upd = { ...prev, plan: d.plan, planPaid: true };
+          try { localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(upd)); } catch { /* ignore */ }
+          return upd;
+        });
+      } catch { /* hors-ligne — on garde le plan local */ }
+    })();
+    return () => { cancelled = true; };
+  }, [user?.email]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // La bannière disparaît toute seule
+  useEffect(() => {
+    if (!notice) return;
+    const t = setTimeout(() => setNotice(null), 7000);
+    return () => clearTimeout(t);
+  }, [notice]);
 
   // Hard guard — si user devient null alors qu'on est dans l'app, retour à landing
   useEffect(() => {
@@ -2150,9 +2457,36 @@ export default function Root() {
 
   return (
     <>
-      {screen === "landing" && <Landing onAuth={handleAuth} />}
+      {screen === "landing" && <Landing onAuth={handleAuth} onChoosePlan={handleChoosePlan} />}
       {screen === "app" && user && <App user={user} onLogout={handleLogout} />}
-      {authMode && <AuthModal mode={authMode} onClose={() => setAuthMode(null)} onSuccess={handleSuccess} />}
+      {authMode && <AuthModal mode={authMode} onClose={() => { setAuthMode(null); setPlanPick(null); }} onSuccess={handleSuccess} initialPlan={planPick} />}
+      {checkoutResult && (
+        <CheckoutResultPage
+          result={checkoutResult}
+          onClose={() => {
+            setCheckoutResult(null);
+            // Paiement réussi mais pas connecté (email à confirmer) → on l'amène au login
+            if (checkoutResult.type === "success" && !user) setAuthMode("login");
+          }}
+          onRetry={() => {
+            const planId = checkoutResult.plan;
+            setCheckoutResult(null);
+            startCheckout(planId, user?.email).catch(e => setNotice({ type: "info", text: e.message }));
+          }}
+        />
+      )}
+      {notice && (
+        <div style={{
+          position: "fixed", top: 16, left: "50%", transform: "translateX(-50%)", zIndex: 3000,
+          background: notice.type === "success" ? "rgba(18,110,55,0.96)" : "rgba(35,35,55,0.96)",
+          color: "#fff", padding: "12px 22px", borderRadius: 12, fontSize: 14,
+          fontFamily: "'DM Sans', sans-serif", boxShadow: "0 10px 40px rgba(0,0,0,0.5)",
+          display: "flex", alignItems: "center", gap: 14, maxWidth: "90vw",
+        }}>
+          {notice.text}
+          <span onClick={() => setNotice(null)} style={{ cursor: "pointer", opacity: 0.7, fontSize: 18 }}>×</span>
+        </div>
+      )}
     </>
   );
 }
