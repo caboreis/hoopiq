@@ -640,6 +640,7 @@ function AuthModal({ mode, onClose, onSuccess, initialPlan }) {
       name: u.user_metadata?.name || u.email.split("@")[0],
       email: u.email,
       plan: u.user_metadata?.plan || "scout",
+      createdAt: u.created_at,
     });
   };
 
@@ -670,7 +671,7 @@ function AuthModal({ mode, onClose, onSuccess, initialPlan }) {
     }
     setLoading(false);
     if (!data.session) { setStep(4); return; } // confirmation email requise
-    onSuccess({ name, email, plan: form.plan });
+    onSuccess({ name, email, plan: form.plan, createdAt: data.user?.created_at });
   };
 
   const selectedPlan = PLANS.find(p => p.id === form.plan);
@@ -2256,6 +2257,17 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
       </div>{/* /flex layout */}
 
       <HoopiqRadio />
+      {user.trialExpired && (
+        <div onClick={() => setPaywallTab("oracle")} style={{
+          position: "fixed", top: 12, left: "50%", transform: "translateX(-50%)", zIndex: 1500,
+          background: "linear-gradient(90deg, rgba(255,92,0,0.95), rgba(255,140,66,0.95))",
+          color: "#fff", padding: "10px 20px", borderRadius: 30, fontSize: 13, fontWeight: 700,
+          fontFamily: "'DM Sans', sans-serif", cursor: "pointer", whiteSpace: "nowrap",
+          boxShadow: "0 8px 30px rgba(255,92,0,0.35)", maxWidth: "92vw", overflow: "hidden", textOverflow: "ellipsis",
+        }}>
+          ⏰ Essai gratuit terminé — passe au niveau supérieur 🚀
+        </div>
+      )}
       {paywallTab && <PaywallModal tabId={paywallTab} user={user} onClose={() => setPaywallTab(null)} />}
     </div>
   );
@@ -2372,6 +2384,7 @@ export default function Root() {
         name: sUser.user_metadata?.name || sUser.email.split("@")[0],
         email: sUser.email,
         plan: sUser.user_metadata?.plan || "scout",
+        createdAt: sUser.created_at,
       });
     };
     supabase.auth.getSession().then(({ data }) => sync(data?.session?.user));
@@ -2454,10 +2467,22 @@ export default function Root() {
     if (!user && screen === "app") setScreen("landing");
   }, [user, screen]);
 
+  // Essai gratuit 14 jours : sans abonnement payé, retour au plan Scout après expiration.
+  // Admin et abonnés payants (planPaid) ne sont jamais rétrogradés.
+  const TRIAL_MS = 14 * 24 * 60 * 60 * 1000;
+  let appUser = user;
+  if (
+    user && user.email !== "admin@hoopiq.com" && !user.planPaid &&
+    user.createdAt && (PLAN_RANK[user.plan] || 1) > 1 &&
+    Date.now() - new Date(user.createdAt).getTime() > TRIAL_MS
+  ) {
+    appUser = { ...user, plan: "scout", trialExpired: true };
+  }
+
   return (
     <>
       {screen === "landing" && <Landing onAuth={handleAuth} onChoosePlan={handleChoosePlan} />}
-      {screen === "app" && user && <App user={user} onLogout={handleLogout} />}
+      {screen === "app" && user && <App user={appUser} onLogout={handleLogout} />}
       {authMode && <AuthModal mode={authMode} onClose={() => { setAuthMode(null); setPlanPick(null); }} onSuccess={handleSuccess} initialPlan={planPick} />}
       {checkoutResult && (
         <CheckoutResultPage
