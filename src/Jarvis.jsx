@@ -170,8 +170,24 @@ export default function Jarvis() {
         @media(max-width:767px){ .jarvis-cmds{grid-template-columns:1fr 1fr !important;} .jarvis-header-title{font-size:18px !important;} button{min-height:44px;} input{font-size:16px !important;} }
       `}</style>
 
+      {/* Fond filigrane — le trio légendaire des Bulls (Jordan · Pippen · Rodman) */}
+      <div style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none", display: "flex", overflow: "hidden" }}>
+        {["jordan", "pippen", "rodman"].map((p) => (
+          <div key={p} style={{
+            flex: 1,
+            backgroundImage: `url(/images/${p}.jpg)`,
+            backgroundSize: "cover",
+            backgroundPosition: "center top",
+            opacity: 0.13,
+            filter: "grayscale(0.4) contrast(1.05)",
+          }} />
+        ))}
+        {/* Voile bleu sombre pour garder le texte lisible */}
+        <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at center, rgba(3,8,15,0.55), rgba(3,8,15,0.9))" }} />
+      </div>
+
       {/* Header */}
-      <div style={{ background: "rgba(3,8,15,0.98)", borderBottom: "1px solid rgba(79,163,255,0.15)", padding: "12px 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <div style={{ position: "relative", zIndex: 1, background: "rgba(3,8,15,0.92)", borderBottom: "1px solid rgba(79,163,255,0.15)", padding: "12px 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
           <div style={{ position: "relative" }}>
             <div style={{ width: 42, height: 42, borderRadius: "50%", background: "linear-gradient(135deg, #0a1628, #1a3a6e)", border: "2px solid #4fa3ff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, boxShadow: "0 0 20px rgba(79,163,255,0.4)" }}>🦾</div>
@@ -206,7 +222,7 @@ export default function Jarvis() {
       </div>
 
       {/* Quick commands */}
-      <div style={{ background: "rgba(3,8,15,0.9)", borderBottom: "1px solid rgba(79,163,255,0.08)", padding: "10px 24px", display: "flex", gap: 8, overflowX: "auto" }}>
+      <div style={{ position: "relative", zIndex: 1, background: "rgba(3,8,15,0.85)", borderBottom: "1px solid rgba(79,163,255,0.08)", padding: "10px 24px", display: "flex", gap: 8, overflowX: "auto" }}>
         {QUICK_COMMANDS.map(cmd => (
           <button key={cmd.label} className="cmd-btn" onClick={() => send(cmd.prompt)} style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 14px", borderRadius: 20, border: "1px solid rgba(79,163,255,0.2)", background: "rgba(79,163,255,0.05)", color: "rgba(224,240,255,0.8)", fontSize: 12, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", whiteSpace: "nowrap", transition: "all .15s" }}>
             <span>{cmd.icon}</span> {cmd.label}
@@ -215,7 +231,7 @@ export default function Jarvis() {
       </div>
 
       {/* Messages */}
-      <div style={{ flex: 1, overflowY: "auto", padding: "20px 24px", display: "flex", flexDirection: "column", gap: 16, maxWidth: 900, width: "100%", margin: "0 auto" }}>
+      <div style={{ position: "relative", zIndex: 1, flex: 1, overflowY: "auto", padding: "20px 24px", display: "flex", flexDirection: "column", gap: 16, maxWidth: 900, width: "100%", margin: "0 auto" }}>
         {messages.map((msg, i) => (
           <div key={i} className="msg-in" style={{ display: "flex", gap: 12, flexDirection: msg.role === "user" ? "row-reverse" : "row", alignItems: "flex-start" }}>
             {msg.role === "assistant" && (
@@ -256,7 +272,7 @@ export default function Jarvis() {
       </div>
 
       {/* Input */}
-      <div style={{ background: "rgba(3,8,15,0.98)", borderTop: "1px solid rgba(79,163,255,0.1)", padding: "14px 24px" }}>
+      <div style={{ position: "relative", zIndex: 1, background: "rgba(3,8,15,0.92)", borderTop: "1px solid rgba(79,163,255,0.1)", padding: "14px 24px" }}>
         <div style={{ maxWidth: 900, margin: "0 auto", display: "flex", gap: 10, alignItems: "center" }}>
           <div style={{ fontSize: 11, color: "rgba(79,163,255,0.5)", fontFamily: "monospace", flexShrink: 0 }}>JORGE ›</div>
           <input
