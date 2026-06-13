@@ -1211,6 +1211,12 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
     if (isTabLocked(tab)) { setTab("dashboard"); setPaywallTab(tab); }
   }, [tab, user.plan]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Accès aux cartes OR Légendaires : Pro/Elite, admin, ou pendant l'essai gratuit (débloque tout)
+  const cardsTrialActive = !isAdmin && !user.planPaid && !!user.createdAt &&
+    (Date.now() - new Date(user.createdAt).getTime()) < 14 * 864e5;
+  const legendaryUnlocked = isAdmin || user.plan === "pro" || user.plan === "elite" || cardsTrialActive;
+  const isElitePlan = isAdmin || user.plan === "elite";
+
   // Assistant IA personnel selon le plan de l'utilisateur (Rookie / Coach Pro / JARVIS Elite)
   const myAssistant = ASSISTANTS[user.plan] || ASSISTANTS.scout;
 
@@ -2198,7 +2204,7 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
         {tab === "marketing" && isAdmin && <Marketing />}
 {tab === "cards" && (
   <div className="fade-in" style={{ height: "calc(100vh - 114px)", marginTop: -28, marginLeft: -24, marginRight: -24 }}>
-    <Cards />
+    <Cards plan={user.plan} legendaryUnlocked={legendaryUnlocked} isElite={isElitePlan} onUpgrade={() => setPaywallTab("cards-legendary")} />
   </div>
 )}
 {tab === "live" && (

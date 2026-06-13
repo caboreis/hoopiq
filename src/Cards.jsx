@@ -155,6 +155,12 @@ const WNBA_LEGEND_CARDS = [
   { id: 802, espnId: null, league: "wnba", name: "Diana Taurasi", pos: "PG", team: "Phoenix Mercury", era: "2004-2023", pts: 19.9, ast: 4.5, reb: 3.9, fg: 43, score: 99, rarity: "gold", trait: "WHITE MAMBA", titles: 3 },
 ];
 
+// ── CARTES EXCLUSIVES ELITE (variantes Black Edition réservées au plan Elite) ──
+const ELITE_EXCLUSIVE_CARDS = [
+  { id: 701, espnId: 1966, photo: null, name: "LeBron James", pos: "SF", team: "HoopIQ Black Edition", era: "EXCLUSIF ELITE", pts: 27.1, ast: 7.4, reb: 7.5, fg: 50, score: 100, rarity: "gold", trait: "✦ BLACK EDITION", titles: 4 },
+  { id: 702, espnId: 3975, photo: null, name: "Stephen Curry", pos: "PG", team: "HoopIQ Black Edition", era: "EXCLUSIF ELITE", pts: 24.6, ast: 6.5, reb: 4.7, fg: 47, score: 99, rarity: "gold", trait: "✦ BLACK EDITION", titles: 4 },
+];
+
 // ── ROSTER WNBA COMPLET ──
 const WNBA_PLAYERS = [
   // ── LÉGENDAIRES ──
@@ -204,7 +210,7 @@ function PlayerPhoto({ espnId, photo, name, size, league }) {
   );
 }
 
-function HoloCard({ card, size = "normal", onClick }) {
+function HoloCard({ card, size = "normal", onClick, locked = false }) {
   const r = RARITY[card.rarity];
   const [mouse, setMouse] = useState({ x: 50, y: 50 });
   const [hovered, setHovered] = useState(false);
@@ -257,21 +263,41 @@ function HoloCard({ card, size = "normal", onClick }) {
             <div style={{ fontSize: size === "small" ? 5 : 6, color: isGold ? "#ffd70055" : "#333", fontFamily: "monospace" }}>{isGold ? "✦ HOOPIQ GOLD ✦" : `HOOPIQ · #${String(card.id).padStart(3,"0")}`}</div>
           </div>
         </div>
+        {/* Cadenas plan : la carte OR reste visible et brille dessous, mais verrouillée */}
+        {locked && (
+          <div style={{
+            position: "absolute", inset: 0, zIndex: 5, borderRadius: isGold ? 15 : 16,
+            background: "rgba(2,2,8,0.5)", display: "flex", flexDirection: "column",
+            alignItems: "center", justifyContent: "center", gap: size === "small" ? 4 : 7,
+          }}>
+            <div style={{ fontSize: size === "small" ? 22 : 36, filter: "drop-shadow(0 0 10px rgba(255,215,0,0.6))" }}>🔒</div>
+            <div style={{
+              fontSize: size === "small" ? 6 : 9, fontWeight: 900, letterSpacing: 1, color: "#ffd700",
+              background: "rgba(0,0,0,0.7)", padding: "2px 9px", borderRadius: 10, border: "1px solid rgba(255,215,0,0.5)",
+            }}>PRO / ELITE</div>
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
-function PackOpening({ pack, onClose, onDone }) {
+function PackOpening({ pack, onClose, onDone, legendaryUnlocked = false, isElite = false }) {
   const [phase, setPhase] = useState("shake");
   const [cards, setCards] = useState([]);
 
   const generate = () => {
     const allLegends = [...LEGEND_CARDS, ...WNBA_LEGEND_CARDS];
+    // Sans accès Légendaire, aucune carte OR ne peut tomber : on la remplace par une carte standard.
+    const stripGold = (arr) => {
+      if (legendaryUnlocked) return arr;
+      const fallback = [...ALL_PLAYERS, ...WNBA_PLAYERS].filter(p => p.rarity !== "gold");
+      return arr.map(c => c.rarity === "gold" ? fallback[Math.floor(Math.random() * fallback.length)] : c);
+    };
     if (pack.id === "legend") {
       const gold = allLegends[Math.floor(Math.random() * allLegends.length)];
       const rest = [...ALL_PLAYERS, ...WNBA_PLAYERS].sort(() => Math.random() - 0.5).slice(0, 4);
-      return [gold, ...rest];
+      return stripGold([gold, ...rest]);
     }
     if (pack.id === "wnba") {
       const pool = [...WNBA_PLAYERS].sort(() => Math.random() - 0.5);
@@ -283,7 +309,7 @@ function PackOpening({ pack, onClose, onDone }) {
         const c = pool[result.length % pool.length];
         if (!result.find(r => r.id === c.id)) result.push(c);
       }
-      return result.slice(0, pack.cards);
+      return stripGold(result.slice(0, pack.cards));
     }
     const pool = [...ALL_PLAYERS].sort(() => Math.random() - 0.5);
     const result = [];
@@ -300,7 +326,7 @@ function PackOpening({ pack, onClose, onDone }) {
       const c = pool[result.length % pool.length];
       if (!result.find(r => r.id === c.id)) result.push(c);
     }
-    return result.slice(0, pack.cards);
+    return stripGold(result.slice(0, pack.cards));
   };
 
   useState(() => {
@@ -313,12 +339,24 @@ function PackOpening({ pack, onClose, onDone }) {
   const hasGold = cards.some(c => c.rarity === "gold");
 
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 1000, background: hasGold && phase === "reveal" ? "radial-gradient(ellipse at center,#1a1000,#000)" : "rgba(0,0,0,0.97)", backdropFilter: "blur(20px)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", fontFamily: "'DM Sans',sans-serif" }}>
-      <style>{`@keyframes shk{0%,100%{transform:rotate(0) scale(1)}25%{transform:rotate(-10deg) scale(1.08)}75%{transform:rotate(10deg) scale(1.08)}} @keyframes exp{0%{transform:scale(1);opacity:1}100%{transform:scale(0);opacity:0}} @keyframes cin{from{opacity:0;transform:translateY(40px) scale(0.8) rotateY(180deg)}to{opacity:1;transform:none}} @keyframes gp{0%,100%{text-shadow:0 0 20px #ffd700}50%{text-shadow:0 0 60px #ffd700,0 0 100px #ffaa00}}`}</style>
+    <div style={{ position: "fixed", inset: 0, zIndex: 1000, background: (hasGold || isElite) && phase === "reveal" ? "radial-gradient(ellipse at center,#1a1000,#000)" : "rgba(0,0,0,0.97)", backdropFilter: "blur(20px)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", fontFamily: "'DM Sans',sans-serif" }}>
+      <style>{`@keyframes shk{0%,100%{transform:rotate(0) scale(1)}25%{transform:rotate(-10deg) scale(1.08)}75%{transform:rotate(10deg) scale(1.08)}} @keyframes exp{0%{transform:scale(1);opacity:1}100%{transform:scale(0);opacity:0}} @keyframes cin{from{opacity:0;transform:translateY(40px) scale(0.8) rotateY(180deg)}to{opacity:1;transform:none}} @keyframes gp{0%,100%{text-shadow:0 0 20px #ffd700}50%{text-shadow:0 0 60px #ffd700,0 0 100px #ffaa00}} @keyframes elitePart{0%{transform:translateY(0) scale(1);opacity:0.9}100%{transform:translateY(-120px) scale(0.2);opacity:0}}`}</style>
+      {/* Pluie de particules dorées — animation premium réservée au plan Elite */}
+      {isElite && phase === "reveal" && (
+        <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none", zIndex: 0 }}>
+          {Array.from({ length: 18 }).map((_, i) => (
+            <div key={i} style={{
+              position: "absolute", bottom: 0, left: `${(i * 5.5 + 4) % 100}%`,
+              fontSize: 10 + (i % 4) * 4, animation: `elitePart ${1.6 + (i % 5) * 0.4}s ease-out ${(i % 6) * 0.25}s infinite`,
+            }}>✦</div>
+          ))}
+        </div>
+      )}
       {phase === "shake" && <div style={{ textAlign: "center" }}><div style={{ fontSize: 120, animation: "shk 0.25s infinite", marginBottom: 24 }}>{pack.emoji}</div><div style={{ fontSize: 26, fontWeight: 900, color: "#fff", letterSpacing: 3 }}>OUVERTURE...</div></div>}
       {phase === "open" && <div style={{ textAlign: "center" }}><div style={{ fontSize: 120, animation: "exp 1s forwards" }}>{pack.emoji}</div><div style={{ fontSize: 36, fontWeight: 900, color: pack.color, marginTop: 20 }}>✨ RÉVÉLATION !</div></div>}
       {phase === "reveal" && (
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 20 }}>
+        <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 20 }}>
+          {isElite && <div style={{ fontSize: 13, fontWeight: 900, letterSpacing: 3, color: "#ffd700", fontFamily: "monospace", animation: "gp 1.5s infinite" }}>✦ OUVERTURE PREMIUM ELITE ✦</div>}
           {hasGold && <div style={{ fontSize: 26, fontWeight: 900, color: "#ffd700", animation: "gp 1.5s infinite" }}>✦ CARTE OR LÉGENDAIRE ✦</div>}
           {!hasGold && <div style={{ fontSize: 20, fontWeight: 900, color: "#fff" }}>✨ TES CARTES !</div>}
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center", maxWidth: "92vw" }}>
@@ -338,11 +376,12 @@ function PackOpening({ pack, onClose, onDone }) {
   );
 }
 
-export default function Cards() {
+export default function Cards({ plan = "scout", legendaryUnlocked = false, isElite = false, onUpgrade }) {
   const [view, setView] = useState("teams");
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [collection, setCollection] = useState([ALL_PLAYERS[0], ALL_PLAYERS[5]]);
   const [selectedCard, setSelectedCard] = useState(null);
+  const [lockedCard, setLockedCard] = useState(null); // carte OR verrouillée cliquée (plan Scout)
   const [openPack, setOpenPack] = useState(null);
   const [filter, setFilter] = useState("all");
   const [notif, setNotif] = useState(null);
@@ -355,6 +394,12 @@ export default function Cards() {
   }, []);
 
   const showNotif = (msg) => { setNotif(msg); setTimeout(() => setNotif(null), 4000); };
+
+  // Une carte OR est verrouillée si l'utilisateur n'a pas l'accès Légendaire (plan Scout hors essai)
+  const isLocked = (card) => card?.rarity === "gold" && !legendaryUnlocked;
+  const openCard = (card) => { if (isLocked(card)) setLockedCard(card); else setSelectedCard(card); };
+  // Le Pack Légende (OR garanti) est réservé aux plans Pro/Elite
+  const openPackSafe = (pack) => { if (pack.id === "legend" && !legendaryUnlocked) setLockedCard({ pack: true }); else setOpenPack(pack); };
 
   const handleDone = (cards) => {
     const newCards = cards.filter(c => !collection.find(col => col.id === c.id));
@@ -381,7 +426,24 @@ export default function Cards() {
 
       {notif && <div style={{ position: "fixed", top: 80, right: 24, zIndex: 500, background: notif.includes("OR") ? "linear-gradient(135deg,#ffd700,#ff8c00)" : "linear-gradient(135deg,#ff5c00,#ff8c42)", color: notif.includes("OR") ? "#1a0800" : "#fff", padding: "13px 22px", borderRadius: 14, fontWeight: 900, fontSize: 14, animation: "ni .4s ease", boxShadow: "0 8px 40px rgba(255,92,0,0.5)" }}>{notif}</div>}
 
-      {openPack && <PackOpening pack={openPack} onClose={() => setOpenPack(null)} onDone={handleDone} />}
+      {openPack && <PackOpening pack={openPack} onClose={() => setOpenPack(null)} onDone={handleDone} legendaryUnlocked={legendaryUnlocked} isElite={isElite} />}
+
+      {/* Modal carte OR verrouillée (plan Scout) */}
+      {lockedCard && (
+        <div onClick={() => setLockedCard(null)} style={{ position: "fixed", inset: 0, zIndex: 600, background: "rgba(0,0,0,0.9)", backdropFilter: "blur(16px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
+          <div onClick={e => e.stopPropagation()} style={{ maxWidth: 400, width: "100%", textAlign: "center", background: "linear-gradient(160deg,#1a1000,#0d0700)", border: "1px solid rgba(255,215,0,0.4)", borderRadius: 22, padding: "40px 30px", boxShadow: "0 0 60px rgba(255,215,0,0.2)" }}>
+            <div style={{ fontSize: 56, marginBottom: 12, filter: "drop-shadow(0 0 16px rgba(255,215,0,0.6))" }}>🔒</div>
+            <h2 style={{ fontFamily: "'Bebas Neue',cursive", fontSize: 30, letterSpacing: 1, color: "#ffd700", margin: "0 0 10px" }}>CARTE LÉGENDAIRE</h2>
+            <p style={{ fontSize: 14, color: "rgba(255,255,255,0.75)", lineHeight: 1.6, marginBottom: 26 }}>
+              Débloque les cartes <b style={{ color: "#ffd700" }}>OR Légendaires</b> (Jordan, Kobe, Magic, Bird…) avec le plan <b>Pro</b> ou <b>Elite</b> 🚀
+            </p>
+            <button onClick={() => { setLockedCard(null); onUpgrade?.(); }} style={{ width: "100%", padding: "14px", borderRadius: 12, border: "none", cursor: "pointer", background: "linear-gradient(135deg,#ffd700,#ff8c00)", color: "#1a0800", fontWeight: 900, fontSize: 15, fontFamily: "inherit", marginBottom: 10 }}>
+              💎 Passer à Pro / Elite →
+            </button>
+            <button onClick={() => setLockedCard(null)} style={{ width: "100%", padding: "11px", borderRadius: 12, border: "1px solid rgba(255,255,255,0.15)", background: "transparent", color: "#888", cursor: "pointer", fontFamily: "inherit" }}>Plus tard</button>
+          </div>
+        </div>
+      )}
 
       {selectedCard && (
         <div onClick={() => setSelectedCard(null)} style={{ position: "fixed", inset: 0, zIndex: 500, background: "rgba(0,0,0,0.92)", backdropFilter: "blur(16px)", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 24 }}>
@@ -544,7 +606,8 @@ export default function Cards() {
                       <HoloCard
                         card={player}
                         size="normal"
-                        onClick={() => setSelectedCard(player)}
+                        onClick={() => openCard(player)}
+                        locked={isLocked(player)}
                       />
                       {/* Info équipe sous la carte */}
                       <div style={{ marginTop: 8, textAlign: "center" }}>
@@ -588,7 +651,7 @@ export default function Cards() {
                 {WNBA_LEGEND_CARDS.map((card, i) => (
                   <div key={card.id} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
                     <div style={{ animation: `float ${3 + i * 0.8}s ease-in-out infinite` }}>
-                      <HoloCard card={card} size="normal" onClick={() => setSelectedCard(card)} />
+                      <HoloCard card={card} size="normal" onClick={() => openCard(card)} locked={isLocked(card)} />
                     </div>
                     <div style={{ textAlign: "center" }}>
                       <div style={{ fontSize: 12, fontWeight: 800, color: "#ffd700" }}>{card.name}</div>
@@ -620,7 +683,7 @@ export default function Cards() {
               <div style={{ display: "flex", flexWrap: "wrap", gap: 18 }}>
                 {filteredCollection.map((card, i) => (
                   <div key={card.id} style={{ animation: `float ${3 + i * 0.4}s ease-in-out infinite` }}>
-                    <HoloCard card={card} size="normal" onClick={() => setSelectedCard(card)} />
+                    <HoloCard card={card} size="normal" onClick={() => openCard(card)} locked={isLocked(card)} />
                   </div>
                 ))}
               </div>
@@ -635,29 +698,43 @@ export default function Cards() {
             <p style={{ color: "#6b7280", fontSize: 13, marginBottom: 32 }}>Obtiens les stars NBA · les joueuses WNBA · et les légendes OR 🏆</p>
             <div className="cards-packs-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(260px,1fr))", gap: 20, marginBottom: 36 }}>
               {PACKS.map(pack => (
-                <div key={pack.id} className="pack-h" onClick={() => setOpenPack(pack)} style={{ background: pack.id === "legend" ? "linear-gradient(160deg,#1a1000,#3d2800)" : `linear-gradient(160deg,rgba(0,0,0,0.9),${pack.color}20)`, border: `2px solid ${pack.color}${pack.id === "legend" ? "cc" : "50"}`, borderRadius: 20, padding: 28, textAlign: "center", cursor: "pointer", transition: "all .3s", animation: pack.id === "legend" ? "gp 3s ease-in-out infinite" : "none" }}>
+                <div key={pack.id} className="pack-h" onClick={() => openPackSafe(pack)} style={{ background: pack.id === "legend" ? "linear-gradient(160deg,#1a1000,#3d2800)" : `linear-gradient(160deg,rgba(0,0,0,0.9),${pack.color}20)`, border: `2px solid ${pack.color}${pack.id === "legend" ? "cc" : "50"}`, borderRadius: 20, padding: 28, textAlign: "center", cursor: "pointer", transition: "all .3s", animation: pack.id === "legend" ? "gp 3s ease-in-out infinite" : "none" }}>
                   {pack.id === "legend" && <div style={{ fontSize: 11, color: "#ffd700", fontWeight: 800, letterSpacing: 2, marginBottom: 8 }}>✦ ÉDITION LIMITÉE ✦</div>}
                   <div style={{ fontSize: 70, marginBottom: 14, animation: "float 3s ease-in-out infinite" }}>{pack.emoji}</div>
                   <div style={{ fontFamily: "'Bebas Neue',cursive", fontSize: 26, color: pack.color, letterSpacing: 1, marginBottom: 6 }}>{pack.name}</div>
                   <div style={{ fontSize: 12, color: "#888", marginBottom: 16, lineHeight: 1.6 }}>{pack.desc}</div>
                   <div style={{ fontFamily: "'Bebas Neue',cursive", fontSize: 40, color: pack.color, marginBottom: 16 }}>{pack.price}</div>
-                  <button style={{ width: "100%", padding: "12px", borderRadius: 10, border: "none", cursor: "pointer", background: pack.id === "legend" ? "linear-gradient(135deg,#ffd700,#ff8c00)" : `linear-gradient(135deg,${pack.color},${pack.color}99)`, color: pack.id === "legend" ? "#1a0800" : "#fff", fontWeight: 900, fontSize: 14, fontFamily: "inherit" }}>Ouvrir →</button>
+                  <button style={{ width: "100%", padding: "12px", borderRadius: 10, border: "none", cursor: "pointer", background: pack.id === "legend" ? "linear-gradient(135deg,#ffd700,#ff8c00)" : `linear-gradient(135deg,${pack.color},${pack.color}99)`, color: pack.id === "legend" ? "#1a0800" : "#fff", fontWeight: 900, fontSize: 14, fontFamily: "inherit" }}>{pack.id === "legend" && !legendaryUnlocked ? "🔒 Pro / Elite" : "Ouvrir →"}</button>
                 </div>
               ))}
             </div>
+
+            {/* Section exclusive — réservée au plan Elite */}
+            {isElite && (
+              <div style={{ background: "linear-gradient(135deg,rgba(255,215,0,0.08),rgba(0,0,0,0.4))", border: "1px solid rgba(255,215,0,0.35)", borderRadius: 16, padding: 24, marginBottom: 24, animation: "gp 3s ease-in-out infinite" }}>
+                <div style={{ fontSize: 11, fontWeight: 900, letterSpacing: 3, color: "#ffd700", fontFamily: "monospace", marginBottom: 6 }}>👑 EXCLUSIF ELITE · BLACK EDITION</div>
+                <p style={{ fontSize: 12, color: "#888", marginBottom: 18, marginTop: 0 }}>Variantes ultra-rares réservées aux membres Elite.</p>
+                <div className="holo-legend-row" style={{ display: "flex", gap: 18, flexWrap: "wrap" }}>
+                  {ELITE_EXCLUSIVE_CARDS.map(card => (
+                    <HoloCard key={card.id} card={card} size="normal" onClick={() => openCard(card)} />
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div style={{ background: "rgba(255,215,0,0.05)", border: "1px solid rgba(255,215,0,0.2)", borderRadius: 16, padding: 20 }}>
               <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 2, color: "#ffd700", textTransform: "uppercase", marginBottom: 6, fontFamily: "monospace" }}>✦ Légendes disponibles</div>
               <p style={{ fontSize: 12, color: "#888", marginBottom: 14, marginTop: 0 }}>NBA · Les Grands du jeu</p>
               <div className="holo-legend-row" style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 20 }}>
                 {LEGEND_CARDS.map(card => (
-                  <HoloCard key={card.id} card={card} size="small" onClick={() => setSelectedCard(card)} />
+                  <HoloCard key={card.id} card={card} size="small" onClick={() => openCard(card)} locked={isLocked(card)} />
                 ))}
               </div>
               <div style={{ borderTop: "1px solid rgba(192,132,252,0.2)", paddingTop: 16 }}>
                 <p style={{ fontSize: 12, color: "#c084fc", marginBottom: 14, marginTop: 0, fontWeight: 700 }}>🌸 WNBA · Les pionnières</p>
                 <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
                   {WNBA_LEGEND_CARDS.map(card => (
-                    <HoloCard key={card.id} card={card} size="small" onClick={() => setSelectedCard(card)} />
+                    <HoloCard key={card.id} card={card} size="small" onClick={() => openCard(card)} locked={isLocked(card)} />
                   ))}
                 </div>
               </div>
