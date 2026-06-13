@@ -974,9 +974,14 @@ function App({ user, onLogout }) {
   const [nflBeatIdx, setNflBeatIdx] = useState(0);
   const [nflBeatPlaying, setNflBeatPlaying] = useState(false);
   const nflAudioRef = useRef(null);
+  // Relais vidéo : chaque vidéo joue NFL_VIDEO_SECONDS puis passe le relai à la suivante.
+  // Les 3 <video> restent montées → leur currentTime est conservé, donc chacune reprend où elle s'était arrêtée.
+  const NFL_VIDEO_SECONDS = 20;
+  const nflVideoRefs = useRef([]);
 
   useEffect(() => {
     if (showNflTeaser) {
+      setNflVideoIdx(0);
       setNflBeatIdx(0);
       setNflBeatPlaying(true);
     } else {
@@ -984,6 +989,25 @@ function App({ user, onLogout }) {
       if (nflAudioRef.current) { nflAudioRef.current.pause(); nflAudioRef.current.currentTime = 0; }
     }
   }, [showNflTeaser]);
+
+  // Joue la vidéo active, met les autres en pause SANS toucher leur currentTime (reprise au bon endroit)
+  useEffect(() => {
+    if (!showNflTeaser) return;
+    nflVideoRefs.current.forEach((v, i) => {
+      if (!v) return;
+      if (i === nflVideoIdx) v.play().catch(() => {});
+      else v.pause();
+    });
+  }, [showNflTeaser, nflVideoIdx]);
+
+  // Minuteur de relais : au bout de 20 s, on passe à la vidéo suivante (boucle infinie)
+  useEffect(() => {
+    if (!showNflTeaser) return;
+    const t = setTimeout(() => {
+      setNflVideoIdx(i => (i + 1) % NFL_VIDEOS.length);
+    }, NFL_VIDEO_SECONDS * 1000);
+    return () => clearTimeout(t);
+  }, [showNflTeaser, nflVideoIdx]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     const a = nflAudioRef.current;
@@ -1257,14 +1281,21 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
             position: "fixed", inset: 0, zIndex: 2000, overflow: "hidden",
             display: "flex", alignItems: "center", justifyContent: "center",
           }}>
-            {/* Vidéo NFL plein écran — alterne nfl.mp4 / nfl2.mp4 */}
-            <video
-              key={nflVideoIdx}
-              autoPlay muted playsInline
-              onEnded={() => setNflVideoIdx(i => (i + 1) % NFL_VIDEOS.length)}
-              style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
-              src={NFL_VIDEOS[nflVideoIdx]}
-            />
+            {/* Relais de 3 vidéos NFL — toutes montées en permanence, une seule visible (fondu).
+                Chacune reprend où elle s'était mise en pause grâce au currentTime conservé. */}
+            {NFL_VIDEOS.map((src, i) => (
+              <video
+                key={src}
+                ref={el => { nflVideoRefs.current[i] = el; }}
+                muted playsInline loop preload="auto"
+                style={{
+                  position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover",
+                  opacity: i === nflVideoIdx ? 1 : 0,
+                  transition: "opacity 0.8s ease",
+                }}
+                src={src}
+              />
+            ))}
 
             {/* Overlay sombre pour lisibilité */}
             <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.55) 50%, rgba(0,0,0,0.8) 100%)" }} />
