@@ -1,5 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 
+// En dev, l'API tourne sur le port 3001 ; en prod elle est servie sur le même domaine.
+const API_BASE = import.meta.env.DEV ? "http://localhost:3001" : "";
+
 const SYSTEM_PROMPT = `Tu es Jarvis, le bras droit IA du boss de HoopIQ. T'es pas un robot corporate — t'es dans la team, tu parles vrai, tu vas droit au but comme un pick-and-roll bien exécuté.
 
 Tu gères toutes les opérations de la plateforme HoopIQ (basket + IA) :
@@ -101,7 +104,7 @@ export default function HoopIQAgent() {
     const load = async () => {
       setPlansLoading(true)
       try {
-        const res = await fetch('/api/plans')
+        const res = await fetch(`${API_BASE}/api/plans`)
         const data = await res.json()
         setPlans(data.plans || [])
       } catch (err) {
@@ -124,7 +127,7 @@ export default function HoopIQAgent() {
     const newHistory = [...history, { role: "user", content: msg }];
 
     try {
-      const res = await fetch(`${import.meta.env.DEV ? "http://localhost:3001" : ""}/api/anthropic`, {
+      const res = await fetch(`${API_BASE}/api/anthropic`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -231,7 +234,7 @@ export default function HoopIQAgent() {
                 if (purchaseLoading) return
                 setPurchaseLoading(true)
                 try {
-                  const res = await fetch(`/api/checkout/${p.id}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ customerEmail: '' }) })
+                  const res = await fetch(`${API_BASE}/api/checkout/${p.id}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ customerEmail: '' }) })
                   const data = await res.json()
                   if (data.url) {
                     window.location.href = data.url
