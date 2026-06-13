@@ -112,7 +112,6 @@ const TAB_MIN_PLAN = {
   scout: "pro",
   trade: "pro",
   chat: "pro",
-  agent: "pro",
 };
 
 const PLAYERS = [
@@ -1207,7 +1206,7 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
     { sep: true },
     { id: "chat",      label: "IA Chat",   icon: "🤖" },
     ...(isAdmin ? [{ id: "jarvis", label: "JARVIS", icon: "🦾" }] : []),
-    { id: "agent",     label: "Agent IA",  icon: "🧠" },
+    ...(isAdmin ? [{ id: "agent", label: "Agent IA", icon: "🧠" }] : []),
     ...(isAdmin ? [{ id: "marketing", label: "Marketing", icon: "🚀" }] : []),
     { sep: true },
     { id: "account",   label: "Compte",    icon: "👤" },
@@ -2143,8 +2142,8 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
     <Jarvis />
   </div>
 )}
-        {/* ── AGENT ── */}
-        {tab === "agent" && (
+        {/* ── AGENT (admin uniquement) ── */}
+        {tab === "agent" && isAdmin && (
           <div className="fade-in" style={{ height: "calc(100vh - 120px)", marginTop: -28, marginLeft: -24, marginRight: -24 }}>
             <Agent />
           </div>
