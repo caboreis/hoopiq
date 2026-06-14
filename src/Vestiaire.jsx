@@ -220,7 +220,7 @@ export default function Vestiaire({ user }) {
 
       {/* Sidebar */}
       <div className="vest-scroll" style={{ background: C.bg2, borderRight: `1px solid ${C.border}`, overflowY: "auto", padding: 12 }}>
-        <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 20, letterSpacing: 2, background: `linear-gradient(135deg,${C.orange},${C.gold})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", padding: "6px 8px 10px", borderBottom: `1px solid ${C.border}` }}>
+        <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 20, letterSpacing: 2, background: `linear-gradient(135deg,${C.orange},${C.gold})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", padding: "6px 8px 10px", borderBottom: `1px solid ${C.border}` }}>
           🏀 LE VESTIAIRE
         </div>
 

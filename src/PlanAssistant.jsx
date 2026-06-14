@@ -143,7 +143,7 @@ export default function PlanAssistant({ plan = "scout" }) {
           justifyContent: "center", fontSize: 28, boxShadow: `0 0 24px ${cfg.color}55`,
         }}>{cfg.icon}</div>
         <div>
-          <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 40, letterSpacing: 2, lineHeight: 1, margin: 0 }}>
+          <h1 style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 40, letterSpacing: 2, lineHeight: 1, margin: 0 }}>
             {cfg.name.toUpperCase()}
           </h1>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 4 }}>

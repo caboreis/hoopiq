@@ -106,7 +106,7 @@ function Ring({ score, size = 64, color = C.orange }) {
         strokeDasharray={c} strokeDashoffset={c * (1 - score / 100)} strokeLinecap="round"
         style={{ transition: "stroke-dashoffset 1.3s cubic-bezier(.4,0,.2,1)" }} />
       <text x={size / 2} y={size / 2 + 5} textAnchor="middle" fill="#fff"
-        fontSize={size * 0.22} fontWeight={800} fontFamily="'Bebas Neue', cursive"
+        fontSize={size * 0.22} fontWeight={800} fontFamily="'Permanent Marker', cursive"
         style={{ transform: `rotate(90deg)`, transformOrigin: `${size / 2}px ${size / 2}px` }}>{score}</text>
     </svg>
   );
@@ -126,7 +126,7 @@ function PlayerPhoto({ espnId, name, size = 72, color = C.red }) {
     }}>
       {!err
         ? <img src={url} alt={name} onError={() => setErr(true)} style={{ width: "130%", height: "130%", objectFit: "cover", objectPosition: "top center", marginTop: -8 }} />
-        : <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: size * 0.32, color, letterSpacing: 1 }}>{initials}</span>
+        : <span style={{ fontFamily: "'Permanent Marker', cursive", fontSize: size * 0.32, color, letterSpacing: 1 }}>{initials}</span>
       }
     </div>
   );
@@ -154,7 +154,7 @@ function NFLGameCard({ game, onClick, selected }) {
           <div style={{ fontSize: 10, color: C.muted }}>{game.home.record}</div>
         </div>
         <div style={{ textAlign: "center" }}>
-          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 22, letterSpacing: 2, lineHeight: 1 }}>
+          <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 22, letterSpacing: 2, lineHeight: 1 }}>
             <span style={{ color: C.text }}>{game.home.score}</span>
             <span style={{ color: C.muted, fontSize: 14, margin: "0 4px" }}>–</span>
             <span style={{ color: C.text }}>{game.away.score}</span>
@@ -243,7 +243,7 @@ export default function NFL() {
       {/* ── Header ── */}
       <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: 8, flexWrap: "wrap", gap: 12 }}>
         <div>
-          <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 52, letterSpacing: 3, lineHeight: 1, margin: 0 }}>
+          <h1 style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 52, letterSpacing: 3, lineHeight: 1, margin: 0 }}>
             <span style={{ color: C.text }}>NFL</span>{" "}
             <span style={{ background: "linear-gradient(135deg,#C8102E,#FFB612)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>ZONE</span>
           </h1>
@@ -284,7 +284,7 @@ export default function NFL() {
           }}>
             <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: k.color, opacity: 0.8 }} />
             <div style={{ fontSize: 20, marginBottom: 4 }}>{k.icon}</div>
-            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 30, color: k.color, lineHeight: 1 }}>{k.val}</div>
+            <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 30, color: k.color, lineHeight: 1 }}>{k.val}</div>
             <div style={{ fontSize: 11, color: C.muted, marginTop: 3 }}>{k.label}</div>
           </div>
         ))}
@@ -341,7 +341,7 @@ export default function NFL() {
                 <div style={{ display: "flex", alignItems: "center", gap: 18, marginBottom: 24 }}>
                   <PlayerPhoto espnId={selectedStar.espnId} name={selectedStar.name} size={84} color={selectedStar.teamColor} />
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 32, letterSpacing: 2, lineHeight: 1.1 }}>
+                    <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 32, letterSpacing: 2, lineHeight: 1.1 }}>
                       {selectedStar.name}
                     </div>
                     <div style={{ fontSize: 13, color: C.muted, marginTop: 3 }}>
@@ -367,7 +367,7 @@ export default function NFL() {
                       background: "rgba(0,0,0,0.3)", borderRadius: 12, padding: "12px 14px", textAlign: "center",
                       border: `1px solid ${s.color}30`,
                     }}>
-                      <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 28, color: s.color, lineHeight: 1 }}>{s.val}</div>
+                      <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 28, color: s.color, lineHeight: 1 }}>{s.val}</div>
                       <div style={{ fontSize: 10, color: C.muted, marginTop: 3 }}>{s.label}</div>
                     </div>
                   ))}
@@ -429,7 +429,7 @@ export default function NFL() {
                     width: 36, height: 36, borderRadius: "50%",
                     background: `${team.color}25`, border: `1px solid ${team.color}50`,
                     display: "flex", alignItems: "center", justifyContent: "center",
-                    fontFamily: "'Bebas Neue', cursive", fontSize: 11, color: team.color, fontWeight: 800,
+                    fontFamily: "'Permanent Marker', cursive", fontSize: 11, color: team.color, fontWeight: 800,
                   }}>{team.abbr}</div>
                   <div>
                     <div style={{ fontWeight: 700, fontSize: 12, color: C.text }}>{team.abbr}</div>
@@ -489,13 +489,13 @@ export default function NFL() {
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                   {/* Home */}
                   <div style={{ textAlign: "center", flex: 1 }}>
-                    <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 42, color: selectedGame.home.color, lineHeight: 1 }}>{selectedGame.home.abbr}</div>
+                    <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 42, color: selectedGame.home.color, lineHeight: 1 }}>{selectedGame.home.abbr}</div>
                     <div style={{ fontSize: 12, color: C.muted }}>{selectedGame.home.name}</div>
                     <div style={{ fontSize: 11, color: C.muted }}>{selectedGame.home.record}</div>
                   </div>
                   {/* Score */}
                   <div style={{ textAlign: "center", padding: "0 24px" }}>
-                    <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 52, lineHeight: 1, letterSpacing: 4 }}>
+                    <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 52, lineHeight: 1, letterSpacing: 4 }}>
                       <span style={{ color: C.text }}>{selectedGame.home.score}</span>
                       <span style={{ color: C.muted, fontSize: 32, margin: "0 8px" }}>–</span>
                       <span style={{ color: C.text }}>{selectedGame.away.score}</span>
@@ -515,7 +515,7 @@ export default function NFL() {
                   </div>
                   {/* Away */}
                   <div style={{ textAlign: "center", flex: 1 }}>
-                    <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 42, color: selectedGame.away.color, lineHeight: 1 }}>{selectedGame.away.abbr}</div>
+                    <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 42, color: selectedGame.away.color, lineHeight: 1 }}>{selectedGame.away.abbr}</div>
                     <div style={{ fontSize: 12, color: C.muted }}>{selectedGame.away.name}</div>
                     <div style={{ fontSize: 11, color: C.muted }}>{selectedGame.away.record}</div>
                   </div>

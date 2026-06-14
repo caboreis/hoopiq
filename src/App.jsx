@@ -191,7 +191,7 @@ function Avatar({ name, size = 44, glow, espnId, headshot, league }) {
       width: size, height: size, borderRadius: "50%", flexShrink: 0, overflow: "hidden",
       background: showPhoto ? "#111" : G.orange,
       display: "flex", alignItems: "center", justifyContent: "center",
-      fontFamily: "'Bebas Neue', cursive", fontSize: size * 0.36, color: "#fff", letterSpacing: 1,
+      fontFamily: "'Permanent Marker', cursive", fontSize: size * 0.36, color: "#fff", letterSpacing: 1,
       boxShadow: glow ? `0 0 24px rgba(255,92,0,0.55)` : `0 2px 10px rgba(0,0,0,0.5)`,
       position: "relative",
     }}>
@@ -225,7 +225,7 @@ function Ring({ score, size = 68 }) {
         strokeDasharray={c} strokeDashoffset={c * (1 - score / 100)} strokeLinecap="round"
         style={{ transition: "stroke-dashoffset 1.3s cubic-bezier(.4,0,.2,1)" }} />
       <text x={size / 2} y={size / 2 + 5} textAnchor="middle" fill="#fff"
-        fontSize={size * 0.22} fontWeight={800} fontFamily="'Bebas Neue', cursive"
+        fontSize={size * 0.22} fontWeight={800} fontFamily="'Permanent Marker', cursive"
         style={{ transform: `rotate(90deg)`, transformOrigin: `${size / 2}px ${size / 2}px` }}>{score}</text>
     </svg>
   );
@@ -319,7 +319,7 @@ function BallLogo({ size = 40, fontSize = 26 }) {
         </div>
       </div>
       <span style={{
-        fontFamily: "'Bebas Neue', cursive", fontSize,
+        fontFamily: "'Permanent Marker', cursive", fontSize,
         background: G.orange, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
         letterSpacing: 3, lineHeight: 1,
       }}>HOOP IQ</span>
@@ -406,7 +406,7 @@ function Landing({ onAuth, onChoosePlan }) {
   return (
     <div style={{ minHeight: "100vh", background: C.bg, color: C.text, overflowX: "hidden" }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;700&family=Permanent+Marker&family=Bangers&display=swap');
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { background: ${C.bg}; }
         ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-thumb { background: ${C.orange}; border-radius: 4px; }
@@ -454,7 +454,7 @@ function Landing({ onAuth, onChoosePlan }) {
           <Badge color={C.orange}>🏀 IA Basket · Saison 2025-26</Badge>
         </div>
 
-        <h1 className="fade-in" style={{ fontFamily: "'Bebas Neue', cursive", fontSize: "clamp(60px, 10vw, 110px)", lineHeight: .9, marginTop: 24, letterSpacing: 2, animationDelay: ".1s" }}>
+        <h1 className="fade-in" style={{ fontFamily: "'Permanent Marker', cursive", fontSize: "clamp(60px, 10vw, 110px)", lineHeight: .9, marginTop: 24, letterSpacing: 2, animationDelay: ".1s" }}>
           L'INTELLIGENCE<br />
           <span style={{ background: G.orange, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>ARTIFICIELLE</span><br />
           DU BASKET
@@ -478,7 +478,7 @@ function Landing({ onAuth, onChoosePlan }) {
         <div className="fade-in" style={{ marginTop: 48, display: "flex", gap: 32, alignItems: "center", animationDelay: ".4s" }}>
           {[["2 400+", "Analystes"], ["89%", "Précision IA"], ["48", "Ligues"]].map(([v, l]) => (
             <div key={l} style={{ textAlign: "center" }}>
-              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 32, color: C.orange }}>{v}</div>
+              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 38, color: C.orange }}>{v}</div>
               <div style={{ fontSize: 12, color: C.muted, fontFamily: "'DM Sans', sans-serif" }}>{l}</div>
             </div>
           ))}
@@ -490,7 +490,7 @@ function Landing({ onAuth, onChoosePlan }) {
       <section style={{ padding: "80px 40px", maxWidth: 1100, margin: "0 auto" }}>
         <div style={{ textAlign: "center", marginBottom: 56 }}>
           <SectionTitle>Fonctionnalités</SectionTitle>
-          <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 52, letterSpacing: 1 }}>TOUT CE DONT TU AS <span style={{ color: C.orange }}>BESOIN</span></h2>
+          <h2 style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 52, letterSpacing: 1 }}>TOUT CE DONT TU AS <span style={{ color: C.orange }}>BESOIN</span></h2>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 20 }}>
           {[
@@ -503,7 +503,7 @@ function Landing({ onAuth, onChoosePlan }) {
           ].map((f) => (
             <Card key={f.title} sx={{ transition: "all .3s" }} style={{ transition: "all .3s" }}>
               <div style={{ fontSize: 36, marginBottom: 12 }}>{f.icon}</div>
-              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 22, letterSpacing: 1, marginBottom: 8 }}>{f.title}</div>
+              <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 22, letterSpacing: 1, marginBottom: 8 }}>{f.title}</div>
               <div style={{ fontSize: 13, color: C.muted, lineHeight: 1.7, fontFamily: "'DM Sans', sans-serif" }}>{f.desc}</div>
             </Card>
           ))}
@@ -514,7 +514,7 @@ function Landing({ onAuth, onChoosePlan }) {
       <section style={{ padding: "80px 40px", maxWidth: 1100, margin: "0 auto" }}>
         <div style={{ textAlign: "center", marginBottom: 56 }}>
           <SectionTitle>Tarifs</SectionTitle>
-          <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 52, letterSpacing: 1 }}>CHOISIS TON <span style={{ color: C.orange }}>NIVEAU</span></h2>
+          <h2 style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 52, letterSpacing: 1 }}>CHOISIS TON <span style={{ color: C.orange }}>NIVEAU</span></h2>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 20 }}>
           {PLANS.map((plan) => (
@@ -526,10 +526,10 @@ function Landing({ onAuth, onChoosePlan }) {
             }} onClick={() => onChoosePlan(plan.id)}>
               {plan.popular && <div style={{ position: "absolute", top: -14, left: "50%", transform: "translateX(-50%)", background: G.orange, color: "#fff", fontSize: 11, fontWeight: 800, padding: "4px 16px", borderRadius: 20, letterSpacing: 1.5, whiteSpace: "nowrap" }}>⚡ PLUS POPULAIRE</div>}
               <div style={{ fontSize: 40, marginBottom: 12 }}>{plan.icon}</div>
-              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 28, letterSpacing: 2, color: plan.color }}>{plan.name}</div>
+              <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 28, letterSpacing: 2, color: plan.color }}>{plan.name}</div>
               <div style={{ fontSize: 13, color: C.muted, marginBottom: 20, fontFamily: "'DM Sans', sans-serif" }}>{plan.desc}</div>
               <div style={{ display: "flex", alignItems: "baseline", gap: 4, marginBottom: 24 }}>
-                <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 52, color: plan.color }}>{plan.price}€</span>
+                <span style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 52, color: plan.color }}>{plan.price}€</span>
                 <span style={{ color: C.muted, fontSize: 14 }}>{plan.period}</span>
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 24 }}>
@@ -554,7 +554,7 @@ function Landing({ onAuth, onChoosePlan }) {
 
       {/* FOOTER */}
       <footer style={{ borderTop: `1px solid ${C.border}`, padding: "40px", textAlign: "center", color: C.muted, fontSize: 13, fontFamily: "'DM Sans', sans-serif" }}>
-        <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 22, background: G.orange, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", marginBottom: 12 }}>HOOP IQ</div>
+        <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 22, background: G.orange, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", marginBottom: 12 }}>HOOP IQ</div>
         © 2026 HoopIQ · Propulsé par Claude AI · Tous droits réservés
       </footer>
     </div>
@@ -580,7 +580,7 @@ function PaywallModal({ tabId, user, onClose }) {
       <div onClick={e => e.stopPropagation()} style={{ background: C.bg2, border: `1px solid ${C.border}`, borderRadius: 22, padding: 32, maxWidth: 420, width: "100%", position: "relative", boxShadow: "0 30px 100px rgba(0,0,0,0.7)" }}>
         <button onClick={onClose} style={{ position: "absolute", top: 14, right: 16, background: "none", border: "none", color: C.muted, fontSize: 22, cursor: "pointer" }}>×</button>
         <div style={{ fontSize: 44, textAlign: "center", marginBottom: 8 }}>🔒</div>
-        <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 30, letterSpacing: 1, textAlign: "center", marginBottom: 8 }}>
+        <h2 style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 30, letterSpacing: 1, textAlign: "center", marginBottom: 8 }}>
           FONCTIONNALITÉ <span style={{ color: C.orange }}>{needed.toUpperCase()}</span>
         </h2>
         <p style={{ color: C.muted, fontSize: 13, textAlign: "center", marginBottom: 22, fontFamily: "'DM Sans', sans-serif", lineHeight: 1.5 }}>
@@ -598,7 +598,7 @@ function PaywallModal({ tabId, user, onClose }) {
               opacity: busy && busy !== p.id ? 0.5 : 1, transition: "all .2s",
             }}>
               <span>{p.icon} {p.name}{p.popular ? " · ⚡ populaire" : ""}</span>
-              <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 20, color: p.color }}>
+              <span style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 20, color: p.color }}>
                 {busy === p.id ? "⏳" : `${p.price}€/m`}
               </span>
             </button>
@@ -695,12 +695,12 @@ function AuthModal({ mode, onClose, onSuccess, initialPlan }) {
       <div style={{ background: C.bg2, border: `1px solid ${C.border}`, borderRadius: 22, padding: 36, width: "100%", maxWidth: 440, position: "relative", boxShadow: "0 30px 100px rgba(0,0,0,0.7)" }}>
         <button onClick={onClose} style={{ position: "absolute", top: 16, right: 16, background: "none", border: "none", color: C.muted, fontSize: 22, cursor: "pointer" }}>×</button>
 
-        <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 22, background: G.orange, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", letterSpacing: 2, marginBottom: 24 }}>HOOP IQ</div>
+        <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 22, background: G.orange, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", letterSpacing: 2, marginBottom: 24 }}>HOOP IQ</div>
 
         {/* LOGIN */}
         {m === "login" && (
           <div>
-            <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 34, letterSpacing: 1, marginBottom: 6 }}>Bon retour 👋</h2>
+            <h2 style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 34, letterSpacing: 1, marginBottom: 6 }}>Bon retour 👋</h2>
             <p style={{ color: C.muted, fontSize: 13, marginBottom: 24, fontFamily: "'DM Sans', sans-serif" }}>Connecte-toi pour accéder à ton dashboard</p>
             <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               <input style={inputStyle} placeholder="Email" type="email" {...field("email")} />
@@ -718,7 +718,7 @@ function AuthModal({ mode, onClose, onSuccess, initialPlan }) {
         {/* SIGNUP STEP 1 */}
         {m === "signup" && step === 1 && (
           <div>
-            <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 34, letterSpacing: 1, marginBottom: 6 }}>Créer un compte</h2>
+            <h2 style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 34, letterSpacing: 1, marginBottom: 6 }}>Créer un compte</h2>
             <p style={{ color: C.muted, fontSize: 13, marginBottom: 24, fontFamily: "'DM Sans', sans-serif" }}>14 jours gratuits · Sans carte bancaire</p>
             <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               <input style={inputStyle} placeholder="Prénom ou pseudo" {...field("name")} />
@@ -737,7 +737,7 @@ function AuthModal({ mode, onClose, onSuccess, initialPlan }) {
         {/* SIGNUP STEP 2 — PLAN */}
         {m === "signup" && step === 2 && (
           <div>
-            <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 34, letterSpacing: 1, marginBottom: 6 }}>Ton plan</h2>
+            <h2 style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 34, letterSpacing: 1, marginBottom: 6 }}>Ton plan</h2>
             <p style={{ color: C.muted, fontSize: 13, marginBottom: 20, fontFamily: "'DM Sans', sans-serif" }}>Tu peux changer à tout moment</p>
             <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 24 }}>
               {PLANS.map(plan => (
@@ -754,7 +754,7 @@ function AuthModal({ mode, onClose, onSuccess, initialPlan }) {
                       <div style={{ fontSize: 12, color: C.muted }}>{plan.desc}</div>
                     </div>
                   </div>
-                  <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 22, color: plan.color }}>{plan.price}€/m</div>
+                  <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 22, color: plan.color }}>{plan.price}€/m</div>
                 </div>
               ))}
             </div>
@@ -766,10 +766,10 @@ function AuthModal({ mode, onClose, onSuccess, initialPlan }) {
         {/* SIGNUP STEP 3 — RECAP + vrai paiement Stripe */}
         {m === "signup" && step === 3 && (
           <div>
-            <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 34, letterSpacing: 1, marginBottom: 6 }}>C'est presque bon !</h2>
+            <h2 style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 34, letterSpacing: 1, marginBottom: 6 }}>C'est presque bon !</h2>
             <div style={{ background: `${selectedPlan.color}11`, border: `1px solid ${selectedPlan.color}33`, borderRadius: 10, padding: "10px 14px", marginBottom: 16, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13 }}>{selectedPlan.icon} Plan {selectedPlan.name} · 14j gratuits</span>
-              <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 20, color: selectedPlan.color }}>{selectedPlan.price}€/mois</span>
+              <span style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 20, color: selectedPlan.color }}>{selectedPlan.price}€/mois</span>
             </div>
             <p style={{ color: C.muted, fontSize: 13, marginBottom: 18, fontFamily: "'DM Sans', sans-serif", lineHeight: 1.5 }}>
               Démarre gratuitement sans carte bancaire, ou active ton abonnement tout de suite — paiement 100% sécurisé via Stripe.
@@ -794,7 +794,7 @@ function AuthModal({ mode, onClose, onSuccess, initialPlan }) {
         {m === "signup" && step === 4 && (
           <div style={{ textAlign: "center" }}>
             <div style={{ fontSize: 52, marginBottom: 12 }}>📬</div>
-            <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 34, letterSpacing: 1, marginBottom: 10 }}>Confirme ton email</h2>
+            <h2 style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 34, letterSpacing: 1, marginBottom: 10 }}>Confirme ton email</h2>
             <p style={{ color: C.muted, fontSize: 14, marginBottom: 24, fontFamily: "'DM Sans', sans-serif", lineHeight: 1.6 }}>
               On t'a envoyé un lien de confirmation à<br />
               <b style={{ color: C.orange }}>{form.email}</b><br />
@@ -831,7 +831,7 @@ function MatchesTab({ liveScores, wnbaScores, nbaLoading, nbaError, setTab }) {
 
   return (
     <div className="fade-in">
-      <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 46, letterSpacing: 2, marginBottom: 8 }}>
+      <h1 style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 46, letterSpacing: 2, marginBottom: 8 }}>
         ANALYSE <span style={{ color: C.orange }}>MATCHS</span>
       </h1>
       <p style={{ color: C.muted, fontSize: 13, marginBottom: 24 }}>
@@ -865,7 +865,7 @@ function MatchesTab({ liveScores, wnbaScores, nbaLoading, nbaError, setTab }) {
                     <div style={{ fontSize: 12, color: C.muted }}>vs {game.away.name}</div>
                   </div>
                   <div style={{ textAlign: "right" }}>
-                    <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 32, color: isLive ? C.blue : accentColor }}>
+                    <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 32, color: isLive ? C.blue : accentColor }}>
                       {game.home.score}–{game.away.score}
                     </div>
                     {isLive && game.clock && <div style={{ fontSize: 10, color: accentColor }}>{game.clock}</div>}
@@ -884,12 +884,12 @@ function MatchesTab({ liveScores, wnbaScores, nbaLoading, nbaError, setTab }) {
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 32px 1fr", alignItems: "center", textAlign: "center" }}>
                     <div>
                       <div style={{ fontSize: 11, color: C.muted, marginBottom: 4 }}>{game.home.abbreviation}</div>
-                      <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 26 }}>{game.home.score}</div>
+                      <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 26 }}>{game.home.score}</div>
                     </div>
                     <div style={{ fontSize: 11, color: C.muted }}>vs</div>
                     <div>
                       <div style={{ fontSize: 11, color: C.muted, marginBottom: 4 }}>{game.away.abbreviation}</div>
-                      <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 26 }}>{game.away.score}</div>
+                      <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 26 }}>{game.away.score}</div>
                     </div>
                   </div>
                 </div>
@@ -1265,7 +1265,7 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
   return (
     <div style={{ minHeight: "100vh", background: C.bg, color: C.text, fontFamily: "'DM Sans', sans-serif" }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;700&family=Permanent+Marker&family=Bangers&display=swap');
         * { box-sizing: border-box; }
         ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-thumb { background: ${C.orange}; border-radius: 4px; }
         @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
@@ -1343,14 +1343,14 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
               `}</style>
 
               <div style={{
-                fontFamily: "'Bebas Neue', cursive", fontSize: "clamp(52px,12vw,96px)",
+                fontFamily: "'Permanent Marker', cursive", fontSize: "clamp(52px,12vw,96px)",
                 letterSpacing: 6, lineHeight: 1, color: "#fff",
                 textShadow: "0 0 40px rgba(200,16,46,0.9), 0 4px 24px rgba(0,0,0,0.8)",
                 animation: "nflTextReveal 0.9s ease both",
               }}>NFL</div>
 
               <div style={{
-                fontFamily: "'Bebas Neue', cursive", fontSize: "clamp(28px,6vw,48px)",
+                fontFamily: "'Permanent Marker', cursive", fontSize: "clamp(28px,6vw,48px)",
                 letterSpacing: 10, color: "#FFB612",
                 textShadow: "0 0 20px rgba(255,182,18,0.7)",
                 animation: "nflTextReveal 0.9s ease 0.2s both",
@@ -1403,7 +1403,7 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
               {/* Beat name + barre de progression simulée */}
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{
-                  fontFamily: "'Bebas Neue', cursive", fontSize: 13, letterSpacing: 2,
+                  fontFamily: "'Permanent Marker', cursive", fontSize: 13, letterSpacing: 2,
                   color: "#C8102E", marginBottom: 3,
                 }}>NFL BEATS</div>
                 <div style={{
@@ -1609,8 +1609,8 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
           <div className="fade-in">
             <div style={{ marginBottom: 28, display: "flex", alignItems: "flex-end", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
               <div>
-                <div style={{ fontSize: 13, color: C.muted, marginBottom: 4 }}>Bienvenue, {user.name} 👋</div>
-                <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: isMobile ? 32 : 46, letterSpacing: 2, lineHeight: 1 }}>
+                <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 20, color: C.orange, marginBottom: 6, transform: "rotate(-2deg)" }}>Bienvenue, {user.name} 👋</div>
+                <h1 style={{ fontFamily: "'Permanent Marker', cursive", fontSize: isMobile ? 30 : 44, letterSpacing: 0, lineHeight: 1.1 }}>
                   TABLEAU DE <span style={{ background: G.orange, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>BORD</span>
                 </h1>
               </div>
@@ -1646,7 +1646,7 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
                     <div style={{ width: 40, height: 40, borderRadius: 12, background: `${k.color}18`, border: `1px solid ${k.color}30`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>{k.icon}</div>
                     <div style={{ width: 8, height: 8, borderRadius: "50%", background: k.color, opacity: 0.7, marginTop: 6 }} />
                   </div>
-                  <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 40, color: k.color, lineHeight: 1, letterSpacing: 1 }}>{k.val}</div>
+                  <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 44, color: k.color, lineHeight: 1, letterSpacing: 1 }}>{k.val}</div>
                   <div style={{ fontSize: 12, color: C.text, fontWeight: 600, marginTop: 5 }}>{k.label}</div>
                   <div style={{ fontSize: 11, color: C.muted, marginTop: 2 }}>{k.sub}</div>
                 </div>
@@ -1710,7 +1710,7 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
                               <div style={{ fontSize: 10, color: C.muted, marginTop: 2 }}>{game.home.abbreviation} · Domicile</div>
                             </div>
                             <div style={{ textAlign: "center", padding: "4px 12px", background: "rgba(255,255,255,0.04)", borderRadius: 10, minWidth: 90 }}>
-                              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 28, letterSpacing: 2, lineHeight: 1 }}>
+                              <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 28, letterSpacing: 2, lineHeight: 1 }}>
                                 <span style={{ color: homeWin ? C.orange : C.text }}>{game.home.score}</span>
                                 <span style={{ color: C.muted, fontSize: 18, margin: "0 4px" }}>–</span>
                                 <span style={{ color: awayWin ? C.orange : C.text }}>{game.away.score}</span>
@@ -1765,7 +1765,7 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
                         <div style={{ fontSize: 12, color: C.muted }}>{player.pos} · {player.fg}% fg</div>
                       </div>
                       <div style={{ textAlign: 'right' }}>
-                        <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 18, color: C.orange }}>{player.score}</div>
+                        <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 18, color: C.orange }}>{player.score}</div>
                         <div style={{ fontSize: 11, color: player.trend >= 0 ? C.green : C.red }}>{player.trend >= 0 ? `+${player.trend}` : player.trend}</div>
                       </div>
                     </div>
@@ -1784,14 +1784,14 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
                     borderRadius: 10, transition: "all .15s",
                     borderBottom: i < 3 ? `1px solid ${C.border}` : "none",
                   }}>
-                    <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 18, color: i === 0 ? C.orange : C.muted, width: 20, textAlign: "center" }}>#{i + 1}</span>
+                    <span style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 18, color: i === 0 ? C.orange : C.muted, width: 20, textAlign: "center" }}>#{i + 1}</span>
                     <Avatar name={p.name} size={38} glow={i === 0} espnId={p.espnId} headshot={p.headshot} league={p.league} />
                     <div style={{ flex: 1 }}>
                       <div style={{ fontWeight: 700, fontSize: 14 }}>{p.name} {p.hot && <span title="En feu">🔥</span>}</div>
                       <div style={{ fontSize: 12, color: C.muted }}>{p.team} · {p.pos}</div>
                     </div>
                     <div style={{ textAlign: "right", marginRight: 8 }}>
-                      <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 22, color: C.orange }}>{p.pts}</div>
+                      <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 22, color: C.orange }}>{p.pts}</div>
                       <div style={{ fontSize: 11, color: C.muted }}>pts/match</div>
                     </div>
                     <Ring score={p.score} size={56} />
@@ -1831,7 +1831,7 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
                 {/* Plan card */}
                 <Card>
                   <SectionTitle>💳 Mon abonnement</SectionTitle>
-                  <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 28, color: plan.color }}>{plan.icon} {plan.name}</div>
+                  <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 28, color: plan.color }}>{plan.icon} {plan.name}</div>
                   <div style={{ fontSize: 13, color: C.muted, margin: "4px 0 14px" }}>{plan.price}€ / mois · Renouvellement le 7 Juil</div>
                   <Btn variant="ghost" small full onClick={() => setTab("account")}>Gérer mon plan →</Btn>
                 </Card>
@@ -1860,7 +1860,7 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
                           {g.league === "wnba" && <span style={{ fontSize: 9, color: "#c084fc" }}>🌸 WNBA</span>}
                         </div>
                         <div style={{ fontWeight: 700, fontSize: 13 }}>{g.home.name || g.home.abbreviation}</div>
-                        <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 24, color: isLive ? C.red : C.orange, letterSpacing: 1 }}>
+                        <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 24, color: isLive ? C.red : C.orange, letterSpacing: 1 }}>
                           {g.home.score} — {g.away.score}
                         </div>
                         <div style={{ fontSize: 12, color: C.muted }}>{g.away.name || g.away.abbreviation}</div>
@@ -1915,7 +1915,7 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
                     <div style={{ display: "flex", alignItems: "center", gap: 20, marginBottom: 28 }}>
                       <Avatar name={selectedPlayer.name} size={80} glow espnId={selectedPlayer.espnId} headshot={selectedPlayer.headshot} league={selectedPlayer.league} />
                       <div style={{ flex: 1 }}>
-                        <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 34, letterSpacing: 2, lineHeight: 1 }}>
+                        <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 34, letterSpacing: 2, lineHeight: 1 }}>
                           {selectedPlayer.name}
                         </div>
                         <div style={{ fontSize: 13, color: C.muted, marginTop: 4 }}>
@@ -1982,7 +1982,7 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
                 </div>
               )}
 
-              <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 46, letterSpacing: 2, marginBottom: 6 }}>ANALYSE <span style={{ color: C.orange }}>JOUEURS</span></h1>
+              <h1 style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 46, letterSpacing: 2, marginBottom: 6 }}>ANALYSE <span style={{ color: C.orange }}>JOUEURS</span></h1>
               <p style={{ color: C.muted, fontSize: 14, marginBottom: 20 }}>Analyse IA automatique · Clique sur un joueur pour changer</p>
 
               {/* Search bar */}
@@ -2120,7 +2120,7 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
 
         {tab === "chat" && (
           <div className="fade-in">
-            <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 46, letterSpacing: 2, marginBottom: 6 }}>ASSISTANT <span style={{ color: C.orange }}>IA</span></h1>
+            <h1 style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 46, letterSpacing: 2, marginBottom: 6 }}>ASSISTANT <span style={{ color: C.orange }}>IA</span></h1>
             <p style={{ color: C.muted, fontSize: 14, marginBottom: 20 }}>Pose n'importe quelle question basket — powered by Claude</p>
             <div className="dash-grid" style={{ display: "grid", gridTemplateColumns: "1fr 280px", gap: 20, alignItems: "start" }}>
               <div>
@@ -2238,7 +2238,7 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
         {/* ── ACCOUNT ── */}
         {tab === "account" && (
           <div className="fade-in">
-            <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 46, letterSpacing: 2, marginBottom: 24 }}>MON <span style={{ color: C.orange }}>COMPTE</span></h1>
+            <h1 style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 46, letterSpacing: 2, marginBottom: 24 }}>MON <span style={{ color: C.orange }}>COMPTE</span></h1>
             <div className="account-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
               {/* Profile */}
               <Card>
@@ -2271,7 +2271,7 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
                   <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
                     <div style={{ fontSize: 42 }}>{plan.icon}</div>
                     <div>
-                      <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 32, color: plan.color }}>{plan.name}</div>
+                      <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 32, color: plan.color }}>{plan.name}</div>
                       <div style={{ fontSize: 13, color: C.muted }}>{plan.price}€ / mois · Actif</div>
                     </div>
                   </div>
@@ -2294,12 +2294,12 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
                     <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
                       <span style={{ fontSize: 26 }}>{p.icon}</span>
                       <div>
-                        <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 20, color: p.color }}>{p.name}</div>
+                        <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 20, color: p.color }}>{p.name}</div>
                         <div style={{ fontSize: 12, color: C.muted }}>{p.desc}</div>
                       </div>
                     </div>
                     <div style={{ textAlign: "right" }}>
-                      <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 24, color: p.color }}>{p.price}€/m</div>
+                      <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 24, color: p.color }}>{p.price}€/m</div>
                       <button style={{ fontSize: 12, color: p.color, background: "none", border: `1px solid ${p.color}55`, borderRadius: 6, padding: "3px 10px", cursor: "pointer", marginTop: 4 }}>
                         {p.id === "elite" ? "Contacter" : "Passer à +"} →
                       </button>
@@ -2361,7 +2361,7 @@ function CheckoutResultPage({ result, onClose, onRetry }) {
     <div style={{ position: "fixed", inset: 0, zIndex: 4000, background: "rgba(4,4,12,0.96)", backdropFilter: "blur(14px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
       <div style={{ textAlign: "center", maxWidth: 460, width: "100%", background: C.bg2, border: `1px solid ${ok ? "rgba(34,197,94,0.35)" : C.border}`, borderRadius: 24, padding: "48px 36px", boxShadow: ok ? "0 0 80px rgba(34,197,94,0.15)" : "0 30px 100px rgba(0,0,0,0.7)" }}>
         <div style={{ fontSize: 64, marginBottom: 16 }}>{ok ? "🎉" : "😕"}</div>
-        <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 42, letterSpacing: 2, marginBottom: 10, color: ok ? C.green : C.text }}>
+        <h1 style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 42, letterSpacing: 2, marginBottom: 10, color: ok ? C.green : C.text }}>
           {ok ? "PAIEMENT CONFIRMÉ" : "PAIEMENT ANNULÉ"}
         </h1>
         {ok ? (
@@ -2369,7 +2369,7 @@ function CheckoutResultPage({ result, onClose, onRetry }) {
             {plan && (
               <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: `${plan.color}15`, border: `1px solid ${plan.color}44`, borderRadius: 30, padding: "8px 20px", marginBottom: 18 }}>
                 <span style={{ fontSize: 20 }}>{plan.icon}</span>
-                <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 20, letterSpacing: 1, color: plan.color }}>PLAN {plan.name.toUpperCase()} ACTIVÉ</span>
+                <span style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 20, letterSpacing: 1, color: plan.color }}>PLAN {plan.name.toUpperCase()} ACTIVÉ</span>
               </div>
             )}
             <p style={{ color: C.muted, fontSize: 14, marginBottom: 28, fontFamily: "'DM Sans', sans-serif", lineHeight: 1.6 }}>

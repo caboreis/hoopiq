@@ -95,7 +95,7 @@ function TeamBtn({ game, side, userPick, locked, winner, onPick }) {
       )}
       <Logo url={team?.logo} size={40} />
       <span style={{
-        fontFamily: "'Bebas Neue', cursive", fontSize: 26, letterSpacing: 1, color: team?.color || nameCol,
+        fontFamily: "'Permanent Marker', cursive", fontSize: 26, letterSpacing: 1, color: team?.color || nameCol,
         opacity: isLoser && !isPicked ? 0.4 : 1,
       }}>{abbr}</span>
       <span style={{ fontSize: 11, color: nameCol, fontWeight: 600, opacity: isLoser && !isPicked ? 0.5 : 1 }}>
@@ -144,7 +144,7 @@ function AIPrediction({ game, pred, loading, winner }) {
         </div>
         <div style={{ fontSize: 13, color: C.text, marginTop: 3, fontWeight: 700 }}>
           Prédit :{" "}
-          <span style={{ color: aiTeam?.color || C.purple, fontFamily: "'Bebas Neue', cursive", fontSize: 15, letterSpacing: .5 }}>
+          <span style={{ color: aiTeam?.color || C.purple, fontFamily: "'Permanent Marker', cursive", fontSize: 15, letterSpacing: .5 }}>
             {pred.winner}
           </span>
           {" "}· {pred.homeWinPct && (pred.winner === game.home.abbr ? pred.homeWinPct : 100 - pred.homeWinPct)}%
@@ -193,12 +193,12 @@ function GameCard({ game, userPick, aiPred, aiLoading, onPick }) {
           {live ? "LIVE " + (game.clock || "") : final ? "FINAL" : "À VENIR"}
         </span>
         {final && (
-          <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 20, color: C.text, letterSpacing: 1 }}>
+          <span style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 20, color: C.text, letterSpacing: 1 }}>
             {game.away?.score} – {game.home?.score}
           </span>
         )}
         {live && (
-          <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 20, color: C.red, letterSpacing: 1 }}>
+          <span style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 20, color: C.red, letterSpacing: 1 }}>
             {game.away?.score} – {game.home?.score}
           </span>
         )}
@@ -269,7 +269,7 @@ function ShareModal({ games, userPicks, aiPicks, userScore, aiScore, total, onCl
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
       <div style={{ background: "#0d0d1f", border: `1px solid ${C.border}`, borderRadius: 24, padding: "28px 24px", maxWidth: 480, width: "100%", animation: "fadeIn .2s" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-          <h2 style={{ margin: 0, fontFamily: "'Bebas Neue', cursive", fontSize: 28, letterSpacing: 2, color: C.orange }}>PARTAGE TA VICTOIRE</h2>
+          <h2 style={{ margin: 0, fontFamily: "'Permanent Marker', cursive", fontSize: 28, letterSpacing: 2, color: C.orange }}>PARTAGE TA VICTOIRE</h2>
           <button onClick={onClose} style={{ background: "none", border: "none", color: C.muted, fontSize: 22, cursor: "pointer" }}>✕</button>
         </div>
 
@@ -426,7 +426,7 @@ export default function Duel() {
       <div style={{ marginBottom: 24 }}>
         <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
           <div>
-            <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 52, letterSpacing: 3, lineHeight: 1, margin: 0 }}>
+            <h1 style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 52, letterSpacing: 3, lineHeight: 1, margin: 0 }}>
               DUEL <span style={{ color: C.orange }}>IA</span> <span style={{ fontSize: 36 }}>⚔️</span>
             </h1>
             <p style={{ color: C.muted, fontSize: 13, marginTop: 4 }}>
@@ -442,12 +442,12 @@ export default function Duel() {
               animation: "popIn .4s ease",
             }}>
               <div style={{ padding: "12px 20px", textAlign: "center", borderRight: `1px solid ${C.border}` }}>
-                <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 32, color: C.orange, lineHeight: 1 }}>{userScore}</div>
+                <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 32, color: C.orange, lineHeight: 1 }}>{userScore}</div>
                 <div style={{ fontSize: 10, color: C.muted, marginTop: 2 }}>TOI</div>
               </div>
               <div style={{ padding: "8px 14px", fontSize: 18, color: C.muted }}>vs</div>
               <div style={{ padding: "12px 20px", textAlign: "center", borderLeft: `1px solid ${C.border}` }}>
-                <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 32, color: C.purple, lineHeight: 1 }}>{aiScore}</div>
+                <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 32, color: C.purple, lineHeight: 1 }}>{aiScore}</div>
                 <div style={{ fontSize: 10, color: C.muted, marginTop: 2 }}>IA</div>
               </div>
             </div>
@@ -471,7 +471,7 @@ export default function Duel() {
           background: resultBg, border: `1px solid ${resultBdr}`, animation: "popIn .5s ease",
         }}>
           <div>
-            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 30, letterSpacing: 2, color: resultColor }}>
+            <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 30, letterSpacing: 2, color: resultColor }}>
               {resultLabel}
             </div>
             <div style={{ fontSize: 13, color: C.muted, marginTop: 2 }}>
@@ -511,7 +511,7 @@ export default function Duel() {
       ) : games.length === 0 ? (
         <div style={{ textAlign: "center", padding: "80px 20px", color: C.muted }}>
           <div style={{ fontSize: 48, marginBottom: 16 }}>🏀</div>
-          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 28, color: C.text, letterSpacing: 2, marginBottom: 8 }}>
+          <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 28, color: C.text, letterSpacing: 2, marginBottom: 8 }}>
             PAS DE MATCHS CE SOIR
           </div>
           <div style={{ fontSize: 14, maxWidth: 360, margin: "0 auto", lineHeight: 1.7 }}>
@@ -519,11 +519,11 @@ export default function Duel() {
           </div>
           <div style={{ marginTop: 24, display: "flex", gap: 14, justifyContent: "center", flexWrap: "wrap" }}>
             <div style={{ padding: "14px 22px", borderRadius: 14, background: C.surface, border: `1px solid ${C.border}` }}>
-              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 22, color: C.orange }}>ORACLE</div>
+              <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 22, color: C.orange }}>ORACLE</div>
               <div style={{ fontSize: 12, color: C.muted, marginTop: 3 }}>Pronostics IA sur les prochains matchs</div>
             </div>
             <div style={{ padding: "14px 22px", borderRadius: 14, background: C.surface, border: `1px solid ${C.border}` }}>
-              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 22, color: C.gold }}>DÉFIS</div>
+              <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 22, color: C.gold }}>DÉFIS</div>
               <div style={{ fontSize: 12, color: C.muted, marginTop: 3 }}>Challenges NBA quotidiens</div>
             </div>
           </div>

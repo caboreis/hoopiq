@@ -93,7 +93,7 @@ function ChallengeCard({ challenge, progress, onAnswer, revealed }) {
             display: "flex", alignItems: "center", justifyContent: "center",
           }}>{challenge.icon}</div>
           <div>
-            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 18, letterSpacing: 1, color: challenge.color }}>{challenge.title}</div>
+            <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 18, letterSpacing: 1, color: challenge.color }}>{challenge.title}</div>
             <div style={{ fontSize: 11, color: C.muted, marginTop: 2 }}>+{challenge.points} pts</div>
           </div>
         </div>
@@ -191,7 +191,7 @@ export default function Challenges() {
         ))}
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to right, rgba(6,6,15,0.85) 0%, rgba(6,6,15,0.4) 100%)" }} />
         <div style={{ position: "relative", zIndex: 1, padding: "28px 32px", height: "100%", display: "flex", flexDirection: "column", justifyContent: "center" }}>
-          <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 46, letterSpacing: 2, lineHeight: 1, margin: 0 }}>
+          <h1 style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 46, letterSpacing: 2, lineHeight: 1, margin: 0 }}>
             DÉFIS <span style={{ color: C.orange }}>QUOTIDIENS</span>
           </h1>
           <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 13, marginTop: 6 }}>
@@ -203,7 +203,7 @@ export default function Challenges() {
       {/* Header */}
       <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: 8, flexWrap: "wrap", gap: 12 }}>
         <div>
-          <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 46, letterSpacing: 2, lineHeight: 1, margin: 0, display: "none" }}>
+          <h1 style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 46, letterSpacing: 2, lineHeight: 1, margin: 0, display: "none" }}>
             DÉFIS <span style={{ color: C.orange }}>QUOTIDIENS</span>
           </h1>
           <p style={{ display: "none" }} />
@@ -226,7 +226,7 @@ export default function Challenges() {
           </div>
         </div>
         <div style={{ textAlign: "center", padding: "0 20px", borderLeft: `1px solid ${C.border}` }}>
-          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 36, color: C.gold, lineHeight: 1 }}>{totalPoints}</div>
+          <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 36, color: C.gold, lineHeight: 1 }}>{totalPoints}</div>
           <div style={{ fontSize: 11, color: C.muted }}>/ {maxPoints} pts</div>
         </div>
         {allAnswered && (
@@ -254,7 +254,7 @@ export default function Challenges() {
           }}
         >
           <div style={{ fontSize: 28, marginBottom: 8 }}>⚡</div>
-          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 20, color: C.purple, letterSpacing: 1 }}>DÉFI BONUS DÉBLOQUÉ</div>
+          <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 20, color: C.purple, letterSpacing: 1 }}>DÉFI BONUS DÉBLOQUÉ</div>
           <div style={{ fontSize: 13, color: C.muted, marginTop: 4 }}>Clique pour tenter le défi bonus +300 pts</div>
         </div>
       )}

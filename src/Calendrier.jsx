@@ -105,7 +105,7 @@ function EventCard({ event }) {
       {/* Content */}
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8, marginBottom: 4 }}>
-          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 17, letterSpacing: 0.8, color: isPast ? C.muted : C.text, lineHeight: 1.2 }}>
+          <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 17, letterSpacing: 0.8, color: isPast ? C.muted : C.text, lineHeight: 1.2 }}>
             {event.title}
           </div>
           <CountdownBadge days={days} />
@@ -147,7 +147,7 @@ export default function Calendrier() {
       }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 20 }}>
           <div>
-            <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 46, letterSpacing: 2, lineHeight: 1, margin: 0 }}>
+            <h1 style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 46, letterSpacing: 2, lineHeight: 1, margin: 0 }}>
               DATES <span style={{ color: C.orange }}>CLÉS</span> NBA
             </h1>
             <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 13, marginTop: 6 }}>
@@ -166,7 +166,7 @@ export default function Calendrier() {
               <div style={{ fontSize: 10, fontWeight: 800, color: nextEvent.color, letterSpacing: 1.5, marginBottom: 4, textTransform: "uppercase" }}>
                 {nextEvent.icon} Prochain événement
               </div>
-              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: nextDays === 0 ? 28 : 44, color: nextEvent.color, lineHeight: 1 }}>
+              <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: nextDays === 0 ? 28 : 44, color: nextEvent.color, lineHeight: 1 }}>
                 {nextDays === 0 ? "AUJOURD'HUI" : `J-${nextDays}`}
               </div>
               <div style={{ fontSize: 11, color: "rgba(255,255,255,0.6)", marginTop: 4, maxWidth: 160 }}>{nextEvent.title}</div>

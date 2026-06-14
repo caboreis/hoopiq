@@ -86,7 +86,7 @@ export default function Oracle() {
       <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 8 }}>
         <div style={{ fontSize: 30 }}>🔮</div>
         <div>
-          <h1 style={{ margin: 0, fontFamily: "'Bebas Neue', cursive", fontSize: 34, letterSpacing: 2, background: `linear-gradient(135deg,${C.purple},${C.blue})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>HOOP IQ ORACLE</h1>
+          <h1 style={{ margin: 0, fontFamily: "'Permanent Marker', cursive", fontSize: 34, letterSpacing: 2, background: `linear-gradient(135deg,${C.purple},${C.blue})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>HOOP IQ ORACLE</h1>
           <p style={{ margin: 0, color: C.muted, fontSize: 13 }}>Pronostics IA ancrés dans les vraies données NBA — cotes Vegas, confrontations, blessures, stats.</p>
         </div>
       </div>
@@ -116,9 +116,9 @@ export default function Oracle() {
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                       <Logo url={g.away.logo} size={24} />
-                      <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 16, color: g.away.color }}>{g.away.abbr}</span>
+                      <span style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 16, color: g.away.color }}>{g.away.abbr}</span>
                       <span style={{ color: C.muted, fontSize: 11 }}>@</span>
-                      <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 16, color: g.home.color }}>{g.home.abbr}</span>
+                      <span style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 16, color: g.home.color }}>{g.home.abbr}</span>
                       <Logo url={g.home.logo} size={24} />
                     </div>
                     <span style={{ fontSize: 9, fontWeight: 800, color: g.status === "live" ? C.red : g.status === "final" ? C.muted : C.blue, textTransform: "uppercase" }}>
@@ -163,12 +163,12 @@ export default function Oracle() {
                     <Logo url={winnerTeam?.logo} size={48} />
                     <div>
                       <div style={{ fontSize: 10, color: C.muted, letterSpacing: 1.5, textTransform: "uppercase" }}>Vainqueur prédit</div>
-                      <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 34, color: winnerTeam?.color, letterSpacing: 1 }}>{winnerTeam?.name}</div>
+                      <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 34, color: winnerTeam?.color, letterSpacing: 1 }}>{winnerTeam?.name}</div>
                     </div>
                   </div>
                   <div style={{ textAlign: "right" }}>
                     <div style={{ fontSize: 10, color: C.muted, letterSpacing: 1, textTransform: "uppercase" }}>Score projeté</div>
-                    <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 30, color: C.text }}>
+                    <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 30, color: C.text }}>
                       {selected.home.abbr} {pred.projectedScore?.home} – {pred.projectedScore?.away} {selected.away.abbr}
                     </div>
                   </div>
@@ -214,7 +214,7 @@ export default function Oracle() {
                 {/* X-factor */}
                 <div style={{ background: `linear-gradient(135deg, rgba(255,215,0,0.06), ${C.surface})`, border: `1px solid rgba(255,215,0,0.2)`, borderRadius: 14, padding: 18 }}>
                   <div style={{ fontSize: 10, fontWeight: 800, color: C.gold, letterSpacing: 1.5, marginBottom: 12, textTransform: "uppercase" }}>⭐ X-Factor</div>
-                  <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 24, color: C.gold, marginBottom: 6 }}>{pred.xFactor?.player}</div>
+                  <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 24, color: C.gold, marginBottom: 6 }}>{pred.xFactor?.player}</div>
                   <p style={{ margin: 0, fontSize: 13, color: "#dde", lineHeight: 1.5 }}>{pred.xFactor?.reason}</p>
                 </div>
               </div>

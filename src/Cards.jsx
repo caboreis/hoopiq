@@ -199,7 +199,7 @@ function PlayerPhoto({ espnId, photo, name, size, league }) {
     <div style={{ width: size, height: size * 0.85, position: "relative", overflow: "hidden" }}>
       {showPlaceholder && (
         <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <div style={{ fontSize: size * 0.28, fontWeight: 900, color: (!url || error) ? "rgba(255,255,255,0.55)" : "rgba(255,255,255,0.2)", fontFamily: "'Bebas Neue',cursive", letterSpacing: 2, textShadow: "0 2px 12px rgba(0,0,0,0.8)" }}>{initials}</div>
+          <div style={{ fontSize: size * 0.28, fontWeight: 900, color: (!url || error) ? "rgba(255,255,255,0.55)" : "rgba(255,255,255,0.2)", fontFamily: "'Permanent Marker',cursive", letterSpacing: 2, textShadow: "0 2px 12px rgba(0,0,0,0.8)" }}>{initials}</div>
         </div>
       )}
       {url && !error && (
@@ -433,7 +433,7 @@ export default function Cards({ plan = "scout", legendaryUnlocked = false, isEli
         <div onClick={() => setLockedCard(null)} style={{ position: "fixed", inset: 0, zIndex: 600, background: "rgba(0,0,0,0.9)", backdropFilter: "blur(16px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
           <div onClick={e => e.stopPropagation()} style={{ maxWidth: 400, width: "100%", textAlign: "center", background: "linear-gradient(160deg,#1a1000,#0d0700)", border: "1px solid rgba(255,215,0,0.4)", borderRadius: 22, padding: "40px 30px", boxShadow: "0 0 60px rgba(255,215,0,0.2)" }}>
             <div style={{ fontSize: 56, marginBottom: 12, filter: "drop-shadow(0 0 16px rgba(255,215,0,0.6))" }}>🔒</div>
-            <h2 style={{ fontFamily: "'Bebas Neue',cursive", fontSize: 30, letterSpacing: 1, color: "#ffd700", margin: "0 0 10px" }}>CARTE LÉGENDAIRE</h2>
+            <h2 style={{ fontFamily: "'Permanent Marker',cursive", fontSize: 30, letterSpacing: 1, color: "#ffd700", margin: "0 0 10px" }}>CARTE LÉGENDAIRE</h2>
             <p style={{ fontSize: 14, color: "rgba(255,255,255,0.75)", lineHeight: 1.6, marginBottom: 26 }}>
               Débloque les cartes <b style={{ color: "#ffd700" }}>OR Légendaires</b> (Jordan, Kobe, Magic, Bird…) avec le plan <b>Pro</b> ou <b>Elite</b> 🚀
             </p>
@@ -449,7 +449,7 @@ export default function Cards({ plan = "scout", legendaryUnlocked = false, isEli
         <div onClick={() => setSelectedCard(null)} style={{ position: "fixed", inset: 0, zIndex: 500, background: "rgba(0,0,0,0.92)", backdropFilter: "blur(16px)", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 24 }}>
           <div onClick={e => e.stopPropagation()}><HoloCard card={selectedCard} size="large" /></div>
           <div style={{ textAlign: "center" }}>
-            <div style={{ fontFamily: "'Bebas Neue',cursive", fontSize: 32, color: RARITY[selectedCard.rarity].color, letterSpacing: 2 }}>{selectedCard.name}</div>
+            <div style={{ fontFamily: "'Permanent Marker',cursive", fontSize: 32, color: RARITY[selectedCard.rarity].color, letterSpacing: 2 }}>{selectedCard.name}</div>
             <div style={{ fontSize: 13, color: "#888" }}>{RARITY[selectedCard.rarity].label} · Score {selectedCard.score}/100</div>
             {selectedCard.titles > 0 && <div style={{ fontSize: 14, color: "#ffd700", marginTop: 4 }}>🏆 {selectedCard.titles} titre{selectedCard.titles > 1 ? "s" : ""} {selectedCard.league === "wnba" ? "WNBA" : "NBA"}</div>}
           </div>
@@ -459,7 +459,7 @@ export default function Cards({ plan = "scout", legendaryUnlocked = false, isEli
 
       {/* Header */}
       <div style={{ background: "rgba(6,6,15,0.95)", backdropFilter: "blur(20px)", borderBottom: "1px solid rgba(255,255,255,0.07)", padding: "0 24px", height: 60, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <div style={{ fontFamily: "'Bebas Neue',cursive", fontSize: 20, background: "linear-gradient(135deg,#ff5c00,#ff8c42)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", letterSpacing: 3 }}>HOOP IQ · CARTES NBA</div>
+        <div style={{ fontFamily: "'Permanent Marker',cursive", fontSize: 20, background: "linear-gradient(135deg,#ff5c00,#ff8c42)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", letterSpacing: 3 }}>HOOP IQ · CARTES NBA</div>
         <div style={{ display: "flex", gap: 4 }}>
           {TABS.map(t => (
             <button key={t.id} onClick={() => setView(t.id)} style={{ padding: "7px 14px", borderRadius: 8, border: "none", cursor: "pointer", background: view === t.id ? "rgba(255,92,0,0.15)" : "transparent", color: view === t.id ? "#ff5c00" : "#6b7280", fontWeight: 700, fontSize: 12, borderBottom: view === t.id ? "2px solid #ff5c00" : "2px solid transparent", fontFamily: "inherit" }}>{t.label}</button>
@@ -479,7 +479,7 @@ export default function Cards({ plan = "scout", legendaryUnlocked = false, isEli
         ))}
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to right, rgba(6,6,15,0.88) 0%, rgba(6,6,15,0.45) 100%)" }} />
         <div style={{ position: "relative", zIndex: 1, padding: "28px 32px", height: "100%", display: "flex", flexDirection: "column", justifyContent: "center" }}>
-          <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 46, letterSpacing: 2, lineHeight: 1, margin: 0, color: "#f0f0ff" }}>
+          <h1 style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 46, letterSpacing: 2, lineHeight: 1, margin: 0, color: "#f0f0ff" }}>
             CARTES <span style={{ color: "#ff5c00" }}>NBA</span>
           </h1>
           <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 13, marginTop: 6 }}>
@@ -494,7 +494,7 @@ export default function Cards({ plan = "scout", legendaryUnlocked = false, isEli
         {view === "teams" && (
           <div>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
-              <h1 style={{ fontFamily: "'Bebas Neue',cursive", fontSize: 40, letterSpacing: 2 }}>30 ÉQUIPES <span style={{ color: "#ff5c00" }}>NBA</span></h1>
+              <h1 style={{ fontFamily: "'Permanent Marker',cursive", fontSize: 40, letterSpacing: 2 }}>30 ÉQUIPES <span style={{ color: "#ff5c00" }}>NBA</span></h1>
               <div style={{ display: "flex", gap: 8 }}>
                 {[["all","Toutes"],["Est","Conférence Est"],["Ouest","Conférence Ouest"]].map(([id,label]) => (
                   <button key={id} onClick={() => setConfFilter(id)} style={{ padding: "6px 14px", borderRadius: 20, border: `1px solid ${confFilter === id ? "#ff5c00" : "rgba(255,255,255,0.1)"}`, background: confFilter === id ? "rgba(255,92,0,0.12)" : "transparent", color: confFilter === id ? "#ff5c00" : "#6b7280", fontSize: 12, cursor: "pointer", fontFamily: "inherit" }}>{label}</button>
@@ -508,7 +508,7 @@ export default function Cards({ plan = "scout", legendaryUnlocked = false, isEli
                 <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 24, padding: 20, background: `${selectedTeam.color}15`, borderRadius: 16, border: `1px solid ${selectedTeam.color}30` }}>
                   <div style={{ width: 16, height: 60, background: selectedTeam.color, borderRadius: 4 }} />
                   <div>
-                    <div style={{ fontFamily: "'Bebas Neue',cursive", fontSize: 36, letterSpacing: 1 }}>{selectedTeam.name}</div>
+                    <div style={{ fontFamily: "'Permanent Marker',cursive", fontSize: 36, letterSpacing: 1 }}>{selectedTeam.name}</div>
                     <div style={{ fontSize: 13, color: "#888" }}>Conférence {selectedTeam.conf} · {selectedTeam.players.length} joueurs</div>
                   </div>
                 </div>
@@ -527,7 +527,7 @@ export default function Cards({ plan = "scout", legendaryUnlocked = false, isEli
                     <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 10 }}>
                       <div style={{ width: 6, height: 40, background: team.color, borderRadius: 3, flexShrink: 0 }} />
                       <div>
-                        <div style={{ fontFamily: "'Bebas Neue',cursive", fontSize: 16, color: team.color, letterSpacing: 1 }}>{team.id}</div>
+                        <div style={{ fontFamily: "'Permanent Marker',cursive", fontSize: 16, color: team.color, letterSpacing: 1 }}>{team.id}</div>
                         <div style={{ fontSize: 12, fontWeight: 700, lineHeight: 1.3 }}>{team.name}</div>
                         <div style={{ fontSize: 11, color: "#6b7280" }}>{team.conf}</div>
                       </div>
@@ -560,7 +560,7 @@ export default function Cards({ plan = "scout", legendaryUnlocked = false, isEli
                   <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: 2, color: "#c084fc", textTransform: "uppercase", fontFamily: "monospace" }}>🌸 ÉDITION WNBA</span>
                   <div style={{ height: 1, flex: 1, background: "rgba(192,132,252,0.2)" }} />
                 </div>
-                <h1 style={{ fontFamily: "'Bebas Neue',cursive", fontSize: 48, letterSpacing: 2, lineHeight: 1, margin: 0, background: "linear-gradient(135deg,#fff,#c084fc)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>STARS DE LA WNBA</h1>
+                <h1 style={{ fontFamily: "'Permanent Marker',cursive", fontSize: 48, letterSpacing: 2, lineHeight: 1, margin: 0, background: "linear-gradient(135deg,#fff,#c084fc)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>STARS DE LA WNBA</h1>
                 <p style={{ color: "rgba(192,132,252,0.7)", fontSize: 13, marginTop: 6 }}>17 joueuses · 2 Légendes OR · Saison 2024</p>
               </div>
             </div>
@@ -627,7 +627,7 @@ export default function Cards({ plan = "scout", legendaryUnlocked = false, isEli
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 {[...WNBA_PLAYERS].sort((a, b) => b.score - a.score).map((p, i) => (
                   <div key={p.id} style={{ display: "flex", alignItems: "center", gap: 14, padding: "10px 14px", borderRadius: 10, background: i === 0 ? "rgba(255,215,0,0.06)" : "rgba(255,255,255,0.02)", border: `1px solid ${i === 0 ? "rgba(255,215,0,0.2)" : "rgba(255,255,255,0.05)"}`, cursor: "pointer" }} onClick={() => setSelectedCard(p)}>
-                    <span style={{ fontFamily: "'Bebas Neue',cursive", fontSize: 20, color: i === 0 ? "#ffd700" : "#6b7280", width: 22, textAlign: "center" }}>#{i + 1}</span>
+                    <span style={{ fontFamily: "'Bebas Neue',cursive", fontSize: 22, color: i === 0 ? "#ffd700" : "#6b7280", width: 22, textAlign: "center" }}>#{i + 1}</span>
                     <div style={{ flex: 1 }}>
                       <div style={{ fontWeight: 700, fontSize: 13 }}>{p.name} <span style={{ fontSize: 10, color: "#c084fc", background: "rgba(192,132,252,0.1)", padding: "1px 6px", borderRadius: 4, marginLeft: 4 }}>{p.trait}</span></div>
                       <div style={{ fontSize: 11, color: p.teamColor }}>{p.team} · {p.pos}</div>
@@ -637,7 +637,7 @@ export default function Cards({ plan = "scout", legendaryUnlocked = false, isEli
                       <div style={{ textAlign: "center" }}><div style={{ fontFamily: "'Bebas Neue',cursive", fontSize: 18, color: "#22d37a" }}>{p.reb}</div><div style={{ fontSize: 9, color: "#6b7280" }}>REB</div></div>
                       <div style={{ textAlign: "center" }}><div style={{ fontFamily: "'Bebas Neue',cursive", fontSize: 18, color: "#4fa3ff" }}>{p.ast}</div><div style={{ fontSize: 9, color: "#6b7280" }}>AST</div></div>
                     </div>
-                    <div style={{ width: 36, height: 36, borderRadius: "50%", background: `${RARITY[p.rarity].color}20`, border: `2px solid ${RARITY[p.rarity].color}60`, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Bebas Neue',cursive", fontSize: 14, color: RARITY[p.rarity].color }}>{p.score}</div>
+                    <div style={{ width: 36, height: 36, borderRadius: "50%", background: `${RARITY[p.rarity].color}20`, border: `2px solid ${RARITY[p.rarity].color}60`, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Bebas Neue',cursive", fontSize: 16, color: RARITY[p.rarity].color }}>{p.score}</div>
                   </div>
                 ))}
               </div>
@@ -667,7 +667,7 @@ export default function Cards({ plan = "scout", legendaryUnlocked = false, isEli
         {/* COLLECTION */}
         {view === "collection" && (
           <div>
-            <h1 style={{ fontFamily: "'Bebas Neue',cursive", fontSize: 40, letterSpacing: 2, marginBottom: 20 }}>MA <span style={{ color: "#ff5c00" }}>COLLECTION</span></h1>
+            <h1 style={{ fontFamily: "'Permanent Marker',cursive", fontSize: 40, letterSpacing: 2, marginBottom: 20 }}>MA <span style={{ color: "#ff5c00" }}>COLLECTION</span></h1>
             <div style={{ display: "flex", gap: 8, marginBottom: 24, flexWrap: "wrap" }}>
               {[["all","Toutes"],["gold","✦ OR"],["legendary","🔥 Légendaires"],["epic","💜 Épiques"],["rare","💙 Rares"],["common","⬜ Communes"],["wnba","🌸 WNBA"]].map(([id,label]) => (
                 <button key={id} onClick={() => setFilter(id)} style={{ padding: "5px 14px", borderRadius: 20, border: `1px solid ${filter === id ? (id === "gold" ? "#ffd700" : "#ff5c00") : "rgba(255,255,255,0.1)"}`, background: filter === id ? (id === "gold" ? "rgba(255,215,0,0.12)" : "rgba(255,92,0,0.12)") : "transparent", color: filter === id ? (id === "gold" ? "#ffd700" : "#ff5c00") : "#6b7280", fontSize: 12, cursor: "pointer", fontFamily: "inherit" }}>{label}</button>
@@ -694,16 +694,16 @@ export default function Cards({ plan = "scout", legendaryUnlocked = false, isEli
         {/* PACKS */}
         {view === "packs" && (
           <div>
-            <h1 style={{ fontFamily: "'Bebas Neue',cursive", fontSize: 40, letterSpacing: 2, marginBottom: 8 }}>OUVRIR DES <span style={{ color: "#ff5c00" }}>PACKS</span></h1>
+            <h1 style={{ fontFamily: "'Permanent Marker',cursive", fontSize: 40, letterSpacing: 2, marginBottom: 8 }}>OUVRIR DES <span style={{ color: "#ff5c00" }}>PACKS</span></h1>
             <p style={{ color: "#6b7280", fontSize: 13, marginBottom: 32 }}>Obtiens les stars NBA · les joueuses WNBA · et les légendes OR 🏆</p>
             <div className="cards-packs-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(260px,1fr))", gap: 20, marginBottom: 36 }}>
               {PACKS.map(pack => (
                 <div key={pack.id} className="pack-h" onClick={() => openPackSafe(pack)} style={{ background: pack.id === "legend" ? "linear-gradient(160deg,#1a1000,#3d2800)" : `linear-gradient(160deg,rgba(0,0,0,0.9),${pack.color}20)`, border: `2px solid ${pack.color}${pack.id === "legend" ? "cc" : "50"}`, borderRadius: 20, padding: 28, textAlign: "center", cursor: "pointer", transition: "all .3s", animation: pack.id === "legend" ? "gp 3s ease-in-out infinite" : "none" }}>
                   {pack.id === "legend" && <div style={{ fontSize: 11, color: "#ffd700", fontWeight: 800, letterSpacing: 2, marginBottom: 8 }}>✦ ÉDITION LIMITÉE ✦</div>}
                   <div style={{ fontSize: 70, marginBottom: 14, animation: "float 3s ease-in-out infinite" }}>{pack.emoji}</div>
-                  <div style={{ fontFamily: "'Bebas Neue',cursive", fontSize: 26, color: pack.color, letterSpacing: 1, marginBottom: 6 }}>{pack.name}</div>
+                  <div style={{ fontFamily: "'Permanent Marker',cursive", fontSize: 26, color: pack.color, letterSpacing: 1, marginBottom: 6 }}>{pack.name}</div>
                   <div style={{ fontSize: 12, color: "#888", marginBottom: 16, lineHeight: 1.6 }}>{pack.desc}</div>
-                  <div style={{ fontFamily: "'Bebas Neue',cursive", fontSize: 40, color: pack.color, marginBottom: 16 }}>{pack.price}</div>
+                  <div style={{ fontFamily: "'Bebas Neue',cursive", fontSize: 44, color: pack.color, marginBottom: 16 }}>{pack.price}</div>
                   <button style={{ width: "100%", padding: "12px", borderRadius: 10, border: "none", cursor: "pointer", background: pack.id === "legend" ? "linear-gradient(135deg,#ffd700,#ff8c00)" : `linear-gradient(135deg,${pack.color},${pack.color}99)`, color: pack.id === "legend" ? "#1a0800" : "#fff", fontWeight: 900, fontSize: 14, fontFamily: "inherit" }}>{pack.id === "legend" && !legendaryUnlocked ? "🔒 Pro / Elite" : "Ouvrir →"}</button>
                 </div>
               ))}

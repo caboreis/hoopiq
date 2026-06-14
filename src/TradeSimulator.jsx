@@ -138,7 +138,7 @@ Sois passionné, data-driven, en français. Parle comme un vrai insider NBA.`,
       if (line.startsWith("## ")) {
         return (
           <div key={i} style={{
-            fontFamily: "'Bebas Neue', cursive", fontSize: 22,
+            fontFamily: "'Permanent Marker', cursive", fontSize: 22,
             color: C.orange, letterSpacing: 1.5, marginTop: 20, marginBottom: 6,
           }}>{line.replace("## ", "")}</div>
         );
@@ -183,7 +183,7 @@ Sois passionné, data-driven, en français. Parle comme un vrai insider NBA.`,
 
       {/* Header */}
       <div style={{ marginBottom: 28 }}>
-        <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 48, letterSpacing: 2, lineHeight: 1, marginBottom: 6 }}>
+        <h1 style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 48, letterSpacing: 2, lineHeight: 1, marginBottom: 6 }}>
           TRADE <span style={{ color: C.orange }}>SIMULATOR</span>
         </h1>
         <p style={{ color: C.muted, fontSize: 14 }}>
@@ -310,7 +310,7 @@ Sois passionné, data-driven, en français. Parle comme un vrai insider NBA.`,
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <span style={{ fontSize: 24, animation: loading ? "pulse 1.2s infinite" : "none" }}>🦾</span>
               <div>
-                <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 20, color: C.orange, letterSpacing: 2 }}>
+                <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 20, color: C.orange, letterSpacing: 2 }}>
                   JARVIS TRADE REPORT
                 </div>
                 <div style={{ fontSize: 12, color: C.muted }}>

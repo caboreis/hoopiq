@@ -38,7 +38,7 @@ function PodiumBlock({ player, height, delay }) {
         display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-start", paddingTop: 12,
       }}>
         <div style={{ fontSize: 28 }}>{player.badge}</div>
-        <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 28, color, lineHeight: 1 }}>#{player.rank}</div>
+        <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 28, color, lineHeight: 1 }}>#{player.rank}</div>
       </div>
     </div>
   );
@@ -57,7 +57,7 @@ export default function Leaderboard() {
 
       <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: 8, flexWrap: "wrap", gap: 12 }}>
         <div>
-          <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 46, letterSpacing: 2, lineHeight: 1, margin: 0 }}>
+          <h1 style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 46, letterSpacing: 2, lineHeight: 1, margin: 0 }}>
             CLASSEMENT <span style={{ color: C.orange }}>HOOPIQ</span>
           </h1>
           <p style={{ color: C.muted, fontSize: 13, marginTop: 4 }}>Meilleurs pronostiqueurs · Mis à jour en temps réel</p>
@@ -84,7 +84,7 @@ export default function Leaderboard() {
         ].map(s => (
           <div key={s.label} style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 14, padding: "14px 18px", textAlign: "center" }}>
             <div style={{ fontSize: 22, marginBottom: 4 }}>{s.icon}</div>
-            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 26, color: C.orange }}>{s.val}</div>
+            <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 26, color: C.orange }}>{s.val}</div>
             <div style={{ fontSize: 11, color: C.muted }}>{s.label}</div>
           </div>
         ))}
@@ -120,7 +120,7 @@ export default function Leaderboard() {
               boxShadow: p.rank === 1 ? "0 0 0 1px rgba(255,215,0,0.1)" : undefined,
               animation: p.rank <= 3 ? `riseUp 0.5s ease ${p.rank * 0.05}s both` : undefined,
             }}>
-              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 20, color: rankColor, display: "flex", alignItems: "center" }}>
+              <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 20, color: rankColor, display: "flex", alignItems: "center" }}>
                 {p.badge || `#${p.rank}`}
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -130,7 +130,7 @@ export default function Leaderboard() {
                   <div style={{ fontSize: 11, color: C.muted }}>{p.team}</div>
                 </div>
               </div>
-              <div style={{ textAlign: "right", fontFamily: "'Bebas Neue', cursive", fontSize: 18, color: rankColor, display: "flex", alignItems: "center", justifyContent: "flex-end" }}>
+              <div style={{ textAlign: "right", fontFamily: "'Permanent Marker', cursive", fontSize: 18, color: rankColor, display: "flex", alignItems: "center", justifyContent: "flex-end" }}>
                 {p.pts.toLocaleString()}
               </div>
               <div style={{ textAlign: "right", fontSize: 13, color: C.text, display: "flex", alignItems: "center", justifyContent: "flex-end" }}>

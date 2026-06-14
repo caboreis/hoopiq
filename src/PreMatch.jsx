@@ -148,7 +148,7 @@ export default function PreMatch() {
               <span style={{ width: 7, height: 7, borderRadius: "50%", background: C.orange, animation: "glowPulse 1.5s infinite", display: "inline-block" }} />
               Analyse IA · NBA
             </div>
-            <h1 style={{ margin: 0, fontFamily: "'Bebas Neue', cursive", fontSize: 56, letterSpacing: 2, lineHeight: .9 }}>
+            <h1 style={{ margin: 0, fontFamily: "'Permanent Marker', cursive", fontSize: 56, letterSpacing: 2, lineHeight: .9 }}>
               PRONOSTICS<br />
               <span style={{ background: `linear-gradient(135deg,${C.orange},${C.gold})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>IA LIVE</span>
             </h1>
@@ -188,7 +188,7 @@ export default function PreMatch() {
           ].map(s => (
             <div key={s.l} style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 14px", borderRadius: 20, background: `${s.c}12`, border: `1px solid ${s.c}30` }}>
               <span>{s.icon}</span>
-              <span style={{ fontFamily: "'Bebas Neue',cursive", fontSize: 20, color: s.c, letterSpacing: .5 }}>{s.v}</span>
+              <span style={{ fontFamily: "'Permanent Marker',cursive", fontSize: 20, color: s.c, letterSpacing: .5 }}>{s.v}</span>
               <span style={{ fontSize: 11, color: C.muted }}>{s.l}</span>
             </div>
           ))}
@@ -203,9 +203,9 @@ export default function PreMatch() {
               <PickBadge />
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <Logo url={pickOfDay.away.logo} size={32} />
-                <span style={{ fontFamily: "'Bebas Neue',cursive", fontSize: 22, color: pickOfDay.away.color || C.text }}>{pickOfDay.away.abbr}</span>
+                <span style={{ fontFamily: "'Permanent Marker',cursive", fontSize: 22, color: pickOfDay.away.color || C.text }}>{pickOfDay.away.abbr}</span>
                 <span style={{ color: C.muted, fontSize: 12 }}>@</span>
-                <span style={{ fontFamily: "'Bebas Neue',cursive", fontSize: 22, color: pickOfDay.home.color || C.text }}>{pickOfDay.home.abbr}</span>
+                <span style={{ fontFamily: "'Permanent Marker',cursive", fontSize: 22, color: pickOfDay.home.color || C.text }}>{pickOfDay.home.abbr}</span>
                 <Logo url={pickOfDay.home.logo} size={32} />
               </div>
               <div style={{ fontSize: 13, color: C.gold, fontWeight: 700 }}>→ {predictions[pickOfDay.id].winner} gagne · {Math.max(predictions[pickOfDay.id].homeWinPct, 100 - predictions[pickOfDay.id].homeWinPct)}% de confiance</div>
@@ -230,7 +230,7 @@ export default function PreMatch() {
       ) : games.length === 0 ? (
         <div style={{ textAlign: "center", padding: "60px 20px", border: `1px dashed ${C.border}`, borderRadius: 20 }}>
           <div style={{ fontSize: 52, marginBottom: 14 }}>🏀</div>
-          <div style={{ fontSize: 20, fontFamily: "'Bebas Neue',cursive", letterSpacing: 1, marginBottom: 8 }}>Aucun match programmé</div>
+          <div style={{ fontSize: 20, fontFamily: "'Permanent Marker',cursive", letterSpacing: 1, marginBottom: 8 }}>Aucun match programmé</div>
           <div style={{ fontSize: 13, color: C.muted }}>Reviens ce soir pour les pronostics de la prochaine soirée NBA !</div>
         </div>
       ) : (
@@ -267,12 +267,12 @@ export default function PreMatch() {
                       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                         <Logo url={g.away.logo} size={26} />
                         <div>
-                          <div style={{ fontFamily: "'Bebas Neue',cursive", fontSize: 15, color: g.away.color || C.text, letterSpacing: .5 }}>{g.away.abbr}</div>
+                          <div style={{ fontFamily: "'Permanent Marker',cursive", fontSize: 15, color: g.away.color || C.text, letterSpacing: .5 }}>{g.away.abbr}</div>
                           <div style={{ fontSize: 9, color: C.muted }}>{g.away.record}</div>
                         </div>
                         <span style={{ fontSize: 10, color: C.muted, margin: "0 2px" }}>@</span>
                         <div style={{ textAlign: "right" }}>
-                          <div style={{ fontFamily: "'Bebas Neue',cursive", fontSize: 15, color: g.home.color || C.text, letterSpacing: .5 }}>{g.home.abbr}</div>
+                          <div style={{ fontFamily: "'Permanent Marker',cursive", fontSize: 15, color: g.home.color || C.text, letterSpacing: .5 }}>{g.home.abbr}</div>
                           <div style={{ fontSize: 9, color: C.muted }}>{g.home.record}</div>
                         </div>
                         <Logo url={g.home.logo} size={26} />
@@ -327,11 +327,11 @@ export default function PreMatch() {
                     {/* Home */}
                     <div style={{ flex: 1, textAlign: "center" }}>
                       <Logo url={selected.home.logo} size={80} />
-                      <div style={{ fontFamily: "'Bebas Neue',cursive", fontSize: 36, color: selected.home.color || C.text, letterSpacing: 2, marginTop: 10, textShadow: `0 0 40px ${selected.home.color || C.orange}70`, lineHeight: 1 }}>{selected.home.abbr}</div>
+                      <div style={{ fontFamily: "'Permanent Marker',cursive", fontSize: 36, color: selected.home.color || C.text, letterSpacing: 2, marginTop: 10, textShadow: `0 0 40px ${selected.home.color || C.orange}70`, lineHeight: 1 }}>{selected.home.abbr}</div>
                       <div style={{ fontSize: 12, color: C.muted, marginTop: 4 }}>{selected.home.name}</div>
                       <div style={{ fontSize: 11, color: C.muted, fontFamily: "monospace", marginTop: 2 }}>{selected.home.record}</div>
                       {pred && !pred.error && (
-                        <div style={{ fontFamily: "'Bebas Neue',cursive", fontSize: 42, color: selected.home.color || C.orange, marginTop: 10, letterSpacing: 1, textShadow: `0 0 20px ${selected.home.color || C.orange}60` }}>
+                        <div style={{ fontFamily: "'Permanent Marker',cursive", fontSize: 42, color: selected.home.color || C.orange, marginTop: 10, letterSpacing: 1, textShadow: `0 0 20px ${selected.home.color || C.orange}60` }}>
                           {pred.projectedScore?.home}
                         </div>
                       )}
@@ -339,7 +339,7 @@ export default function PreMatch() {
 
                     {/* Centre */}
                     <div style={{ textAlign: "center", flexShrink: 0, minWidth: 120 }}>
-                      <div style={{ fontFamily: "'Bebas Neue',cursive", fontSize: 52, color: "rgba(255,255,255,0.08)", letterSpacing: 6, lineHeight: 1 }}>VS</div>
+                      <div style={{ fontFamily: "'Permanent Marker',cursive", fontSize: 52, color: "rgba(255,255,255,0.08)", letterSpacing: 6, lineHeight: 1 }}>VS</div>
                       {selected.gameTime && <div style={{ marginTop: 10 }}><Countdown gameTime={selected.gameTime} /></div>}
                       {pred && !pred.error && <div style={{ fontSize: 10, color: C.muted, marginTop: 8, letterSpacing: 1 }}>SCORE PROJETÉ</div>}
                     </div>
@@ -347,11 +347,11 @@ export default function PreMatch() {
                     {/* Away */}
                     <div style={{ flex: 1, textAlign: "center" }}>
                       <Logo url={selected.away.logo} size={80} />
-                      <div style={{ fontFamily: "'Bebas Neue',cursive", fontSize: 36, color: selected.away.color || C.text, letterSpacing: 2, marginTop: 10, textShadow: `0 0 40px ${selected.away.color || C.blue}70`, lineHeight: 1 }}>{selected.away.abbr}</div>
+                      <div style={{ fontFamily: "'Permanent Marker',cursive", fontSize: 36, color: selected.away.color || C.text, letterSpacing: 2, marginTop: 10, textShadow: `0 0 40px ${selected.away.color || C.blue}70`, lineHeight: 1 }}>{selected.away.abbr}</div>
                       <div style={{ fontSize: 12, color: C.muted, marginTop: 4 }}>{selected.away.name}</div>
                       <div style={{ fontSize: 11, color: C.muted, fontFamily: "monospace", marginTop: 2 }}>{selected.away.record}</div>
                       {pred && !pred.error && (
-                        <div style={{ fontFamily: "'Bebas Neue',cursive", fontSize: 42, color: selected.away.color || C.blue, marginTop: 10, letterSpacing: 1, textShadow: `0 0 20px ${selected.away.color || C.blue}60` }}>
+                        <div style={{ fontFamily: "'Permanent Marker',cursive", fontSize: 42, color: selected.away.color || C.blue, marginTop: 10, letterSpacing: 1, textShadow: `0 0 20px ${selected.away.color || C.blue}60` }}>
                           {pred.projectedScore?.away}
                         </div>
                       )}
@@ -414,7 +414,7 @@ export default function PreMatch() {
                       <Logo url={winnerTeam?.logo} size={50} />
                       <div>
                         <div style={{ fontSize: 10, color: C.muted, letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 2 }}>Vainqueur prédit</div>
-                        <div style={{ fontFamily: "'Bebas Neue',cursive", fontSize: 34, color: winnerTeam?.color || C.orange, letterSpacing: 1, lineHeight: 1 }}>{winnerTeam?.name}</div>
+                        <div style={{ fontFamily: "'Permanent Marker',cursive", fontSize: 34, color: winnerTeam?.color || C.orange, letterSpacing: 1, lineHeight: 1 }}>{winnerTeam?.name}</div>
                       </div>
                     </div>
                     <ConfBadge conf={pred.confidence} />
@@ -441,7 +441,7 @@ export default function PreMatch() {
                     {/* X-Factor */}
                     <div style={{ background: `linear-gradient(135deg,rgba(245,200,66,0.09),${C.surface})`, border: `1px solid rgba(245,200,66,0.28)`, borderRadius: 14, padding: "16px 18px" }}>
                       <div style={{ fontSize: 10, fontWeight: 800, color: C.gold, letterSpacing: 1.5, marginBottom: 12, textTransform: "uppercase", fontFamily: "monospace" }}>⭐ X-Factor</div>
-                      <div style={{ fontFamily: "'Bebas Neue',cursive", fontSize: 24, color: C.gold, marginBottom: 8, letterSpacing: 1 }}>{pred.xFactor?.player}</div>
+                      <div style={{ fontFamily: "'Permanent Marker',cursive", fontSize: 24, color: C.gold, marginBottom: 8, letterSpacing: 1 }}>{pred.xFactor?.player}</div>
                       <p style={{ margin: 0, fontSize: 13, color: "#dde", lineHeight: 1.6 }}>{pred.xFactor?.reason}</p>
                     </div>
                   </div>

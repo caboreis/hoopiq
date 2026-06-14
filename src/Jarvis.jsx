@@ -138,7 +138,7 @@ export default function Jarvis() {
         <div style={{ position: "fixed", inset: 0, background: "linear-gradient(180deg, transparent, rgba(0,150,255,0.02), transparent)", animation: "scan 3s linear infinite", pointerEvents: "none" }} />
         <div style={{ textAlign: "center", zIndex: 10 }}>
           <div style={{ fontSize: 60, marginBottom: 24, animation: "blink 2s infinite" }}>🦾</div>
-          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 36, color: "#4fa3ff", letterSpacing: 8, marginBottom: 32, textShadow: "0 0 30px rgba(79,163,255,0.8)" }}>
+          <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 36, color: "#4fa3ff", letterSpacing: 8, marginBottom: 32, textShadow: "0 0 30px rgba(79,163,255,0.8)" }}>
             JARVIS
           </div>
           <div style={{ width: 300, height: 2, background: "rgba(79,163,255,0.2)", borderRadius: 2, marginBottom: 24, overflow: "hidden" }}>
@@ -194,7 +194,7 @@ export default function Jarvis() {
             <div style={{ position: "absolute", inset: -4, borderRadius: "50%", border: "1px solid rgba(79,163,255,0.4)", animation: "pulseRing 2s ease-in-out infinite" }} />
           </div>
           <div>
-            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 22, color: "#4fa3ff", letterSpacing: 3, lineHeight: 1, textShadow: "0 0 15px rgba(79,163,255,0.5)" }}>JARVIS</div>
+            <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 22, color: "#4fa3ff", letterSpacing: 3, lineHeight: 1, textShadow: "0 0 15px rgba(79,163,255,0.5)" }}>JARVIS</div>
             <div style={{ fontSize: 11, color: "rgba(79,163,255,0.6)", letterSpacing: 1.5, fontFamily: "monospace" }}>HOOPIQ PERSONAL AI · EN LIGNE</div>
           </div>
         </div>
@@ -206,12 +206,12 @@ export default function Jarvis() {
             { label: "Churn", value: "3.2%", color: "#ff5c00" },
           ].map(stat => (
             <div key={stat.label} style={{ textAlign: "center" }}>
-              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 18, color: stat.color, lineHeight: 1 }}>{stat.value}</div>
+              <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 18, color: stat.color, lineHeight: 1 }}>{stat.value}</div>
               <div style={{ fontSize: 9, color: "rgba(255,255,255,0.3)", letterSpacing: 1, fontFamily: "monospace" }}>{stat.label}</div>
             </div>
           ))}
           <div style={{ textAlign: "right" }}>
-            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 20, color: "#4fa3ff", letterSpacing: 2 }}>
+            <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 20, color: "#4fa3ff", letterSpacing: 2 }}>
               {time.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
             </div>
             <div style={{ fontSize: 9, color: "rgba(255,255,255,0.3)", fontFamily: "monospace" }}>

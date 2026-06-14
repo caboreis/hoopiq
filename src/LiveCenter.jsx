@@ -201,7 +201,7 @@ function WatchLiveModal({ game, onClose }) {
             ) : (
               <span style={{ padding: "3px 10px", background: "rgba(255,255,255,0.06)", borderRadius: 6, fontSize: 10, color: C.muted, fontWeight: 800 }}>{game.status === "final" ? "REPLAY" : "PREVIEW"}</span>
             )}
-            <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 20, letterSpacing: 1 }}>
+            <span style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 20, letterSpacing: 1 }}>
               <span style={{ color: game.home.color }}>{game.home.abbr}</span> <span style={{ color: C.muted }}>vs</span> <span style={{ color: game.away.color }}>{game.away.abbr}</span>
             </span>
           </div>
@@ -281,12 +281,12 @@ function TeamScore({ team, score, pts_q, quarter, side }) {
       <div style={{ display: "flex", alignItems: "center", gap: 10, flexDirection: side === "away" ? "row-reverse" : "row" }}>
         <Logo url={team.logo} size={40} />
         <div>
-          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 15, color: team.color, letterSpacing: 2 }}>{team.abbr}</div>
+          <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 15, color: team.color, letterSpacing: 2 }}>{team.abbr}</div>
           <div style={{ fontSize: 11, color: C.muted, lineHeight: 1.2 }}>{team.short || lastWord(team.name)}</div>
           {team.record && <div style={{ fontSize: 10, color: C.muted, opacity: 0.7 }}>{team.record}</div>}
         </div>
       </div>
-      <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 54, lineHeight: 1, marginTop: 6, color: "#fff" }}>{score}</div>
+      <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 54, lineHeight: 1, marginTop: 6, color: "#fff" }}>{score}</div>
       <div style={{ display: "flex", gap: 3, marginTop: 4, flexDirection: side === "away" ? "row-reverse" : "row", flexWrap: "wrap" }}>
         {pts_q.map((q, i) => (
           <div key={i} style={{ fontSize: 10, color: i < (quarter || 1) ? C.text : C.muted, background: i < (quarter || 1) ? "rgba(255,255,255,0.06)" : "transparent", padding: "2px 5px", borderRadius: 3, fontFamily: "monospace" }}>
@@ -353,7 +353,7 @@ function BoxScore({ team, color }) {
     <div style={{ flex: 1, minWidth: 0 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
         <div style={{ width: 8, height: 18, background: color, borderRadius: 2 }} />
-        <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 16, color, letterSpacing: 1 }}>{team.abbr}</span>
+        <span style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 16, color, letterSpacing: 1 }}>{team.abbr}</span>
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 30px 30px 30px 38px", gap: 4, fontSize: 9, color: C.muted, fontWeight: 800, padding: "0 8px 6px", textTransform: "uppercase", letterSpacing: 0.5 }}>
         <span>Joueur</span><span style={{ textAlign: "center" }}>PTS</span><span style={{ textAlign: "center" }}>REB</span><span style={{ textAlign: "center" }}>AST</span><span style={{ textAlign: "center" }}>+/-</span>
@@ -710,7 +710,7 @@ export default function LiveCenter() {
       <div style={{ background: "rgba(6,6,15,0.95)", backdropFilter: "blur(20px)", borderBottom: `1px solid ${C.border}`, padding: "0 24px", height: 60, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <div style={{ width: 8, height: 8, borderRadius: "50%", background: liveCount ? C.red : C.muted, animation: liveCount ? "pulse 1s infinite" : "none" }} />
-          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 20, background: `linear-gradient(135deg,${C.orange},${C.gold})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", letterSpacing: 3 }}>HOOP IQ · LIVE CENTER</div>
+          <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 20, background: `linear-gradient(135deg,${C.orange},${C.gold})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", letterSpacing: 3 }}>HOOP IQ · LIVE CENTER</div>
         </div>
         <div style={{ display: "flex", gap: 16, fontSize: 12, color: C.muted, alignItems: "center" }}>
           <span style={{ color: liveCount ? C.red : C.muted }}>🔴 {liveCount} live</span>
@@ -808,16 +808,16 @@ export default function LiveCenter() {
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                     <Logo url={game.home.logo} size={28} />
                     <div>
-                      <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 14, color: game.home.color }}>{game.home.abbr}</div>
-                      <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 26, lineHeight: 1 }}>{game.home.score}</div>
+                      <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 14, color: game.home.color }}>{game.home.abbr}</div>
+                      <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 26, lineHeight: 1 }}>{game.home.score}</div>
                     </div>
                   </div>
                   <div style={{ fontSize: 11, color: C.muted }}>vs</div>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, flexDirection: "row-reverse" }}>
                     <Logo url={game.away.logo} size={28} />
                     <div style={{ textAlign: "right" }}>
-                      <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 14, color: game.away.color }}>{game.away.abbr}</div>
-                      <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 26, lineHeight: 1 }}>{game.away.score}</div>
+                      <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 14, color: game.away.color }}>{game.away.abbr}</div>
+                      <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 26, lineHeight: 1 }}>{game.away.score}</div>
                     </div>
                   </div>
                 </div>

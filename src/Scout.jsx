@@ -206,7 +206,7 @@ function ScoreRing({ score, size = 56 }) {
           strokeLinecap="round" style={{ transition: "stroke-dashoffset 1s ease" }} />
       </svg>
       <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: size * 0.28, color: col, lineHeight: 1 }}>{score}</span>
+        <span style={{ fontFamily: "'Permanent Marker', cursive", fontSize: size * 0.28, color: col, lineHeight: 1 }}>{score}</span>
       </div>
     </div>
   );
@@ -216,7 +216,7 @@ function ScoreRing({ score, size = 56 }) {
 function StatPill({ label, value, color, sub }) {
   return (
     <div style={{ textAlign: "center", padding: "6px 10px", background: "rgba(255,255,255,0.04)", borderRadius: 8, minWidth: 52 }}>
-      <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 18, color, lineHeight: 1 }}>{value}</div>
+      <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 18, color, lineHeight: 1 }}>{value}</div>
       <div style={{ fontSize: 11, color: C.muted, letterSpacing: 0.5, textTransform: "uppercase", marginTop: 2 }}>{label}</div>
       {sub && <div style={{ fontSize: 8, color, marginTop: 1 }}>{sub}</div>}
     </div>
@@ -579,7 +579,7 @@ Style : scout NBA pro, direct, data-driven, en français.`,
         {globalAnalysis && (
           <div style={{ fontSize: 16, lineHeight: 1.8, color: C.text, whiteSpace: "pre-wrap" }}>
             {globalAnalysis.split("\n").map((line, i) => {
-              if (line.startsWith("## ")) return <div key={i} style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 22, color: C.purple, letterSpacing: 1, marginTop: 14, marginBottom: 4 }}>{line.replace("## ", "")}</div>;
+              if (line.startsWith("## ")) return <div key={i} style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 22, color: C.purple, letterSpacing: 1, marginTop: 14, marginBottom: 4 }}>{line.replace("## ", "")}</div>;
               if (line.startsWith("• **") || line.match(/^\*\*.+\*\*/)) {
                 const parts = line.replace(/\*\*/g, "|||").split("|||");
                 return <div key={i} style={{ marginTop: 10, fontSize: 16 }}>{parts.map((p, j) => j % 2 === 1 ? <strong key={j} style={{ color: C.cyan }}>{p}</strong> : <span key={j}>{p}</span>)}</div>;
@@ -751,7 +751,7 @@ Direct, data-driven, en français.`,
 
       {/* Header */}
       <div style={{ marginBottom: 20 }}>
-        <h1 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 46, letterSpacing: 2, lineHeight: 1, marginBottom: 4 }}>
+        <h1 style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 46, letterSpacing: 2, lineHeight: 1, marginBottom: 4 }}>
           SCOUT <span style={{ color: C.orange }}>IA</span>
         </h1>
         <p style={{ color: C.muted, fontSize: 13 }}>G-League · NCAA — Stats avancées · JARVIS Score · Prédictions IA</p>
