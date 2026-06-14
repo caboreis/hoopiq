@@ -120,7 +120,7 @@ const TAB_MIN_PLAN = {
 // (pas d'onglets JARVIS admin / Marketing / Agent — ça reste réservé à admin@hoopiq.com).
 // Ajoute les emails ici, en minuscules.
 const VIP_EMAILS = [
-  // "exemple@gmail.com",
+  "dosreislopes.neusa@gmail.com",
 ];
 const isVipEmail = (email) => !!email && VIP_EMAILS.includes(email.trim().toLowerCase());
 
