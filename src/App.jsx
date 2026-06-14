@@ -115,6 +115,15 @@ const TAB_MIN_PLAN = {
   chat: "pro",
 };
 
+// Comptes VIP : accès Elite complet GRATUIT (sans Stripe). Toutes les features payantes
+// débloquées (cartes OR, assistant JARVIS Elite, analyses…), MAIS sans les outils admin
+// (pas d'onglets JARVIS admin / Marketing / Agent — ça reste réservé à admin@hoopiq.com).
+// Ajoute les emails ici, en minuscules.
+const VIP_EMAILS = [
+  // "exemple@gmail.com",
+];
+const isVipEmail = (email) => !!email && VIP_EMAILS.includes(email.trim().toLowerCase());
+
 const PLAYERS = [
   { id: 1,  name: "Caitlin Clark",     pos: "PG", team: "Indiana Fever",      pts: 19.2, ast: 8.4, reb: 5.7,  fg: 40, score: 97, trend: +5, hot: true,  league: "wnba", espnId: 4433403 },
   { id: 2,  name: "A'ja Wilson",       pos: "C",  team: "Las Vegas Aces",     pts: 26.4, ast: 3.5, reb: 11.9, fg: 52, score: 98, trend: +3, hot: true,  league: "wnba", espnId: 3149391 },
@@ -2516,7 +2525,10 @@ export default function Root() {
   // Admin et abonnés payants (planPaid) ne sont jamais rétrogradés.
   const TRIAL_MS = 14 * 24 * 60 * 60 * 1000;
   let appUser = user;
-  if (
+  if (user && isVipEmail(user.email)) {
+    // VIP : Elite gratuit à vie (jamais rétrogradé), mais pas admin.
+    appUser = { ...user, plan: "elite", planPaid: true, vip: true };
+  } else if (
     user && user.email !== "admin@hoopiq.com" && !user.planPaid &&
     user.createdAt && (PLAN_RANK[user.plan] || 1) > 1 &&
     Date.now() - new Date(user.createdAt).getTime() > TRIAL_MS
