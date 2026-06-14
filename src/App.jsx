@@ -115,9 +115,17 @@ const TAB_MIN_PLAN = {
   chat: "pro",
 };
 
+// Comptes ADMIN : accès complet + outils admin (JARVIS ops / Marketing / Agent).
+// L'authentification se fait via un VRAI compte Supabase (email + mot de passe choisi par
+// l'admin) — il n'y a plus aucun mot de passe en dur dans le code. Emails en minuscules.
+const ADMIN_EMAILS = [
+  "jorgedosreis729@gmail.com",
+];
+const isAdminEmail = (email) => !!email && ADMIN_EMAILS.includes(email.trim().toLowerCase());
+
 // Comptes VIP : accès Elite complet GRATUIT (sans Stripe). Toutes les features payantes
 // débloquées (cartes OR, assistant JARVIS Elite, analyses…), MAIS sans les outils admin
-// (pas d'onglets JARVIS admin / Marketing / Agent — ça reste réservé à admin@hoopiq.com).
+// (pas d'onglets JARVIS admin / Marketing / Agent — ça reste réservé aux ADMIN_EMAILS).
 // Ajoute les emails ici, en minuscules.
 const VIP_EMAILS = [
   "dosreislopes.neusa@gmail.com",
@@ -625,11 +633,7 @@ function AuthModal({ mode, onClose, onSuccess, initialPlan }) {
 
   const handleLogin = async () => {
     if (!form.email || !form.password) { setErrors({ general: "Remplis tous les champs." }); return; }
-    // Accès admin secret
-    if (form.email === "admin@hoopiq.com" && form.password === "bulls23") {
-      onSuccess({ name: "Jorge", email: "admin@hoopiq.com", plan: "elite" });
-      return;
-    }
+    // L'admin se connecte comme tout le monde, via son vrai compte Supabase (plus de backdoor).
     if (!isSupabaseConfigured) { setErrors({ general: "Connexion indisponible — réessaie plus tard." }); return; }
     setLoading(true); setErrors({});
     const { data, error } = await supabase.auth.signInWithPassword({
@@ -1209,7 +1213,7 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
     setChatLoading(false);
   };
 
-  const isAdmin = user.email === "admin@hoopiq.com";
+  const isAdmin = isAdminEmail(user.email);
 
   // Gating par plan — un onglet verrouillé ouvre le paywall au lieu de changer d'onglet
   const [paywallTab, setPaywallTab] = useState(null);
@@ -2340,7 +2344,7 @@ function loadStoredUser() {
     if (!u?.email || !u?.name || !u?._s) return null;
     if (u._s !== btoa(`hiq:${u.email}:2025`)) return null;
     // v2 = compte réel Supabase (ou accès admin) — les anciennes sessions simulées sont invalidées
-    if (u._v !== 2 && u.email !== "admin@hoopiq.com") return null;
+    if (u._v !== 2 && !isAdminEmail(u.email)) return null;
     return u;
   } catch {
     return null;
@@ -2491,7 +2495,7 @@ export default function Root() {
 
   // Plan payé vérifié depuis Supabase (table subscriptions) — prime sur le plan choisi à l'inscription
   useEffect(() => {
-    if (!user?.email || user.email === "admin@hoopiq.com") return;
+    if (!user?.email || isAdminEmail(user.email)) return;
     let cancelled = false;
     (async () => {
       try {
@@ -2529,7 +2533,7 @@ export default function Root() {
     // VIP : Elite gratuit à vie (jamais rétrogradé), mais pas admin.
     appUser = { ...user, plan: "elite", planPaid: true, vip: true };
   } else if (
-    user && user.email !== "admin@hoopiq.com" && !user.planPaid &&
+    user && !isAdminEmail(user.email) && !user.planPaid &&
     user.createdAt && (PLAN_RANK[user.plan] || 1) > 1 &&
     Date.now() - new Date(user.createdAt).getTime() > TRIAL_MS
   ) {
