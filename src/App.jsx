@@ -271,72 +271,18 @@ function SectionTitle({ children }) {
 }
 
 function BallLogo({ size = 38, fontSize = 26 }) {
-  const lw = Math.max(1.5, size * 0.05);
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 10, userSelect: "none" }}>
-      <style>{`
-        @keyframes ballSpin3D {
-          from { transform: rotateY(0deg); }
-          to   { transform: rotateY(360deg); }
-        }
-      `}</style>
-      {/* Perspective wrapper — effet 3D */}
-      <div style={{ perspective: `${size * 5}px`, flexShrink: 0 }}>
-        <div style={{
-          position: "relative", width: size, height: size,
-          borderRadius: "50%",
-          background: `radial-gradient(circle at 34% 28%, #f9a84e, #e8601a 45%, #b8410e)`,
-          boxShadow: `inset -${size*.13}px -${size*.1}px ${size*.22}px rgba(0,0,0,0.45),
-                      inset ${size*.07}px ${size*.06}px ${size*.14}px rgba(255,210,140,0.25),
-                      0 3px 16px rgba(0,0,0,0.6)`,
-          overflow: "hidden",
-          animation: "ballSpin3D 2.8s linear infinite",
-          transformStyle: "preserve-3d",
-        }}>
-          {/* Reflet brillant Wilson */}
-          <div style={{
-            position: "absolute", width: "38%", height: "22%",
-            top: "12%", left: "18%",
-            borderRadius: "50%",
-            background: "rgba(255,235,200,0.22)",
-            filter: `blur(${size*.04}px)`,
-          }} />
-          {/* Ligne horizontale centrale */}
-          <div style={{
-            position: "absolute", left: 0, right: 0,
-            top: `calc(50% - ${lw/2}px)`, height: lw,
-            background: "#2a0800",
-          }} />
-          {/* Couture courbe gauche */}
-          <div style={{
-            position: "absolute",
-            width: "78%", height: "190%",
-            left: "-20%", top: "-45%",
-            borderRadius: "50%",
-            border: `${lw}px solid #2a0800`,
-            background: "transparent",
-          }} />
-          {/* Couture courbe droite */}
-          <div style={{
-            position: "absolute",
-            width: "78%", height: "190%",
-            right: "-20%", top: "-45%",
-            borderRadius: "50%",
-            border: `${lw}px solid #2a0800`,
-            background: "transparent",
-          }} />
-          {/* Veinules courtes haut couture gauche */}
-          <div style={{ position: "absolute", width: lw * 4, height: lw, top: "31%", left: "22%", background: "#2a0800", borderRadius: 2, transform: "rotate(-28deg)" }} />
-          <div style={{ position: "absolute", width: lw * 4, height: lw, top: "37%", left: "20%", background: "#2a0800", borderRadius: 2, transform: "rotate(-18deg)" }} />
-          {/* Veinules courtes bas couture gauche */}
-          <div style={{ position: "absolute", width: lw * 4, height: lw, top: "56%", left: "20%", background: "#2a0800", borderRadius: 2, transform: "rotate(18deg)" }} />
-          <div style={{ position: "absolute", width: lw * 4, height: lw, top: "62%", left: "22%", background: "#2a0800", borderRadius: 2, transform: "rotate(28deg)" }} />
-          {/* Veinules droite */}
-          <div style={{ position: "absolute", width: lw * 4, height: lw, top: "31%", right: "22%", background: "#2a0800", borderRadius: 2, transform: "rotate(28deg)" }} />
-          <div style={{ position: "absolute", width: lw * 4, height: lw, top: "37%", right: "20%", background: "#2a0800", borderRadius: 2, transform: "rotate(18deg)" }} />
-          <div style={{ position: "absolute", width: lw * 4, height: lw, top: "56%", right: "20%", background: "#2a0800", borderRadius: 2, transform: "rotate(-18deg)" }} />
-          <div style={{ position: "absolute", width: lw * 4, height: lw, top: "62%", right: "22%", background: "#2a0800", borderRadius: 2, transform: "rotate(-28deg)" }} />
-        </div>
+      <div style={{
+        width: size, height: size, borderRadius: "50%", flexShrink: 0,
+        overflow: "hidden",
+        boxShadow: "0 2px 12px rgba(0,0,0,0.6)",
+      }}>
+        <video
+          src="/videos/wilson-ball.mp4"
+          autoPlay loop muted playsInline
+          style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+        />
       </div>
       <span style={{
         fontFamily: "'Permanent Marker', cursive", fontSize,
