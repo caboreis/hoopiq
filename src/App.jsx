@@ -129,6 +129,7 @@ const isAdminEmail = (email) => !!email && ADMIN_EMAILS.includes(email.trim().to
 // Ajoute les emails ici, en minuscules.
 const VIP_EMAILS = [
   "dosreislopes.neusa@gmail.com",
+  "samaketyler@gmail.com",
 ];
 const isVipEmail = (email) => !!email && VIP_EMAILS.includes(email.trim().toLowerCase());
 
