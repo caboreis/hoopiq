@@ -270,8 +270,8 @@ function SectionTitle({ children }) {
   return <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 2.5, color: C.orange, textTransform: "uppercase", marginBottom: 18, fontFamily: "monospace" }}>{children}</div>;
 }
 
-function BallLogo({ size = 40, fontSize = 26 }) {
-  const lw = Math.max(1.5, size * 0.048);
+function BallLogo({ size = 38, fontSize = 26 }) {
+  const lw = Math.max(1.5, size * 0.05);
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 10, userSelect: "none" }}>
       <style>{`
@@ -280,42 +280,62 @@ function BallLogo({ size = 40, fontSize = 26 }) {
           to   { transform: rotateY(360deg); }
         }
       `}</style>
-      {/* Perspective wrapper — donne l'effet 3D */}
+      {/* Perspective wrapper — effet 3D */}
       <div style={{ perspective: `${size * 5}px`, flexShrink: 0 }}>
         <div style={{
           position: "relative", width: size, height: size,
           borderRadius: "50%",
-          background: `radial-gradient(circle at 36% 32%, #f8a255, #e86818, #c04510)`,
-          boxShadow: `inset -${size*.12}px -${size*.1}px ${size*.2}px rgba(0,0,0,0.4),
-                      inset ${size*.06}px ${size*.05}px ${size*.12}px rgba(255,200,120,0.2),
-                      0 2px 14px rgba(0,0,0,0.55)`,
+          background: `radial-gradient(circle at 34% 28%, #f9a84e, #e8601a 45%, #b8410e)`,
+          boxShadow: `inset -${size*.13}px -${size*.1}px ${size*.22}px rgba(0,0,0,0.45),
+                      inset ${size*.07}px ${size*.06}px ${size*.14}px rgba(255,210,140,0.25),
+                      0 3px 16px rgba(0,0,0,0.6)`,
           overflow: "hidden",
-          animation: "ballSpin3D 2.5s linear infinite",
+          animation: "ballSpin3D 2.8s linear infinite",
+          transformStyle: "preserve-3d",
         }}>
+          {/* Reflet brillant Wilson */}
+          <div style={{
+            position: "absolute", width: "38%", height: "22%",
+            top: "12%", left: "18%",
+            borderRadius: "50%",
+            background: "rgba(255,235,200,0.22)",
+            filter: `blur(${size*.04}px)`,
+          }} />
           {/* Ligne horizontale centrale */}
           <div style={{
             position: "absolute", left: 0, right: 0,
             top: `calc(50% - ${lw/2}px)`, height: lw,
-            background: "#1c0500",
+            background: "#2a0800",
           }} />
-          {/* Couture gauche — ellipse décalée à gauche, on voit son arc droit */}
+          {/* Couture courbe gauche */}
           <div style={{
             position: "absolute",
-            width: "82%", height: "200%",
-            left: "-18%", top: "-50%",
+            width: "78%", height: "190%",
+            left: "-20%", top: "-45%",
             borderRadius: "50%",
-            border: `${lw}px solid #1c0500`,
+            border: `${lw}px solid #2a0800`,
             background: "transparent",
           }} />
-          {/* Couture droite — ellipse décalée à droite, on voit son arc gauche */}
+          {/* Couture courbe droite */}
           <div style={{
             position: "absolute",
-            width: "82%", height: "200%",
-            right: "-18%", top: "-50%",
+            width: "78%", height: "190%",
+            right: "-20%", top: "-45%",
             borderRadius: "50%",
-            border: `${lw}px solid #1c0500`,
+            border: `${lw}px solid #2a0800`,
             background: "transparent",
           }} />
+          {/* Veinules courtes haut couture gauche */}
+          <div style={{ position: "absolute", width: lw * 4, height: lw, top: "31%", left: "22%", background: "#2a0800", borderRadius: 2, transform: "rotate(-28deg)" }} />
+          <div style={{ position: "absolute", width: lw * 4, height: lw, top: "37%", left: "20%", background: "#2a0800", borderRadius: 2, transform: "rotate(-18deg)" }} />
+          {/* Veinules courtes bas couture gauche */}
+          <div style={{ position: "absolute", width: lw * 4, height: lw, top: "56%", left: "20%", background: "#2a0800", borderRadius: 2, transform: "rotate(18deg)" }} />
+          <div style={{ position: "absolute", width: lw * 4, height: lw, top: "62%", left: "22%", background: "#2a0800", borderRadius: 2, transform: "rotate(28deg)" }} />
+          {/* Veinules droite */}
+          <div style={{ position: "absolute", width: lw * 4, height: lw, top: "31%", right: "22%", background: "#2a0800", borderRadius: 2, transform: "rotate(28deg)" }} />
+          <div style={{ position: "absolute", width: lw * 4, height: lw, top: "37%", right: "20%", background: "#2a0800", borderRadius: 2, transform: "rotate(18deg)" }} />
+          <div style={{ position: "absolute", width: lw * 4, height: lw, top: "56%", right: "20%", background: "#2a0800", borderRadius: 2, transform: "rotate(-18deg)" }} />
+          <div style={{ position: "absolute", width: lw * 4, height: lw, top: "62%", right: "22%", background: "#2a0800", borderRadius: 2, transform: "rotate(-28deg)" }} />
         </div>
       </div>
       <span style={{
@@ -422,7 +442,7 @@ function Landing({ onAuth, onChoosePlan }) {
 
       {/* NAV */}
       <nav style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 200, padding: "0 40px", height: 66, display: "flex", alignItems: "center", justifyContent: "space-between", background: "rgba(6,6,15,0.85)", backdropFilter: "blur(24px)", borderBottom: `1px solid ${C.border}` }}>
-        <BallLogo size={36} fontSize={26} />
+        <BallLogo size={38} fontSize={26} />
         <div style={{ display: "flex", gap: 8 }}>
           <Btn variant="ghost" small onClick={() => onAuth("login")}>Connexion</Btn>
           <Btn small onClick={() => onAuth("signup")} style={{ boxShadow: "0 4px 20px rgba(255,92,0,0.4)" }}>Commencer →</Btn>
