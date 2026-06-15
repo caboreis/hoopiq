@@ -629,6 +629,665 @@ def post_to_instagram(image_path: Path, caption: str) -> bool:
         return False
 
 
+# ── TikTok Video Generator ─────────────────────────────────────────────────────
+TK_W, TK_H = 1080, 1920
+TIKTOK_DIR = Path(__file__).parent / "tiktok_ready"
+MUSIC_DIR  = Path(__file__).parent / "public" / "music"
+
+
+_TIKTOK_STARS = [
+    ("LeBron James",             "Los Angeles Lakers", "SF", "LJ"),
+    ("Stephen Curry",            "Golden State Warriors", "PG", "SC"),
+    ("Giannis Antetokounmpo",    "Milwaukee Bucks",    "PF", "GA"),
+    ("Nikola Jokic",             "Denver Nuggets",     "C",  "NJ"),
+    ("Luka Doncic",              "Dallas Mavericks",   "PG", "LD"),
+]
+
+def _fetch_tiktok_player_data(player_name: str = "") -> dict:
+    today = datetime.date.today().strftime("%d %B %Y")
+    if not player_name:
+        star = _TIKTOK_STARS[datetime.date.today().toordinal() % len(_TIKTOK_STARS)]
+        player_name, team, pos, initials = star
+    else:
+        team = pos = initials = ""
+
+    raw = ask_groq(
+        f"Tu es HoopIQ. Aujourd'hui {today}.\n"
+        f"Génère la fiche NBA de {player_name} avec ses vraies stats de cette saison.\n"
+        "Réponds UNIQUEMENT avec ce JSON, rien d'autre :\n"
+        '{"player_name":"' + player_name + '","team":"Équipe","position":"POS",'
+        '"pts":28.5,"ast":7.2,"reb":5.1,"fg":48,"score":91,"initials":"XX",'
+        '"analysis":"Une phrase courte et percutante en français max 12 mots",'
+        '"hashtags":"#NBA #HoopIQ #Basketball #TikTok #NBAFrance"}',
+        max_tokens=350,
+    )
+    d = parse_json(raw)
+    if not d:
+        d = {
+            "player_name": player_name, "team": team, "position": pos,
+            "pts": "—", "ast": "—", "reb": "—", "fg": "—",
+            "score": 95, "initials": initials,
+            "analysis": "Une légende qui redéfinit le basket chaque soir.",
+            "hashtags": f"#NBA #HoopIQ #Basketball #TikTok",
+        }
+    return d
+
+
+def draw_tiktok_frame(data: dict) -> Image.Image:
+    """Rend un visuel 1080×1920 pour TikTok avec la fiche joueur NBA."""
+    img = Image.new("RGB", (TK_W, TK_H), BG_BASE)
+    draw = ImageDraw.Draw(img)
+
+    # Background glow vertical
+    for r in range(700, 0, -10):
+        t = (700 - r) / 700
+        c = (
+            int(BG_BASE[0] + (BG_WARM[0] - BG_BASE[0]) * math.exp(-2.5 * t)),
+            int(BG_BASE[1] + (BG_WARM[1] - BG_BASE[1]) * math.exp(-2.5 * t)),
+            int(BG_BASE[2] + (BG_WARM[2] - BG_BASE[2]) * math.exp(-2.5 * t)),
+        )
+        draw.ellipse([TK_W // 2 - r, 480 - r // 2, TK_W // 2 + r, 480 + r // 2], fill=c)
+
+    # Bandes orange haut/bas
+    for x in range(TK_W):
+        t = x / (TK_W - 1)
+        c = tuple(int(ORANGE[i] + (ORANGE_SOFT[i] - ORANGE[i]) * t) for i in range(3))
+        draw.line([(x, 0), (x, 14)], fill=c)
+        draw.line([(x, TK_H - 15), (x, TK_H - 1)], fill=c)
+
+    # Logo + handle
+    draw.text((60, 44), "HOOP IQ", font=_font(44), fill=ORANGE)
+    draw.text((62, 100), "@hoopiq_officiel", font=_font(24, bold=False), fill=GRAY_TEXT)
+    date_str = datetime.date.today().strftime("%d %B %Y").upper()
+    _center(draw, 162, date_str, _font(28, bold=False), GRAY_TEXT, TK_W)
+    draw.line([(80, 206), (TK_W - 80, 206)], fill=GRAY_LINE, width=1)
+
+    # Cercle photo joueur
+    player_name = str(data.get("player_name", ""))
+    CX, CY, CR = TK_W // 2, 500, 170
+    for r in range(CR + 22, CR + 2, -3):
+        tg = (r - CR - 2) / 20
+        cg = tuple(int(BG_BASE[i] + (ORANGE[i] - BG_BASE[i]) * (1 - tg) * 0.28) for i in range(3))
+        draw.ellipse([CX - r, CY - r, CX + r, CY + r], outline=cg, width=2)
+    draw.ellipse([CX - CR, CY - CR, CX + CR, CY + CR], fill=(20, 8, 2))
+    if player_name:
+        photo = fetch_player_photo(player_name, diameter=CR * 2)
+        if photo:
+            img.paste(photo, (CX - CR, CY - CR), photo.split()[3])
+        else:
+            initials = str(data.get("initials", "??"))[:2].upper()
+            fnt_i = _font(108)
+            bb = draw.textbbox((0, 0), initials, font=fnt_i)
+            draw.text((CX - (bb[2] - bb[0]) // 2, CY - (bb[3] - bb[1]) // 2 - 10),
+                      initials, font=fnt_i, fill=ORANGE)
+    draw.ellipse([CX - CR, CY - CR, CX + CR, CY + CR], outline=ORANGE, width=5)
+
+    # Badge
+    bw, bh = 220, 42
+    draw.rounded_rectangle([TK_W // 2 - bw // 2, 692, TK_W // 2 + bw // 2, 692 + bh],
+                           radius=21, fill=ORANGE)
+    fnt_badge = _font(18)
+    bb = draw.textbbox((0, 0), "ANALYSE IA", font=fnt_badge)
+    draw.text((TK_W // 2 - (bb[2] - bb[0]) // 2, 702), "ANALYSE IA", font=fnt_badge, fill=(255, 255, 255))
+
+    # Nom joueur
+    fnt_name = _font(74)
+    while True:
+        bb = draw.textbbox((0, 0), player_name, font=fnt_name)
+        if bb[2] - bb[0] <= TK_W - 100 or fnt_name.size <= 36:
+            break
+        fnt_name = _font(fnt_name.size - 4)
+    _center(draw, 756, player_name, fnt_name, WHITE_TEXT, TK_W)
+    team_pos = f"{data.get('team', '')}  ·  {data.get('position', '')}".strip(" ·")
+    _center(draw, 844, team_pos, _font(32, bold=False), GRAY_TEXT, TK_W)
+    draw.line([(80, 900), (TK_W - 80, 900)], fill=GRAY_LINE, width=1)
+
+    # Stats 2×2
+    col_l, col_r = TK_W // 4, TK_W * 3 // 4
+    row1_y, row2_y = 924, 1096
+    stats_grid = [
+        (str(data.get("pts", "")), "PTS",  ORANGE,      col_l, row1_y),
+        (str(data.get("ast", "")), "AST",  BLUE_STAT,   col_r, row1_y),
+        (str(data.get("reb", "")), "REB",  GREEN_STAT,  col_l, row2_y),
+        (f"{data.get('fg', '')}%","FG%",  YELLOW_STAT, col_r, row2_y),
+    ]
+    fnt_val = _font(86)
+    fnt_lbl = _font(30, bold=False)
+    for val, lbl, color, sx, sy in stats_grid:
+        bb = draw.textbbox((0, 0), val, font=fnt_val)
+        draw.text((sx - (bb[2] - bb[0]) // 2, sy), val, font=fnt_val, fill=color)
+        bb = draw.textbbox((0, 0), lbl, font=fnt_lbl)
+        draw.text((sx - (bb[2] - bb[0]) // 2, sy + 98), lbl, font=fnt_lbl, fill=GRAY_TEXT)
+    draw.line([(TK_W // 2, 924), (TK_W // 2, 1240)], fill=GRAY_LINE, width=1)
+    draw.line([(80, row1_y + 142), (TK_W - 80, row1_y + 142)], fill=GRAY_LINE, width=1)
+
+    # Score HoopIQ
+    score = str(data.get("score", ""))
+    SX, SY, SR = TK_W // 2, 1340, 76
+    draw.ellipse([SX - SR, SY - SR, SX + SR, SY + SR], fill=BG_BASE, outline=ORANGE, width=6)
+    fnt_sc = _font(58)
+    bb = draw.textbbox((0, 0), score, font=fnt_sc)
+    draw.text((SX - (bb[2] - bb[0]) // 2, SY - (bb[3] - bb[1]) // 2 - 4),
+              score, font=fnt_sc, fill=ORANGE)
+    _center(draw, SY + SR - 16, "SCORE HOOPIQ", _font(20, bold=False), GRAY_TEXT, TK_W)
+
+    # Analyse
+    _wrap(draw, str(data.get("analysis", "")), TK_W // 2, 1452, 940, _font(34, bold=False), WHITE_TEXT, spacing=18)
+
+    # Hashtags + URL
+    _center(draw, TK_H - 152, str(data.get("hashtags", "#NBA #HoopIQ")), _font(26, bold=False), ORANGE, TK_W)
+    _center(draw, TK_H - 106, "hoopiq-ai.com", _font(22, bold=False), GRAY_TEXT, TK_W)
+
+    return img
+
+
+def _draw_scene1(data: dict, photo) -> Image.Image:
+    """Scène 1 — Reveal joueur : photo + nom + team (2.5s)"""
+    img = Image.new("RGB", (TK_W, TK_H), BG_BASE)
+    draw = ImageDraw.Draw(img)
+
+    # Glow burst orange massif centré
+    for r in range(900, 0, -10):
+        t = r / 900
+        alpha = (1 - t) * 0.55
+        c = tuple(int(BG_BASE[i] + (ORANGE[i] - BG_BASE[i]) * alpha) for i in range(3))
+        draw.ellipse([TK_W//2 - r, 860 - r//2, TK_W//2 + r, 860 + r//2], fill=c)
+
+    # Lignes décoratives diagonales
+    for i in range(-6, 20):
+        x = i * 120
+        draw.line([(x, 0), (x + 600, TK_H)], fill=(255, 92, 0, 18), width=1)
+
+    # Bandes orange haut/bas épaissies
+    for x in range(TK_W):
+        t = x / (TK_W - 1)
+        c = tuple(int(ORANGE[i] + (ORANGE_SOFT[i] - ORANGE[i]) * t) for i in range(3))
+        for y in range(18):
+            draw.point((x, y), fill=c)
+            draw.point((x, TK_H - 1 - y), fill=c)
+
+    # Logo top
+    draw.text((60, 50), "HOOP IQ", font=_font(48), fill=ORANGE)
+    draw.text((62, 112), "@hoopiq_officiel", font=_font(26, bold=False), fill=GRAY_TEXT)
+
+    # Cercle photo GRAND
+    CX, CY, CR = TK_W // 2, 760, 210
+    for r in range(CR + 34, CR + 2, -4):
+        tg = (r - CR - 2) / 32
+        cg = tuple(int(BG_BASE[i] + (ORANGE[i] - BG_BASE[i]) * (1 - tg) * 0.5) for i in range(3))
+        draw.ellipse([CX - r, CY - r, CX + r, CY + r], outline=cg, width=3)
+    draw.ellipse([CX - CR, CY - CR, CX + CR, CY + CR], fill=(18, 6, 0))
+    if photo:
+        p = photo.resize((CR * 2, CR * 2), Image.LANCZOS)
+        img.paste(p, (CX - CR, CY - CR), p.split()[3])
+    else:
+        initials = str(data.get("initials", "??"))[:2].upper()
+        fi = _font(130)
+        bb = draw.textbbox((0, 0), initials, font=fi)
+        draw.text((CX - (bb[2]-bb[0])//2, CY - (bb[3]-bb[1])//2 - 12), initials, font=fi, fill=ORANGE)
+    draw.ellipse([CX - CR, CY - CR, CX + CR, CY + CR], outline=ORANGE, width=7)
+
+    # Badge ANALYSE IA
+    bw = 260
+    draw.rounded_rectangle([TK_W//2 - bw//2, 992, TK_W//2 + bw//2, 1044], radius=26, fill=ORANGE)
+    bb = draw.textbbox((0, 0), "🤖 ANALYSE IA", font=_font(22))
+    draw.text((TK_W//2 - (bb[2]-bb[0])//2, 1004), "🤖 ANALYSE IA", font=_font(22), fill=(255,255,255))
+
+    # Nom joueur MASSIF
+    player_name = str(data.get("player_name", "")).upper()
+    fn = _font(90)
+    while draw.textbbox((0,0), player_name, font=fn)[2] > TK_W - 80 and fn.size > 44:
+        fn = _font(fn.size - 4)
+    _center(draw, 1064, player_name, fn, WHITE_TEXT, TK_W)
+
+    # Team · Position
+    team_pos = f"{data.get('team','')}  ·  {data.get('position','')}".strip(" ·")
+    _center(draw, fn.size + 1076, team_pos, _font(36, bold=False), GRAY_TEXT, TK_W)
+
+    # CTA bas
+    _center(draw, TK_H - 130, "hoopiq-ai.com 🔗", _font(30), ORANGE, TK_W)
+
+    return img
+
+
+def _draw_scene2(data: dict) -> Image.Image:
+    """Scène 2 — Stats ÉNORMES en 2×2 (3s)"""
+    img = Image.new("RGB", (TK_W, TK_H), BG_BASE)
+    draw = ImageDraw.Draw(img)
+
+    # Glow centré plus froid
+    for r in range(700, 0, -10):
+        t = r / 700
+        c = (int(8 + (30 - 8) * (1-t)), int(8 + (20 - 8) * (1-t)), int(18 + (60 - 18) * (1-t)))
+        draw.ellipse([TK_W//2 - r, TK_H//2 - r//2, TK_W//2 + r, TK_H//2 + r//2], fill=c)
+
+    for x in range(TK_W):
+        t = x / (TK_W - 1)
+        c = tuple(int(ORANGE[i] + (ORANGE_SOFT[i] - ORANGE[i]) * t) for i in range(3))
+        for y in range(18):
+            draw.point((x, y), fill=c)
+            draw.point((x, TK_H - 1 - y), fill=c)
+
+    # Header
+    draw.text((60, 50), "HOOP IQ", font=_font(42), fill=ORANGE)
+    player_short = str(data.get("player_name","")).upper()
+    _center(draw, 56, player_short, _font(38, bold=False), GRAY_TEXT, TK_W)
+
+    title = "SES STATS 📊"
+    _center(draw, 180, title, _font(70), WHITE_TEXT, TK_W)
+    bb = draw.textbbox((0,0), title, font=_font(70))
+    tw = bb[2] - bb[0]
+    draw.line([(TK_W//2 - tw//2, 262), (TK_W//2 + tw//2, 262)], fill=ORANGE, width=4)
+
+    # Stats 2×2 GÉANTES
+    CL, CR2 = TK_W // 4, TK_W * 3 // 4
+    R1, R2 = 380, 860
+    stats = [
+        (str(data.get("pts","")), "PTS",  ORANGE,      CL,  R1),
+        (str(data.get("ast","")), "AST",  BLUE_STAT,   CR2, R1),
+        (str(data.get("reb","")), "REB",  GREEN_STAT,  CL,  R2),
+        (f"{data.get('fg','')}%","FG%",  YELLOW_STAT, CR2, R2),
+    ]
+    fv = _font(160)
+    fl = _font(44, bold=False)
+    for val, lbl, color, sx, sy in stats:
+        # Box colorée derrière le chiffre
+        bw2, bh2 = 440, 200
+        box_c = tuple(int(BG_BASE[i] + (color[i] - BG_BASE[i]) * 0.12) for i in range(3))
+        draw.rounded_rectangle([sx - bw2//2, sy - 20, sx + bw2//2, sy + bh2], radius=24, fill=box_c,
+                               outline=color, width=2)
+        bb = draw.textbbox((0,0), val, font=fv)
+        draw.text((sx - (bb[2]-bb[0])//2, sy), val, font=fv, fill=color)
+        bb = draw.textbbox((0,0), lbl, font=fl)
+        draw.text((sx - (bb[2]-bb[0])//2, sy + 168), lbl, font=fl, fill=color)
+
+    # Croix centrale
+    draw.line([(TK_W//2, R1 - 30), (TK_W//2, R2 + 210)], fill=GRAY_LINE, width=2)
+    draw.line([(80, (R1+R2)//2 + 90), (TK_W-80, (R1+R2)//2 + 90)], fill=GRAY_LINE, width=2)
+
+    _center(draw, TK_H - 130, "hoopiq-ai.com 🔗", _font(30), ORANGE, TK_W)
+    return img
+
+
+def _draw_scene3(data: dict) -> Image.Image:
+    """Scène 3 — Score HoopIQ + analyse + CTA (2.5s)"""
+    img = Image.new("RGB", (TK_W, TK_H), BG_BASE)
+    draw = ImageDraw.Draw(img)
+
+    # Glow doré
+    for r in range(800, 0, -10):
+        t = r / 800
+        c = (int(8 + (40 - 8) * (1-t)), int(8 + (25 - 8) * (1-t)), int(18 + (8 - 18) * (1-t)))
+        draw.ellipse([TK_W//2 - r, TK_H//2 - r//2, TK_W//2 + r, TK_H//2 + r//2], fill=c)
+
+    for x in range(TK_W):
+        t = x / (TK_W - 1)
+        c = tuple(int(ORANGE[i] + (ORANGE_SOFT[i] - ORANGE[i]) * t) for i in range(3))
+        for y in range(18):
+            draw.point((x, y), fill=c)
+            draw.point((x, TK_H - 1 - y), fill=c)
+
+    draw.text((60, 50), "HOOP IQ", font=_font(48), fill=ORANGE)
+    draw.text((62, 112), "@hoopiq_officiel", font=_font(26, bold=False), fill=GRAY_TEXT)
+
+    _center(draw, 240, "SCORE", _font(80), GRAY_TEXT, TK_W)
+    _center(draw, 326, "HOOPIQ 🏀", _font(80), WHITE_TEXT, TK_W)
+    draw.line([(200, 430), (TK_W-200, 430)], fill=ORANGE, width=3)
+
+    # Ring score MASSIF
+    score = str(data.get("score",""))
+    SX, SY, SR = TK_W//2, 680, 160
+    # Glow ring
+    for r in range(SR + 30, SR - 2, -4):
+        tg = (r - SR + 2) / 32
+        cg = tuple(int(BG_BASE[i] + (ORANGE[i] - BG_BASE[i]) * (1-tg) * 0.6) for i in range(3))
+        draw.ellipse([SX-r, SY-r, SX+r, SY+r], outline=cg, width=3)
+    draw.ellipse([SX-SR, SY-SR, SX+SR, SY+SR], fill=BG_BASE, outline=ORANGE, width=8)
+    fsc = _font(130)
+    bb = draw.textbbox((0,0), score, font=fsc)
+    draw.text((SX-(bb[2]-bb[0])//2, SY-(bb[3]-bb[1])//2-6), score, font=fsc, fill=ORANGE)
+    _center(draw, SY + SR + 16, "/ 100", _font(36, bold=False), GRAY_TEXT, TK_W)
+
+    # Analyse
+    analysis = str(data.get("analysis",""))
+    draw.line([(80, 900), (TK_W-80, 900)], fill=GRAY_LINE, width=1)
+    _wrap(draw, f'"{analysis}"', TK_W//2, 930, 900, _font(40, bold=False), WHITE_TEXT, spacing=20)
+
+    # CTA fort
+    draw.line([(80, 1200), (TK_W-80, 1200)], fill=ORANGE, width=2)
+    _center(draw, 1230, "🔥 REJOINS LA COMMUNAUTÉ", _font(44), ORANGE, TK_W)
+    _center(draw, 1300, "hoopiq-ai.com", _font(50), WHITE_TEXT, TK_W)
+
+    # Hashtags
+    _center(draw, TK_H - 160, str(data.get("hashtags","#NBA #HoopIQ")), _font(28, bold=False), ORANGE, TK_W)
+
+    return img
+
+
+def _draw_scene4_card(data: dict, photo) -> Image.Image:
+    """Scène 4 — Carte exclusive LÉGENDAIRE HoopIQ (trading card style)."""
+    GOLD = (255, 215, 0)
+    GOLD_SOFT = (255, 185, 50)
+    img = Image.new("RGB", (TK_W, TK_H), (4, 4, 10))
+    draw = ImageDraw.Draw(img)
+
+    # Fond : particules dorées (points aléatoires simulés)
+    rng = random.Random(42)
+    for _ in range(320):
+        px, py = rng.randint(0, TK_W), rng.randint(0, TK_H)
+        r = rng.randint(1, 3)
+        alpha = rng.uniform(0.15, 0.55)
+        c = tuple(int(GOLD[i] * alpha) for i in range(3))
+        draw.ellipse([px-r, py-r, px+r, py+r], fill=c)
+
+    # Glow doré central derrière la carte
+    for r in range(700, 0, -10):
+        t = r / 700
+        c = (int(20 * (1-t)), int(14 * (1-t)), int(2 * (1-t)))
+        draw.ellipse([TK_W//2 - r, TK_H//2 - r//2, TK_W//2 + r, TK_H//2 + r//2], fill=c)
+
+    # Bandes orange haut/bas
+    for x in range(TK_W):
+        t = x / (TK_W - 1)
+        c = tuple(int(ORANGE[i] + (ORANGE_SOFT[i] - ORANGE[i]) * t) for i in range(3))
+        for y in range(18):
+            draw.point((x, y), fill=c)
+            draw.point((x, TK_H - 1 - y), fill=c)
+
+    # Header
+    draw.text((60, 50), "HOOP IQ", font=_font(44), fill=ORANGE)
+    draw.text((62, 108), "@hoopiq_officiel", font=_font(24, bold=False), fill=GRAY_TEXT)
+
+    # Titre
+    _center(draw, 188, "✨ CARTE EXCLUSIVE ✨", _font(52), GOLD, TK_W)
+    draw.line([(120, 256), (TK_W-120, 256)], fill=GOLD, width=3)
+
+    # ── La carte trading card ──────────────────────────────────────────────────
+    CX = TK_W // 2
+    CW, CH = 820, 1060
+    CY_TOP = 290
+    cx0, cy0 = CX - CW//2, CY_TOP
+    cx1, cy1 = CX + CW//2, CY_TOP + CH
+
+    # Ombre portée carte
+    for off in range(20, 0, -2):
+        t = off / 20
+        sc = tuple(int(GOLD[i] * 0.18 * t) for i in range(3))
+        draw.rounded_rectangle([cx0+off, cy0+off, cx1+off, cy1+off], radius=32, fill=sc)
+
+    # Corps carte
+    card_bg = (12, 10, 6)
+    draw.rounded_rectangle([cx0, cy0, cx1, cy1], radius=32, fill=card_bg)
+
+    # Bordure dorée dégradée (simulée avec plusieurs rectangles)
+    for i, bw in enumerate([6, 4, 2]):
+        shade = tuple(int(GOLD[j] * (1 - i * 0.25)) for j in range(3))
+        draw.rounded_rectangle([cx0-i, cy0-i, cx1+i, cy1+i], radius=32+i, outline=shade, width=bw)
+
+    # Gradient interne haut (warm glow)
+    for y in range(200):
+        t = y / 200
+        c = (int(30*(1-t)), int(18*(1-t)), int(4*(1-t)))
+        draw.line([(cx0+4, cy0+4+y), (cx1-4, cy0+4+y)], fill=c)
+
+    # Badge LÉGENDAIRE
+    bw2 = 300
+    draw.rounded_rectangle([CX-bw2//2, cy0+18, CX+bw2//2, cy0+62], radius=22, fill=GOLD)
+    bb = draw.textbbox((0,0), "⚡ LÉGENDAIRE", font=_font(22))
+    draw.text((CX-(bb[2]-bb[0])//2, cy0+28), "⚡ LÉGENDAIRE", font=_font(22), fill=(10,6,0))
+
+    # Photo joueur dans la carte
+    PCX, PCY, PCR = CX, cy0 + 280, 170
+    for r in range(PCR+18, PCR-2, -3):
+        tg = (r - PCR + 2) / 20
+        cg = tuple(int(card_bg[i] + (GOLD[i] - card_bg[i]) * (1-tg) * 0.5) for i in range(3))
+        draw.ellipse([PCX-r, PCY-r, PCX+r, PCY+r], outline=cg, width=2)
+    draw.ellipse([PCX-PCR, PCY-PCR, PCX+PCR, PCY+PCR], fill=(8, 6, 2))
+    if photo:
+        p = photo.resize((PCR*2, PCR*2), Image.LANCZOS)
+        img.paste(p, (PCX-PCR, PCY-PCR), p.split()[3])
+    else:
+        initials = str(data.get("initials","??"))[:2].upper()
+        fi = _font(110)
+        bb = draw.textbbox((0,0), initials, font=fi)
+        draw.text((PCX-(bb[2]-bb[0])//2, PCY-(bb[3]-bb[1])//2-8), initials, font=fi, fill=GOLD)
+    draw.ellipse([PCX-PCR, PCY-PCR, PCX+PCR, PCY+PCR], outline=GOLD, width=6)
+
+    # Nom joueur dans la carte
+    player_name = str(data.get("player_name","")).upper()
+    fn = _font(62)
+    while draw.textbbox((0,0), player_name, font=fn)[2] > CW - 60 and fn.size > 30:
+        fn = _font(fn.size - 4)
+    _center(draw, PCY + PCR + 26, player_name, fn, WHITE_TEXT, TK_W)
+    _center(draw, PCY + PCR + fn.size + 36, f"{data.get('team','')}  ·  {data.get('position','')}", _font(28, bold=False), GOLD_SOFT, TK_W)
+
+    # Ligne séparatrice or
+    sep_y = PCY + PCR + fn.size + 82
+    draw.line([(cx0+40, sep_y), (cx1-40, sep_y)], fill=GOLD, width=2)
+
+    # Stats dans la carte — 4 colonnes
+    stats2 = [
+        (str(data.get("pts","")), "PTS",  ORANGE,      cx0+110),
+        (str(data.get("ast","")), "AST",  BLUE_STAT,   cx0+280),
+        (str(data.get("reb","")), "REB",  GREEN_STAT,  cx0+450),
+        (f"{data.get('fg','')}%","FG%",  GOLD,        cx0+620),
+    ]
+    fv2 = _font(58)
+    fl2 = _font(22, bold=False)
+    stat_y = sep_y + 22
+    for val, lbl, color, sx in stats2:
+        bb = draw.textbbox((0,0), val, font=fv2)
+        draw.text((sx-(bb[2]-bb[0])//2, stat_y), val, font=fv2, fill=color)
+        bb = draw.textbbox((0,0), lbl, font=fl2)
+        draw.text((sx-(bb[2]-bb[0])//2, stat_y+64), lbl, font=fl2, fill=GRAY_TEXT)
+    for sx in [cx0+195, cx0+365, cx0+535]:
+        draw.line([(sx, stat_y+6), (sx, stat_y+80)], fill=GRAY_LINE, width=1)
+
+    # Score HoopIQ compact dans la carte
+    score = str(data.get("score",""))
+    ssr_y = stat_y + 108
+    draw.line([(cx0+40, ssr_y), (cx1-40, ssr_y)], fill=GRAY_LINE, width=1)
+    _center(draw, ssr_y+14, f"SCORE HOOPIQ  {score}/100", _font(30), GOLD, TK_W)
+
+    # Numéro de carte + watermark bas
+    card_no = f"#{rng.randint(1,999):03d} / 999"
+    _center(draw, cy1 - 54, card_no, _font(22, bold=False), GOLD_SOFT, TK_W)
+    _center(draw, cy1 - 28, "ÉDITION LIMITÉE", _font(18, bold=False), GRAY_TEXT, TK_W)
+
+    # CTA sous la carte
+    cta_y = cy1 + 28
+    _center(draw, cta_y, "🔥 Rejoins HoopIQ — ta carte t'attend", _font(34), ORANGE, TK_W)
+    _center(draw, cta_y + 50, "hoopiq-ai.com", _font(40), WHITE_TEXT, TK_W)
+    _center(draw, TK_H - 130, str(data.get("hashtags","#NBA #HoopIQ")), _font(24, bold=False), ORANGE, TK_W)
+
+    return img
+
+
+def _encode_scene(frame_path: Path, out_path: Path, duration: float, fps: int,
+                  fade_in: float = 0.0, fade_out: float = 0.0, zoom_dir: str = "in") -> None:
+    """Encode une scène image → MP4 avec zoom + fade via ffmpeg."""
+    import subprocess as _sp
+    d_frames = int(duration * fps)
+    if zoom_dir == "in":
+        z_expr = "min(zoom+0.0004,1.04)"
+    elif zoom_dir == "out":
+        z_expr = "max(zoom-0.0004,1.0)"
+    else:
+        z_expr = "1.02"
+
+    vf = f"zoompan=z='{z_expr}':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d={d_frames}:s={TK_W}x{TK_H}:fps={fps}"
+    if fade_in > 0:
+        vf += f",fade=t=in:st=0:d={fade_in}"
+    if fade_out > 0:
+        vf += f",fade=t=out:st={duration - fade_out}:d={fade_out}"
+
+    cmd = [
+        "ffmpeg", "-y",
+        "-loop", "1", "-framerate", str(fps), "-i", str(frame_path),
+        "-vf", vf,
+        "-t", str(duration),
+        "-c:v", "libx264", "-preset", "fast", "-crf", "21",
+        "-pix_fmt", "yuv420p",
+        str(out_path),
+    ]
+    result = _sp.run(cmd, capture_output=True)
+    if result.returncode != 0:
+        raise RuntimeError(result.stderr.decode()[-600:])
+
+
+def generate_tiktok_video(data: dict = None) -> Path:
+    """
+    Génère un MP4 1080×1920 TikTok en 3 scènes dynamiques + beat.
+    Scène 1 (2.5s) : Reveal joueur  |  Scène 2 (3s) : Stats  |  Scène 3 (2.5s) : Score CTA
+    Usage : python lucie.py --tiktok
+    """
+    import subprocess as _sp
+    import tempfile
+
+    if data is None:
+        print("📝 Génération data joueur via Groq...")
+        data = _fetch_tiktok_player_data()
+
+    TIKTOK_DIR.mkdir(parents=True, exist_ok=True)
+
+    photo = fetch_player_photo(str(data.get("player_name", "")), diameter=420)
+
+    print("🎨 Rendu des 4 scènes...")
+    s1 = _draw_scene1(data, photo)
+    s2 = _draw_scene2(data)
+    s3 = _draw_scene3(data)
+    s4 = _draw_scene4_card(data, photo)
+
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp = Path(tmp)
+        s1.save(str(tmp / "s1.png"))
+        s2.save(str(tmp / "s2.png"))
+        s3.save(str(tmp / "s3.png"))
+        s4.save(str(tmp / "s4.png"))
+
+        print("🎬 Encodage scène 1/4 (reveal joueur)...")
+        _encode_scene(tmp/"s1.png", tmp/"c1.mp4", 7.0, 30, fade_in=0.5, zoom_dir="in")
+        print("🎬 Encodage scène 2/4 (stats)...")
+        _encode_scene(tmp/"s2.png", tmp/"c2.mp4", 8.0, 30, fade_in=0.15, zoom_dir="hold")
+        print("🎬 Encodage scène 3/4 (score + CTA)...")
+        _encode_scene(tmp/"s3.png", tmp/"c3.mp4", 6.0, 30, zoom_dir="out")
+        print("🎬 Encodage scène 4/4 (carte exclusive)...")
+        _encode_scene(tmp/"s4.png", tmp/"c4.mp4", 9.0, 30, fade_in=0.3, fade_out=0.7, zoom_dir="in")
+
+        # Concat les 4 clips
+        concat_txt = tmp / "concat.txt"
+        concat_txt.write_text(
+            f"file '{tmp/'c1.mp4'}'\nfile '{tmp/'c2.mp4'}'\nfile '{tmp/'c3.mp4'}'\nfile '{tmp/'c4.mp4'}'\n"
+        )
+        silent_mp4 = tmp / "silent.mp4"
+        _sp.check_call([
+            "ffmpeg", "-y", "-f", "concat", "-safe", "0",
+            "-i", str(concat_txt),
+            "-c", "copy", str(silent_mp4),
+        ], stdout=_sp.DEVNULL, stderr=_sp.DEVNULL)
+
+        # Ajout beat
+        music_files = list(MUSIC_DIR.glob("*.mp3")) + list(MUSIC_DIR.glob("*.m4a"))
+        music_path = random.choice(music_files) if music_files else None
+
+        ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        slug = str(data.get("player_name","stat")).lower().replace(" ","_").replace(".","")
+        out_path = TIKTOK_DIR / f"hoopiq_{slug}_{ts}.mp4"
+
+        if music_path:
+            print(f"🎵 Beat : {music_path.name[:60]}")
+            result = _sp.run([
+                "ffmpeg", "-y",
+                "-i", str(silent_mp4),
+                "-i", str(music_path),
+                "-c:v", "copy",
+                "-c:a", "aac", "-b:a", "192k",
+                "-af", "afade=t=in:st=0:d=0.4,afade=t=out:st=29:d=1.0",
+                "-shortest", str(out_path),
+            ], capture_output=True)
+            if result.returncode != 0:
+                print("⚠️  Erreur audio, vidéo sans son")
+                import shutil; shutil.copy(str(silent_mp4), str(out_path))
+        else:
+            print("⚠️  Aucun beat — vidéo muette")
+            import shutil; shutil.copy(str(silent_mp4), str(out_path))
+
+        print(f"✅ TikTok prêt : {out_path}")
+        return out_path
+
+
+def post_reel_to_instagram(video_path: Path, caption: str = "") -> bool:
+    """Publie la vidéo TikTok comme Reel Instagram via instagrapi."""
+    try:
+        from instagrapi import Client
+    except ImportError:
+        print("❌ instagrapi non installé → pip install instagrapi")
+        return False
+
+    cl = Client()
+    session_file = Path(__file__).parent / "ig_session.json"
+    print(f"🔐 Connexion Instagram @{IG_USERNAME}...")
+    try:
+        if session_file.exists():
+            cl.load_settings(session_file)
+            cl.login(IG_USERNAME, IG_PASSWORD)
+        else:
+            cl.login(IG_USERNAME, IG_PASSWORD)
+        cl.dump_settings(session_file)
+    except Exception as e:
+        print(f"❌ Connexion Instagram échouée : {e}")
+        return False
+
+    cl.delay_range = [2, 5]
+    print("📤 Publication Reel Instagram...")
+    try:
+        media = cl.clip_upload(video_path, caption=caption)
+        print(f"✅ Reel publié ! https://www.instagram.com/p/{media.code}/")
+        return True
+    except Exception as e:
+        print(f"❌ Erreur Reel Instagram : {e}")
+        return False
+
+
+def post_to_tiktok(video_path: Path, caption: str = "") -> bool:
+    """
+    Publication automatique TikTok via tiktok-uploader (Playwright/Chromium).
+
+    Setup (une seule fois) :
+      1. pip install tiktok-uploader
+      2. Installe l'extension "Get cookies.txt LOCALLY" dans Chrome
+      3. Connecte-toi à TikTok sur Chrome
+      4. Clique sur l'extension → exporte → sauvegarde dans hoopiq/cookies/tiktok_cookies.txt
+      5. Relance : python lucie.py --tiktok --post
+
+    Note : TikTok bloque les comptes qui postent trop vite. Max 1 vidéo / 24h recommandé.
+    """
+    try:
+        from tiktok_uploader.upload import upload_video
+    except ImportError:
+        print("❌ tiktok-uploader non installé → pip install tiktok-uploader")
+        return False
+
+    cookies_path = Path(__file__).parent / "cookies" / "tiktok_cookies.txt"
+    if not cookies_path.exists():
+        print(f"❌ Cookies TikTok manquants : {cookies_path}")
+        print("   → Voir la doc dans post_to_tiktok() pour le setup.")
+        return False
+
+    try:
+        upload_video(
+            str(video_path),
+            description=caption or "🏀 Stat du jour | Analyse IA #NBA #HoopIQ #Basketball #TikTok",
+            cookies=str(cookies_path),
+            headless=True,
+        )
+        print("✅ Vidéo publiée sur TikTok @hoopiq_officiel !")
+        return True
+    except Exception as e:
+        print(f"❌ Erreur TikTok upload : {e}")
+        return False
+
+
 # ── Main ───────────────────────────────────────────────────────────────────────
 def main():
     print("=" * 55)
@@ -636,6 +1295,37 @@ def main():
     print(f"  {datetime.datetime.now().strftime('%d/%m/%Y %H:%M')}")
     print("=" * 55)
 
+    # ── Mode TikTok / Both ─────────────────────────────────────────────────────
+    if "--tiktok" in sys.argv or "--both" in sys.argv:
+        mode = "--both" if "--both" in sys.argv else "--tiktok"
+        print(f"\n🎬 Mode {'TikTok + Instagram Reels' if mode == '--both' else 'TikTok'} activé")
+        video_path = generate_tiktok_video()
+
+        if "--post" in sys.argv or mode == "--both":
+            name = Path(video_path).stem.replace("hoopiq_", "").replace("_", " ").title()
+            caption_tt = (
+                f"🏀 {name} — Analyse IA HoopIQ\n"
+                "#NBA #HoopIQ #Basketball #TikTok #NBAFrance #Stats"
+            )
+            caption_ig = (
+                f"🏀 {name} — Analyse IA HoopIQ 🤖\n\n"
+                f"Stats, carte exclusive & score HoopIQ 🔥\n"
+                f"👉 Lien en bio — hoopiq-ai.com\n\n"
+                "#NBA #HoopIQ #Basketball #NBAFrance #Reels #Stats"
+            )
+            print("\n📱 Publication TikTok...")
+            post_to_tiktok(video_path, caption_tt)
+            if mode == "--both":
+                print("\n📸 Publication Instagram Reel...")
+                post_reel_to_instagram(video_path, caption_ig)
+        else:
+            print(f"\n💡 Pour poster :")
+            print(f"   TikTok seulement  → python lucie.py --tiktok --post")
+            print(f"   TikTok + Instagram → python lucie.py --both")
+        print("\n✅ Terminé ! Check tiktok_ready/ 🎬")
+        return
+
+    # ── Mode Instagram (comportement par défaut) ───────────────────────────────
     day = datetime.date.today().toordinal()
     post_types = [post_daily_buzz, post_player_analysis, post_top5]
     post_fn = post_types[day % len(post_types)]

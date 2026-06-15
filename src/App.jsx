@@ -14,6 +14,7 @@ import Scout from "./Scout.jsx";
 import TradeSimulator from "./TradeSimulator.jsx";
 import Calendrier from "./Calendrier.jsx";
 import PlanAssistant, { ASSISTANTS } from "./PlanAssistant.jsx";
+import Euroleague from "./Euroleague.jsx";
 import { supabase, isSupabaseConfigured } from "./supabaseClient";
 /* ─────────────────────────────────────────
    DESIGN SYSTEM
@@ -1214,7 +1215,8 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
     { id: "scout",     label: "Scout",     icon: "🔍" },
     { id: "trade",      label: "Trade IA",  icon: "🔀" },
     { id: "calendrier", label: "Calendrier", icon: "📅" },
-    { id: "nfl-soon",  label: "NFL",       icon: "🏈", soon: true },
+    { id: "euroleague", label: "Euroleague", icon: "🇪🇺" },
+    { id: "nfl-soon",  label: "NFL",        icon: "🏈", soon: true },
     { sep: true },
     { id: "vestiaire", label: "Vestiaire", icon: "💬" },
     { id: "cards",     label: "Cartes",    icon: "🎴" },
@@ -2179,6 +2181,7 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
         {tab === "scout" && <Scout />}
         {tab === "trade" && <TradeSimulator />}
         {tab === "calendrier" && <Calendrier />}
+        {tab === "euroleague" && <Euroleague />}
 
         {/* ── MARKETING ── */}
         {tab === "marketing" && isAdmin && <Marketing />}
