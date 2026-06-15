@@ -34,3 +34,6 @@ dist-ssr
 # Large media files — servis via Vercel CLI (vercel --prod), pas via git
 public/videos/
 public/music/
+cookies/
+tiktok_ready/
+*.mp4
