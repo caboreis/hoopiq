@@ -442,12 +442,12 @@ export default function Duel() {
               animation: "popIn .4s ease",
             }}>
               <div style={{ padding: "12px 20px", textAlign: "center", borderRight: `1px solid ${C.border}` }}>
-                <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 32, color: C.orange, lineHeight: 1 }}>{userScore}</div>
+                <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 32, color: C.orange, lineHeight: 1 }}>{userScore}</div>
                 <div style={{ fontSize: 10, color: C.muted, marginTop: 2 }}>TOI</div>
               </div>
               <div style={{ padding: "8px 14px", fontSize: 18, color: C.muted }}>vs</div>
               <div style={{ padding: "12px 20px", textAlign: "center", borderLeft: `1px solid ${C.border}` }}>
-                <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 32, color: C.purple, lineHeight: 1 }}>{aiScore}</div>
+                <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 32, color: C.purple, lineHeight: 1 }}>{aiScore}</div>
                 <div style={{ fontSize: 10, color: C.muted, marginTop: 2 }}>IA</div>
               </div>
             </div>

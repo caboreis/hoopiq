@@ -286,7 +286,7 @@ function TeamScore({ team, score, pts_q, quarter, side }) {
           {team.record && <div style={{ fontSize: 10, color: C.muted, opacity: 0.7 }}>{team.record}</div>}
         </div>
       </div>
-      <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 54, lineHeight: 1, marginTop: 6, color: "#fff" }}>{score}</div>
+      <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 54, lineHeight: 1, marginTop: 6, color: "#fff" }}>{score}</div>
       <div style={{ display: "flex", gap: 3, marginTop: 4, flexDirection: side === "away" ? "row-reverse" : "row", flexWrap: "wrap" }}>
         {pts_q.map((q, i) => (
           <div key={i} style={{ fontSize: 10, color: i < (quarter || 1) ? C.text : C.muted, background: i < (quarter || 1) ? "rgba(255,255,255,0.06)" : "transparent", padding: "2px 5px", borderRadius: 3, fontFamily: "monospace" }}>
@@ -809,7 +809,7 @@ export default function LiveCenter() {
                     <Logo url={game.home.logo} size={28} />
                     <div>
                       <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 14, color: game.home.color }}>{game.home.abbr}</div>
-                      <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 26, lineHeight: 1 }}>{game.home.score}</div>
+                      <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 26, lineHeight: 1 }}>{game.home.score}</div>
                     </div>
                   </div>
                   <div style={{ fontSize: 11, color: C.muted }}>vs</div>
@@ -817,7 +817,7 @@ export default function LiveCenter() {
                     <Logo url={game.away.logo} size={28} />
                     <div style={{ textAlign: "right" }}>
                       <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 14, color: game.away.color }}>{game.away.abbr}</div>
-                      <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 26, lineHeight: 1 }}>{game.away.score}</div>
+                      <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 26, lineHeight: 1 }}>{game.away.score}</div>
                     </div>
                   </div>
                 </div>

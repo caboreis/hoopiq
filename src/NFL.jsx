@@ -284,7 +284,7 @@ export default function NFL() {
           }}>
             <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: k.color, opacity: 0.8 }} />
             <div style={{ fontSize: 20, marginBottom: 4 }}>{k.icon}</div>
-            <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 30, color: k.color, lineHeight: 1 }}>{k.val}</div>
+            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 30, color: k.color, lineHeight: 1 }}>{k.val}</div>
             <div style={{ fontSize: 11, color: C.muted, marginTop: 3 }}>{k.label}</div>
           </div>
         ))}
@@ -367,7 +367,7 @@ export default function NFL() {
                       background: "rgba(0,0,0,0.3)", borderRadius: 12, padding: "12px 14px", textAlign: "center",
                       border: `1px solid ${s.color}30`,
                     }}>
-                      <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 28, color: s.color, lineHeight: 1 }}>{s.val}</div>
+                      <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 28, color: s.color, lineHeight: 1 }}>{s.val}</div>
                       <div style={{ fontSize: 10, color: C.muted, marginTop: 3 }}>{s.label}</div>
                     </div>
                   ))}

@@ -188,7 +188,7 @@ export default function PreMatch() {
           ].map(s => (
             <div key={s.l} style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 14px", borderRadius: 20, background: `${s.c}12`, border: `1px solid ${s.c}30` }}>
               <span>{s.icon}</span>
-              <span style={{ fontFamily: "'Permanent Marker',cursive", fontSize: 20, color: s.c, letterSpacing: .5 }}>{s.v}</span>
+              <span style={{ fontFamily: "'Bebas Neue',cursive", fontSize: 20, color: s.c, letterSpacing: .5 }}>{s.v}</span>
               <span style={{ fontSize: 11, color: C.muted }}>{s.l}</span>
             </div>
           ))}

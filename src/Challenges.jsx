@@ -226,7 +226,7 @@ export default function Challenges() {
           </div>
         </div>
         <div style={{ textAlign: "center", padding: "0 20px", borderLeft: `1px solid ${C.border}` }}>
-          <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 36, color: C.gold, lineHeight: 1 }}>{totalPoints}</div>
+          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 36, color: C.gold, lineHeight: 1 }}>{totalPoints}</div>
           <div style={{ fontSize: 11, color: C.muted }}>/ {maxPoints} pts</div>
         </div>
         {allAnswered && (

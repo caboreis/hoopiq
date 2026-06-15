@@ -38,7 +38,7 @@ function PodiumBlock({ player, height, delay }) {
         display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-start", paddingTop: 12,
       }}>
         <div style={{ fontSize: 28 }}>{player.badge}</div>
-        <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 28, color, lineHeight: 1 }}>#{player.rank}</div>
+        <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 28, color, lineHeight: 1 }}>#{player.rank}</div>
       </div>
     </div>
   );
@@ -84,7 +84,7 @@ export default function Leaderboard() {
         ].map(s => (
           <div key={s.label} style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 14, padding: "14px 18px", textAlign: "center" }}>
             <div style={{ fontSize: 22, marginBottom: 4 }}>{s.icon}</div>
-            <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 26, color: C.orange }}>{s.val}</div>
+            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 26, color: C.orange }}>{s.val}</div>
             <div style={{ fontSize: 11, color: C.muted }}>{s.label}</div>
           </div>
         ))}

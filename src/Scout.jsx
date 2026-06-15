@@ -206,7 +206,7 @@ function ScoreRing({ score, size = 56 }) {
           strokeLinecap="round" style={{ transition: "stroke-dashoffset 1s ease" }} />
       </svg>
       <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <span style={{ fontFamily: "'Permanent Marker', cursive", fontSize: size * 0.28, color: col, lineHeight: 1 }}>{score}</span>
+        <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: size * 0.28, color: col, lineHeight: 1 }}>{score}</span>
       </div>
     </div>
   );
@@ -216,7 +216,7 @@ function ScoreRing({ score, size = 56 }) {
 function StatPill({ label, value, color, sub }) {
   return (
     <div style={{ textAlign: "center", padding: "6px 10px", background: "rgba(255,255,255,0.04)", borderRadius: 8, minWidth: 52 }}>
-      <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 18, color, lineHeight: 1 }}>{value}</div>
+      <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 18, color, lineHeight: 1 }}>{value}</div>
       <div style={{ fontSize: 11, color: C.muted, letterSpacing: 0.5, textTransform: "uppercase", marginTop: 2 }}>{label}</div>
       {sub && <div style={{ fontSize: 8, color, marginTop: 1 }}>{sub}</div>}
     </div>
