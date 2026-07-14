@@ -134,13 +134,24 @@ Sois passionné, data-driven, en français. Parle comme un vrai insider NBA.`,
   };
 
   const renderAnalysis = (text) => {
+    let verdictNext = false;
     return text.split("\n").map((line, i) => {
       if (line.startsWith("## ")) {
+        const heading = line.replace("## ", "");
+        verdictNext = /VERDICT GLOBAL/i.test(heading);
         return (
           <div key={i} style={{
             fontFamily: "'Permanent Marker', cursive", fontSize: 22,
             color: C.orange, letterSpacing: 1.5, marginTop: 20, marginBottom: 6,
-          }}>{line.replace("## ", "")}</div>
+          }}>{heading}</div>
+        );
+      }
+      if (verdictNext && line.trim()) {
+        verdictNext = false;
+        return (
+          <div key={i} style={{ marginTop: 4, marginBottom: 6 }}>
+            <VerdictBadge text={line} />
+          </div>
         );
       }
       if (line.startsWith("**") && line.includes("**")) {

@@ -25,9 +25,9 @@ export default function Jarvis() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [history, setHistory] = useState([]);
+  const [, setHistory] = useState([]);
   const [time, setTime] = useState(new Date());
-  const [pulse, setPulse] = useState(false);
+  const [, setPulse] = useState(false);
   const bottomRef = useRef(null);
   const inputRef = useRef(null);
 

@@ -156,6 +156,13 @@ const watchMeta = (status) => {
   return { label: "📺 Watch Live", kind: "NBA preview", live: false };
 };
 
+// Ouvre la recherche YouTube du match dans un nouvel onglet (pas besoin de clé API).
+const ytWatchUrl = (game) => {
+  const m = watchMeta(game.status);
+  const q = `${game.home.name} vs ${game.away.name} ${m.kind} NBA`;
+  return `https://www.youtube.com/results?search_query=${encodeURIComponent(q)}`;
+};
+
 function WatchLiveModal({ game, onClose }) {
   const [videoId, setVideoId] = useState(null);
   const [title, setTitle] = useState("");
@@ -627,12 +634,17 @@ export default function LiveCenter() {
     ...wnbaGames.filter(w => !games.some(n => n.id === w.id)),
     ...nflGames.filter(f => !games.some(n => n.id === f.id)),
   ];
-  const visibleGames = leagueFilter === "nba" ? games
+  const rawVisible = leagueFilter === "nba" ? games
     : leagueFilter === "wnba" ? wnbaGames
     : leagueFilter === "nfl" ? nflGames
     : allGames;
+  // On enlève les matchs terminés et on met les LIVE en premier, puis les à venir.
+  const _order = { live: 0, upcoming: 1 };
+  const visibleGames = rawVisible
+    .filter(g => g.status !== "final")
+    .sort((a, b) => (_order[a.status] ?? 9) - (_order[b.status] ?? 9));
 
-  const selectedGame = allGames.find(g => g.id === selectedId) || allGames[0] || null;
+  const selectedGame = allGames.find(g => g.id === selectedId) || visibleGames[0] || allGames[0] || null;
   const det = detail && selectedGame && detail.id === String(selectedGame.id) ? detail : null;
 
   // win prob: prefer real ESPN curve, fallback to heuristic
@@ -676,7 +688,6 @@ export default function LiveCenter() {
 
   const liveCount = allGames.filter(g => g.status === "live").length;
   const upcomingCount = allGames.filter(g => g.status === "upcoming").length;
-  const finalCount = allGames.filter(g => g.status === "final").length;
   const wnbaLiveCount = wnbaGames.filter(g => g.status === "live").length;
 
   const tabBtn = (active) => ({
@@ -716,7 +727,6 @@ export default function LiveCenter() {
           <span style={{ color: liveCount ? C.red : C.muted }}>🔴 {liveCount} live</span>
           {wnbaLiveCount > 0 && <span style={{ color: C.purple }}>🌸 {wnbaLiveCount} WNBA live</span>}
           <span>{upcomingCount} à venir</span>
-          <span>{finalCount} terminés</span>
         </div>
       </div>
 
@@ -784,7 +794,6 @@ export default function LiveCenter() {
             const isWnba = game.league === "wnba";
             const isNfl  = game.league === "nfl";
             const isSelected = selectedGame && selectedGame.id === game.id;
-            const accentColor = isWnba ? C.purple : isNfl ? C.red : C.orange;
             return (
               <div key={game.id} className="game-card" onClick={() => { setSelectedId(game.id); setSelectedLeague(isWnba ? "wnba" : isNfl ? "nfl" : "nba"); setDetail(null); if (isMobile) setMobilePanel("detail"); }} style={{
                 background: isSelected ? (isWnba ? "rgba(192,132,252,0.07)" : isNfl ? "rgba(200,16,46,0.07)" : "rgba(255,92,0,0.07)") : C.surface,
@@ -823,7 +832,7 @@ export default function LiveCenter() {
                 </div>
                 <PredBar pct={game.prediction} home={game.home} away={game.away} />
                 {!isWnba && (
-                  <button onClick={(e) => { e.stopPropagation(); setWatchGame(game); }} style={{
+                  <button onClick={(e) => { e.stopPropagation(); window.open(ytWatchUrl(game), "_blank", "noopener"); }} style={{
                     width: "100%", marginTop: 4, padding: "8px 0", borderRadius: 9,
                     border: `1px solid ${game.status === "live" ? "rgba(255,77,109,0.35)" : C.border}`,
                     background: game.status === "live" ? "rgba(255,77,109,0.1)" : "rgba(255,255,255,0.04)",
@@ -867,7 +876,7 @@ export default function LiveCenter() {
                   <PredBar pct={winPct} home={selectedGame.home} away={selectedGame.away} label={winLabel} />
                 </div>
                 {selectedGame.league !== "wnba" && (
-                  <button onClick={() => setWatchGame(selectedGame)} style={{
+                  <button onClick={() => window.open(ytWatchUrl(selectedGame), "_blank", "noopener")} style={{
                     width: "100%", marginTop: 14, padding: "11px 0", borderRadius: 11,
                     border: `1px solid ${selectedGame.status === "live" ? "rgba(255,77,109,0.4)" : "rgba(255,255,255,0.12)"}`,
                     background: selectedGame.status === "live" ? "linear-gradient(135deg, rgba(255,77,109,0.18), rgba(255,92,0,0.12))" : "rgba(255,255,255,0.05)",

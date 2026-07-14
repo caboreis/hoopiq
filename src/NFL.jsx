@@ -419,11 +419,14 @@ export default function NFL() {
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 12 }}>
             {filteredTeams.map(team => (
-              <div key={team.id} className="nfl-team-card" style={{
-                background: C.surface, border: `1px solid ${C.border}`,
-                borderRadius: 14, padding: "16px 18px", cursor: "pointer", transition: "all .2s",
-                borderLeft: `3px solid ${team.color}`,
-              }}>
+              <div key={team.id} className="nfl-team-card"
+                onClick={() => setTeamFilter(prev => prev === team.abbr ? null : team.abbr)}
+                style={{
+                  background: teamFilter === team.abbr ? `${team.color}12` : C.surface,
+                  border: `1px solid ${teamFilter === team.abbr ? `${team.color}80` : C.border}`,
+                  borderRadius: 14, padding: "16px 18px", cursor: "pointer", transition: "all .2s",
+                  borderLeft: `3px solid ${team.color}`,
+                }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
                   <div style={{
                     width: 36, height: 36, borderRadius: "50%",
@@ -440,6 +443,33 @@ export default function NFL() {
               </div>
             ))}
           </div>
+
+          {/* Panneau équipe sélectionnée — cherche son match du jour */}
+          {teamFilter && (() => {
+            const team = NFL_TEAMS.find(t => t.abbr === teamFilter);
+            const teamGame = games.find(g => g.home.abbr === teamFilter || g.away.abbr === teamFilter);
+            return (
+              <div style={{
+                marginTop: 20, padding: "16px 20px", borderRadius: 14,
+                background: `${team?.color || C.red}0d`, border: `1px solid ${team?.color || C.red}33`,
+                display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap",
+              }}>
+                <div style={{ fontSize: 13, color: C.text }}>
+                  {teamGame
+                    ? <>🏈 <strong>{team?.name}</strong> joue aujourd'hui : {teamGame.away.abbr} @ {teamGame.home.abbr} ({teamGame.status === "live" ? "🔴 en direct" : teamGame.status === "final" ? "terminé" : "à venir"})</>
+                    : <>Aucun match aujourd'hui pour <strong>{team?.name}</strong>.</>
+                  }
+                </div>
+                {teamGame && (
+                  <button onClick={() => { setSelectedGame(teamGame); setView("live"); }} style={{
+                    padding: "7px 16px", borderRadius: 20, fontSize: 12, fontWeight: 700,
+                    cursor: "pointer", fontFamily: "inherit", background: "rgba(200,16,46,0.15)",
+                    border: "1px solid rgba(200,16,46,0.45)", color: C.red,
+                  }}>Voir le match →</button>
+                )}
+              </div>
+            );
+          })()}
         </div>
       )}
 
@@ -554,5 +584,3 @@ export default function NFL() {
     </div>
   );
 }
-
-const AFC_ABBRS = ["BAL","BUF","KC","MIA","CIN","CLE","HOU","IND","JAX","TEN","DEN","LAC","LV","NE","NYJ","PIT"];

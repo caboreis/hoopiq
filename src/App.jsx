@@ -3,6 +3,7 @@ import Agent from "./Agent.jsx";
 import Marketing from "./Marketing.jsx";
 import Jarvis from "./Jarvis.jsx";
 import Cards from "./Cards.jsx";
+import MMA from "./MMA.jsx";
 import LiveCenter from "./LiveCenter.jsx";
 import Oracle from "./Oracle.jsx";
 import Vestiaire from "./Vestiaire.jsx";
@@ -15,7 +16,6 @@ import TradeSimulator from "./TradeSimulator.jsx";
 import Calendrier from "./Calendrier.jsx";
 import PlanAssistant, { ASSISTANTS } from "./PlanAssistant.jsx";
 import Euroleague from "./Euroleague.jsx";
-import { supabase, isSupabaseConfigured } from "./supabaseClient";
 /* ─────────────────────────────────────────
    DESIGN SYSTEM
 ───────────────────────────────────────── */
@@ -131,6 +131,7 @@ const isAdminEmail = (email) => !!email && ADMIN_EMAILS.includes(email.trim().to
 const VIP_EMAILS = [
   "dosreislopes.neusa@gmail.com",
   "samaketyler@gmail.com",
+  "natauraonline@gmail.com",
 ];
 const isVipEmail = (email) => !!email && VIP_EMAILS.includes(email.trim().toLowerCase());
 
@@ -272,13 +273,15 @@ function SectionTitle({ children }) {
   return <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 2.5, color: C.orange, textTransform: "uppercase", marginBottom: 18, fontFamily: "monospace" }}>{children}</div>;
 }
 
-function BallLogo({ size = 38, fontSize = 26 }) {
+function BallLogo({ size = 38, fontSize = 26, pokeUp = false }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 10, userSelect: "none" }}>
       <div style={{
         width: size, height: size, borderRadius: "50%", flexShrink: 0,
         overflow: "hidden",
         boxShadow: "0 2px 12px rgba(0,0,0,0.6)",
+        // Mobile à encoche : le ballon remonte vers la barre de statut (près de l'heure)
+        transform: pokeUp ? "translateY(calc(-1 * env(safe-area-inset-top, 0px)))" : undefined,
       }}>
         <video
           src="/videos/wilson-ball.mp4"
@@ -386,13 +389,14 @@ function Landing({ onAuth, onChoosePlan }) {
         .plan-card:hover { transform: translateY(-6px) !important; }
         .glow-btn:hover { box-shadow: 0 8px 40px rgba(255,92,0,0.6) !important; transform:translateY(-2px); }
         .fade-in { animation: slide-up .7s ease both; }
+        @media (max-width: 480px) { .nav-login { display: none; } }
       `}</style>
 
       {/* NAV */}
-      <nav style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 200, padding: "0 40px", height: 66, display: "flex", alignItems: "center", justifyContent: "space-between", background: "rgba(6,6,15,0.85)", backdropFilter: "blur(24px)", borderBottom: `1px solid ${C.border}` }}>
-        <BallLogo size={38} fontSize={26} />
-        <div style={{ display: "flex", gap: 8 }}>
-          <Btn variant="ghost" small onClick={() => onAuth("login")}>Connexion</Btn>
+      <nav style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 200, padding: "env(safe-area-inset-top, 0px) clamp(14px, 4vw, 40px) 0", minHeight: 66, height: "auto", boxSizing: "content-box", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, background: "rgba(6,6,15,0.85)", backdropFilter: "blur(24px)", borderBottom: `1px solid ${C.border}` }}>
+        <BallLogo size={38} fontSize={26} pokeUp />
+        <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
+          <span className="nav-login"><Btn variant="ghost" small onClick={() => onAuth("login")}>Connexion</Btn></span>
           <Btn small onClick={() => onAuth("signup")} style={{ boxShadow: "0 4px 20px rgba(255,92,0,0.4)" }}>Commencer →</Btn>
         </div>
       </nav>
@@ -422,7 +426,7 @@ function Landing({ onAuth, onChoosePlan }) {
           <Badge color={C.orange}>🏀 IA Basket · Saison 2025-26</Badge>
         </div>
 
-        <h1 className="fade-in" style={{ fontFamily: "'Permanent Marker', cursive", fontSize: "clamp(60px, 10vw, 110px)", lineHeight: .9, marginTop: 24, letterSpacing: 2, animationDelay: ".1s" }}>
+        <h1 className="fade-in" style={{ fontFamily: "'Permanent Marker', cursive", fontSize: "clamp(34px, 9vw, 110px)", lineHeight: .9, marginTop: 24, letterSpacing: "clamp(0px, 0.4vw, 2px)", animationDelay: ".1s", wordBreak: "break-word" }}>
           L'INTELLIGENCE<br />
           <span style={{ background: G.orange, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>ARTIFICIELLE</span><br />
           DU BASKET
@@ -601,50 +605,52 @@ function AuthModal({ mode, onClose, onSuccess, initialPlan }) {
 
   const handleLogin = async () => {
     if (!form.email || !form.password) { setErrors({ general: "Remplis tous les champs." }); return; }
-    // L'admin se connecte comme tout le monde, via son vrai compte Supabase (plus de backdoor).
-    if (!isSupabaseConfigured) { setErrors({ general: "Connexion indisponible — réessaie plus tard." }); return; }
     setLoading(true); setErrors({});
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: form.email.trim(),
-      password: form.password,
-    });
-    setLoading(false);
-    if (error) {
-      setErrors({
-        general: /confirm/i.test(error.message)
-          ? "Confirme d'abord ton email — regarde ta boîte mail 📬"
-          : "Email ou mot de passe incorrect.",
+    try {
+      const r = await fetch(`${API_BASE}/api/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: form.email.trim(), password: form.password }),
       });
-      return;
+      const d = await r.json();
+      setLoading(false);
+      if (!r.ok) {
+        setErrors({ general: d.error === "invalid_credentials" ? "Email ou mot de passe incorrect." : "Connexion indisponible — réessaie plus tard." });
+        return;
+      }
+      onSuccess({ name: d.name, email: d.email, plan: d.plan, planPaid: d.planPaid, createdAt: d.createdAt });
+    } catch {
+      setLoading(false);
+      setErrors({ general: "Connexion indisponible — vérifie ta connexion internet." });
     }
-    const u = data.user;
-    onSuccess({
-      name: u.user_metadata?.name || u.email.split("@")[0],
-      email: u.email,
-      plan: u.user_metadata?.plan || "scout",
-      createdAt: u.created_at,
-    });
   };
 
   const handleSignup = async (goToCheckout = false) => {
     const email = form.email.trim();
     if (!email || !form.password) { setErrors({ general: "Email et mot de passe requis." }); setStep(1); return; }
     if (form.password.length < 6) { setErrors({ general: "Mot de passe : 6 caractères minimum." }); setStep(1); return; }
-    if (!isSupabaseConfigured) { setErrors({ general: "Inscription indisponible — réessaie plus tard." }); return; }
     setLoading(true); setErrors({});
     const name = form.name || email.split("@")[0];
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password: form.password,
-      options: { data: { name, plan: form.plan } },
-    });
-    if (error) {
-      setLoading(false);
-      setErrors({
-        general: /already|registered/i.test(error.message)
-          ? "Un compte existe déjà avec cet email — connecte-toi !"
-          : error.message,
+    let d;
+    try {
+      const r = await fetch(`${API_BASE}/api/auth/signup`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password: form.password, name, plan: form.plan }),
       });
+      d = await r.json();
+      if (!r.ok) {
+        setLoading(false);
+        setErrors({
+          general: d.error === "email_already_registered"
+            ? "Un compte existe déjà avec cet email — connecte-toi !"
+            : "Inscription indisponible — réessaie plus tard.",
+        });
+        return;
+      }
+    } catch {
+      setLoading(false);
+      setErrors({ general: "Inscription indisponible — vérifie ta connexion internet." });
       return;
     }
     if (goToCheckout) {
@@ -652,8 +658,7 @@ function AuthModal({ mode, onClose, onSuccess, initialPlan }) {
       catch (e) { setErrors({ general: e.message }); }
     }
     setLoading(false);
-    if (!data.session) { setStep(4); return; } // confirmation email requise
-    onSuccess({ name, email, plan: form.plan, createdAt: data.user?.created_at });
+    onSuccess({ name: d.name, email: d.email, plan: d.plan, planPaid: d.planPaid, createdAt: d.createdAt });
   };
 
   const selectedPlan = PLANS.find(p => p.id === form.plan);
@@ -758,19 +763,6 @@ function AuthModal({ mode, onClose, onSuccess, initialPlan }) {
           </div>
         )}
 
-        {/* SIGNUP STEP 4 — confirmation email requise */}
-        {m === "signup" && step === 4 && (
-          <div style={{ textAlign: "center" }}>
-            <div style={{ fontSize: 52, marginBottom: 12 }}>📬</div>
-            <h2 style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 34, letterSpacing: 1, marginBottom: 10 }}>Confirme ton email</h2>
-            <p style={{ color: C.muted, fontSize: 14, marginBottom: 24, fontFamily: "'DM Sans', sans-serif", lineHeight: 1.6 }}>
-              On t'a envoyé un lien de confirmation à<br />
-              <b style={{ color: C.orange }}>{form.email}</b><br />
-              Clique dessus, puis connecte-toi.
-            </p>
-            <Btn full onClick={() => { setM("login"); setStep(0); setErrors({}); }}>J'ai confirmé — Se connecter →</Btn>
-          </div>
-        )}
       </div>
     </div>
   );
@@ -943,6 +935,7 @@ function App({ user, onLogout }) {
   const [playerSearch, setPlayerSearch] = useState("");
   const [showAnalysisModal, setShowAnalysisModal] = useState(false);
   const [showNflTeaser, setShowNflTeaser] = useState(false);
+  const [nflPlaying, setNflPlaying] = useState(false);
   const [nflVideoIdx, setNflVideoIdx] = useState(0);
   const NFL_VIDEOS = ["/videos/nfl.mp4", "/videos/nfl_girls.mp4", "/videos/nfl2.mp4"];
   const NFL_BEATS = [
@@ -959,7 +952,7 @@ function App({ user, onLogout }) {
   // Relais vidéo : chaque vidéo joue NFL_VIDEO_SECONDS puis passe le relai à la suivante.
   // Les 3 <video> restent montées → leur currentTime est conservé, donc chacune reprend où elle s'était arrêtée.
   const NFL_VIDEO_SECONDS = 20;
-  const nflVideoRefs = useRef([]);
+  const nflVideoRef = useRef(null);
 
   useEffect(() => {
     if (showNflTeaser) {
@@ -972,14 +965,26 @@ function App({ user, onLogout }) {
     }
   }, [showNflTeaser]);
 
-  // Joue la vidéo active, met les autres en pause SANS toucher leur currentTime (reprise au bon endroit)
+  // Une seule vidéo montée — on change src + play() à chaque relais.
+  // iOS/Android : il FAUT poser muted/playsInline en JS (le prop React ne suffit pas
+  // pour débloquer l'autoplay), sinon la vidéo ne démarre pas sur smartphone.
   useEffect(() => {
-    if (!showNflTeaser) return;
-    nflVideoRefs.current.forEach((v, i) => {
-      if (!v) return;
-      if (i === nflVideoIdx) v.play().catch(() => {});
-      else v.pause();
-    });
+    if (!showNflTeaser || !nflVideoRef.current) return;
+    const v = nflVideoRef.current;
+    v.muted = true;
+    v.defaultMuted = true;
+    v.playsInline = true;
+    v.setAttribute("muted", "");
+    v.setAttribute("playsinline", "");
+    v.setAttribute("webkit-playsinline", "");
+    v.src = NFL_VIDEOS[nflVideoIdx];
+    v.load();
+    const tryPlay = () => { const p = v.play(); if (p && p.catch) p.catch(() => {}); };
+    tryPlay();
+    // Filet de sécurité : rejoue quand la vidéo est prête à être lue
+    v.oncanplay = tryPlay;
+    v.onplaying = () => setNflPlaying(true);
+    v.onpause = () => setNflPlaying(false);
   }, [showNflTeaser, nflVideoIdx]);
 
   // Minuteur de relais : au bout de 20 s, on passe à la vidéo suivante (boucle infinie)
@@ -1126,8 +1131,7 @@ Analyse ${player.name} en exactement 4 bullets (•), en français, max 2 lignes
 
 Données :
 Poste: ${player.pos} | Équipe: ${player.team}
-${player.pts} pts | ${player.ast} ast | ${player.reb} reb | ${player.fg}% au tir
-Score HoopIQ: ${player.score}/100 | Tendance: ${player.trend > 0 ? "🔥 +" : "📉 "}${player.trend}
+${typeof player.pts === "number" ? `${player.pts} pts | ${player.ast} ast | ${player.reb} reb | ${player.fg}% au tir\n` : ""}Score HoopIQ: ${player.score}/100${typeof player.trend === "number" ? ` | Tendance: ${player.trend > 0 ? "🔥 +" : "📉 "}${player.trend}` : ""}
 
 Termine par une phrase signature unique qui résume ce joueur en une image forte. Pas de blabla, que du feu.`
           }]
@@ -1217,6 +1221,7 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
     { id: "calendrier", label: "Calendrier", icon: "📅" },
     { id: "euroleague", label: "Euroleague", icon: "🇪🇺" },
     { id: "nfl-soon",  label: "NFL",        icon: "🏈", soon: true },
+    { id: "mma",       label: "MMA",       icon: "🥊" },
     { sep: true },
     { id: "vestiaire", label: "Vestiaire", icon: "💬" },
     { id: "cards",     label: "Cartes",    icon: "🎴" },
@@ -1259,6 +1264,8 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
           .dash-grid { grid-template-columns: 1fr !important; }
           .account-grid { grid-template-columns: 1fr !important; }
           .players-grid { grid-template-columns: 1fr !important; }
+          .oracle-grid { grid-template-columns: 1fr !important; }
+          .oracle-grid2 { grid-template-columns: 1fr !important; }
           h1 { font-size: 32px !important; }
           h2 { font-size: 24px !important; }
           .bebas-title { font-size: 28px !important; }
@@ -1275,24 +1282,33 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
             position: "fixed", inset: 0, zIndex: 2000, overflow: "hidden",
             display: "flex", alignItems: "center", justifyContent: "center",
           }}>
-            {/* Relais de 3 vidéos NFL — toutes montées en permanence, une seule visible (fondu).
-                Chacune reprend où elle s'était mise en pause grâce au currentTime conservé. */}
-            {NFL_VIDEOS.map((src, i) => (
-              <video
-                key={src}
-                ref={el => { nflVideoRefs.current[i] = el; }}
-                muted playsInline loop preload="auto"
-                style={{
-                  position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover",
-                  opacity: i === nflVideoIdx ? 1 : 0,
-                  transition: "opacity 0.8s ease",
-                }}
-                src={src}
-              />
-            ))}
+            <video
+              ref={nflVideoRef}
+              muted autoPlay playsInline loop preload="auto"
+              style={{
+                position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover",
+              }}
+            />
 
-            {/* Overlay sombre pour lisibilité */}
-            <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.55) 50%, rgba(0,0,0,0.8) 100%)" }} />
+            {/* Overlay sombre — tap n'importe où force la lecture (geste utilisateur = autoplay garanti sur iOS) */}
+            <div
+              onClick={() => { const v = nflVideoRef.current; if (v) { v.muted = true; v.play().catch(() => {}); } }}
+              style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.55) 50%, rgba(0,0,0,0.8) 100%)", cursor: "pointer" }}
+            />
+
+            {/* Bouton ▶ tant que la vidéo ne joue pas (autoplay bloqué) */}
+            {!nflPlaying && (
+              <button
+                onClick={() => { const v = nflVideoRef.current; if (v) { v.muted = true; v.play().catch(() => {}); } }}
+                style={{
+                  position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)",
+                  zIndex: 2, width: 84, height: 84, borderRadius: "50%", border: "none",
+                  background: "rgba(255,92,0,0.92)", color: "#fff", fontSize: 34, cursor: "pointer",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  boxShadow: "0 8px 32px rgba(255,92,0,0.5)", paddingLeft: 6,
+                }}
+              >▶</button>
+            )}
 
             {/* Bouton fermer */}
             <button onClick={closeTeaser} style={{
@@ -1538,7 +1554,7 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
                     {TABS.filter(t => !t.sep).map(t => {
                       const isActive = tab === t.id;
                       return (
-                        <button key={t.id} onClick={() => { openTab(t.id); setShowMobileMenu(false); }} style={{
+                        <button key={t.id} onClick={() => { setShowMobileMenu(false); if (t.soon) { setShowNflTeaser(true); } else { openTab(t.id); } }} style={{
                           display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
                           padding: "12px 4px", borderRadius: 12, border: "none", cursor: "pointer",
                           background: isActive ? "rgba(255,92,0,0.15)" : "rgba(255,255,255,0.04)",
@@ -1571,7 +1587,7 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
 
       {/* CONTENT */}
       <div style={{ marginLeft: isMobile ? 0 : 220, flex: 1, minWidth: 0 }}>
-      <div style={{ maxWidth: 1140, margin: "0 auto", padding: isMobile ? "16px 14px 90px" : "28px 24px 80px" }}>
+      <div style={{ maxWidth: 1140, margin: "0 auto", padding: isMobile ? "calc(16px + env(safe-area-inset-top, 0px)) 14px 90px" : "28px 24px 80px" }}>
 
         {/* ── DASHBOARD ── */}
         {tab === "dashboard" && (
@@ -1731,11 +1747,10 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
                       <Avatar name={player.name} size={42} espnId={player.espnId} headshot={player.headshot} league={player.league} />
                       <div style={{ flex: 1 }}>
                         <div style={{ fontWeight: 700 }}>{player.name}</div>
-                        <div style={{ fontSize: 12, color: C.muted }}>{player.pos} · {player.fg}% fg</div>
+                        <div style={{ fontSize: 12, color: C.muted }}>{player.pos}{player.jersey ? ` · #${player.jersey}` : ""}</div>
                       </div>
                       <div style={{ textAlign: 'right' }}>
                         <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 18, color: C.orange }}>{player.score}</div>
-                        <div style={{ fontSize: 11, color: player.trend >= 0 ? C.green : C.red }}>{player.trend >= 0 ? `+${player.trend}` : player.trend}</div>
                       </div>
                     </div>
                   ))
@@ -1759,10 +1774,12 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
                       <div style={{ fontWeight: 700, fontSize: 14 }}>{p.name} {p.hot && <span title="En feu">🔥</span>}</div>
                       <div style={{ fontSize: 12, color: C.muted }}>{p.team} · {p.pos}</div>
                     </div>
-                    <div style={{ textAlign: "right", marginRight: 8 }}>
-                      <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 22, color: C.orange }}>{p.pts}</div>
-                      <div style={{ fontSize: 11, color: C.muted }}>pts/match</div>
-                    </div>
+                    {typeof p.pts === "number" && (
+                      <div style={{ textAlign: "right", marginRight: 8 }}>
+                        <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 22, color: C.orange }}>{p.pts}</div>
+                        <div style={{ fontSize: 11, color: C.muted }}>pts/match</div>
+                      </div>
+                    )}
                     <Ring score={p.score} size={56} />
                   </div>
                 ))}
@@ -1891,12 +1908,14 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
                           {selectedPlayer.league === "wnba" && <span style={{ color: "#c084fc" }}>🌸 WNBA · </span>}
                           {selectedPlayer.team} · {selectedPlayer.pos}
                         </div>
-                        <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
-                          <Badge color={C.orange}>{selectedPlayer.pts} pts</Badge>
-                          <Badge color={C.blue}>{selectedPlayer.ast} ast</Badge>
-                          <Badge color={C.green}>{selectedPlayer.reb} reb</Badge>
-                          <Badge color={C.gold}>{selectedPlayer.fg}% FG</Badge>
-                        </div>
+                        {typeof selectedPlayer.pts === "number" && (
+                          <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+                            <Badge color={C.orange}>{selectedPlayer.pts} pts</Badge>
+                            <Badge color={C.blue}>{selectedPlayer.ast} ast</Badge>
+                            <Badge color={C.green}>{selectedPlayer.reb} reb</Badge>
+                            <Badge color={C.gold}>{selectedPlayer.fg}% FG</Badge>
+                          </div>
+                        )}
                       </div>
                       <div style={{ textAlign: "center" }}>
                         <Ring score={selectedPlayer.score} size={72} />
@@ -1904,24 +1923,30 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
                       </div>
                     </div>
 
-                    {/* Stats bars */}
-                    <div style={{ background: "rgba(255,255,255,0.03)", borderRadius: 16, padding: "18px 22px", marginBottom: 24 }}>
-                      <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1.5, color: C.muted, textTransform: "uppercase", marginBottom: 16 }}>Statistiques</div>
-                      {[
-                        { label: "Points / match", v: selectedPlayer.pts, max: 35, c: C.orange },
-                        { label: "Passes décisives", v: selectedPlayer.ast, max: 12, c: C.blue },
-                        { label: "Rebonds", v: selectedPlayer.reb, max: 15, c: C.green },
-                        { label: "% au tir", v: selectedPlayer.fg, max: 70, c: C.gold },
-                      ].map(s => (
-                        <div key={s.label} style={{ marginBottom: 14 }}>
-                          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 5 }}>
-                            <span style={{ color: C.muted }}>{s.label}</span>
-                            <strong style={{ color: s.c }}>{s.v}{s.label.includes("%") ? "%" : ""}</strong>
+                    {/* Stats bars — uniquement si des stats par match réelles sont disponibles */}
+                    {typeof selectedPlayer.pts === "number" ? (
+                      <div style={{ background: "rgba(255,255,255,0.03)", borderRadius: 16, padding: "18px 22px", marginBottom: 24 }}>
+                        <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1.5, color: C.muted, textTransform: "uppercase", marginBottom: 16 }}>Statistiques</div>
+                        {[
+                          { label: "Points / match", v: selectedPlayer.pts, max: 35, c: C.orange },
+                          { label: "Passes décisives", v: selectedPlayer.ast, max: 12, c: C.blue },
+                          { label: "Rebonds", v: selectedPlayer.reb, max: 15, c: C.green },
+                          { label: "% au tir", v: selectedPlayer.fg, max: 70, c: C.gold },
+                        ].map(s => (
+                          <div key={s.label} style={{ marginBottom: 14 }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 5 }}>
+                              <span style={{ color: C.muted }}>{s.label}</span>
+                              <strong style={{ color: s.c }}>{s.v}{s.label.includes("%") ? "%" : ""}</strong>
+                            </div>
+                            <Bar value={s.v} max={s.max} color={s.c} />
                           </div>
-                          <Bar value={s.v} max={s.max} color={s.c} />
-                        </div>
-                      ))}
-                    </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div style={{ background: "rgba(255,255,255,0.03)", borderRadius: 16, padding: "18px 22px", marginBottom: 24, fontSize: 13, color: C.muted }}>
+                        Statistiques par match non disponibles pour ce joueur (roster ESPN sans données live).
+                      </div>
+                    )}
 
                     {/* Analyse IA */}
                     <div style={{ background: "rgba(255,92,0,0.04)", border: "1px solid rgba(255,92,0,0.15)", borderRadius: 16, padding: "22px 24px", marginBottom: 24 }}>
@@ -1997,23 +2022,29 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
                         <div style={{ flex: 1 }}>
                           <div style={{ fontWeight: 700, fontSize: 15 }}>{p.name} {p.hot && "🔥"}</div>
                           <div style={{ fontSize: 12, color: C.muted, marginBottom: 8 }}>
-                            {p.league === "wnba" && <span style={{ color: "#c084fc", marginRight: 4 }}>🌸</span>}{p.team} · {p.pos}
+                            {p.league === "wnba" && <span style={{ color: "#c084fc", marginRight: 4 }}>🌸</span>}{p.team} · {p.pos}{p.jersey ? ` · #${p.jersey}` : ""}
                           </div>
-                          <div style={{ display: "flex", gap: 6 }}>
-                            <Badge color={C.orange}>{p.pts} pts</Badge>
-                            <Badge color={C.blue}>{p.ast} ast</Badge>
-                            <Badge color={C.green}>{p.reb} reb</Badge>
-                          </div>
+                          {typeof p.pts === "number" && (
+                            <div style={{ display: "flex", gap: 6 }}>
+                              <Badge color={C.orange}>{p.pts} pts</Badge>
+                              <Badge color={C.blue}>{p.ast} ast</Badge>
+                              <Badge color={C.green}>{p.reb} reb</Badge>
+                            </div>
+                          )}
                         </div>
                         <div style={{ textAlign: "center" }}>
                           <Ring score={p.score} size={60} />
-                          <div style={{ fontSize: 12, fontWeight: 700, color: p.trend >= 0 ? C.green : C.red, marginTop: 2 }}>{p.trend >= 0 ? "▲" : "▼"} {Math.abs(p.trend)}</div>
+                          {typeof p.trend === "number" && (
+                            <div style={{ fontSize: 12, fontWeight: 700, color: p.trend >= 0 ? C.green : C.red, marginTop: 2 }}>{p.trend >= 0 ? "▲" : "▼"} {Math.abs(p.trend)}</div>
+                          )}
                         </div>
                       </div>
-                      <div style={{ marginTop: 14 }}>
-                        <div style={{ fontSize: 11, color: C.muted, marginBottom: 4 }}>% au tir ({p.fg}%)</div>
-                        <Bar value={p.fg} max={70} color={G.orange} />
-                      </div>
+                      {typeof p.fg === "number" && (
+                        <div style={{ marginTop: 14 }}>
+                          <div style={{ fontSize: 11, color: C.muted, marginBottom: 4 }}>% au tir ({p.fg}%)</div>
+                          <Bar value={p.fg} max={70} color={G.orange} />
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -2055,7 +2086,7 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
                     )}
                   </Card>
 
-                  {selectedPlayer && (
+                  {selectedPlayer && typeof selectedPlayer.pts === "number" && (
                     <Card>
                       <SectionTitle>Statistiques détaillées</SectionTitle>
                       {[
@@ -2145,7 +2176,9 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
                 <Card>
                   <SectionTitle>📊 Stats rapides</SectionTitle>
                   {(() => {
-                    const pool = bullsPlayers.length ? bullsPlayers : PLAYERS;
+                    // Uniquement les joueurs avec de vraies stats par match (pas le roster ESPN, qui n'en a pas).
+                    const pool = (bullsPlayers.length ? bullsPlayers : PLAYERS).filter(p => typeof p.pts === "number");
+                    if (!pool.length) return <div style={{ fontSize: 12, color: C.muted }}>Stats par match indisponibles pour {favoriteTeam.name}.</div>;
                     const scorer = pool.reduce((a, b) => b.pts > a.pts ? b : a, pool[0]);
                     const passer = pool.reduce((a, b) => b.ast > a.ast ? b : a, pool[0]);
                     const rebounder = pool.reduce((a, b) => b.reb > a.reb ? b : a, pool[0]);
@@ -2201,10 +2234,14 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
         {tab === "challenges" && <Challenges />}
         {tab === "leaderboard" && <Leaderboard />}
 {tab === "vestiaire" && (
-  <div className="fade-in" style={{ height: "calc(100vh - 114px)", marginTop: -28, marginLeft: -24, marginRight: -24 }}>
+  <div className="fade-in" style={isMobile
+    ? { height: "calc(100vh - 114px)", marginTop: "calc(-16px - env(safe-area-inset-top, 0px))", marginLeft: -14, marginRight: -14 }
+    : { height: "calc(100vh - 114px)", marginTop: -28, marginLeft: -24, marginRight: -24 }}>
     <Vestiaire user={user} />
   </div>
 )}
+        {tab === "mma" && <MMA />}
+
         {/* ── ACCOUNT ── */}
         {tab === "account" && (
           <div className="fade-in">
@@ -2380,7 +2417,6 @@ export default function Root() {
       if (pending?.email === u.email && pending.plan) {
         plan = pending.plan;
         localStorage.removeItem(PENDING_PLAN_KEY);
-        if (isSupabaseConfigured) supabase.auth.updateUser({ data: { plan } }).catch(() => {});
       }
     } catch { /* ignore */ }
     const signed = { ...u, plan, _v: 2, _s: btoa(`hiq:${u.email}:2025`) };
@@ -2389,7 +2425,6 @@ export default function Root() {
   };
   const handleLogout = () => {
     try { localStorage.removeItem(USER_STORAGE_KEY); } catch { /* storage unavailable */ }
-    if (isSupabaseConfigured) supabase.auth.signOut().catch(() => {});
     setUser(null); setAuthMode(null); setScreen("landing");
   };
 
@@ -2402,25 +2437,6 @@ export default function Root() {
       setAuthMode("signup");
     }
   };
-
-  // Session Supabase = source de vérité (restaure la session au chargement + login auto après confirmation email)
-  useEffect(() => {
-    if (!isSupabaseConfigured) return;
-    const sync = (sUser) => {
-      if (!sUser?.email) return;
-      handleSuccess({
-        name: sUser.user_metadata?.name || sUser.email.split("@")[0],
-        email: sUser.email,
-        plan: sUser.user_metadata?.plan || "scout",
-        createdAt: sUser.created_at,
-      });
-    };
-    supabase.auth.getSession().then(({ data }) => sync(data?.session?.user));
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) sync(session.user);
-    });
-    return () => sub?.subscription?.unsubscribe?.();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Retour de Stripe Checkout — vérifie le paiement côté serveur et active le plan
   useEffect(() => {
@@ -2452,7 +2468,6 @@ export default function Root() {
             try { localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(upd)); } catch { /* ignore */ }
             return upd;
           });
-          if (isSupabaseConfigured) supabase.auth.updateUser({ data: { plan: d.plan } }).catch(() => {});
           setCheckoutResult({ type: "success", plan: d.plan });
         } else {
           setNotice({ type: "info", text: "Paiement en cours de validation — réessaie dans un instant." });

@@ -541,7 +541,16 @@ Style : scout NBA pro, direct, data-driven, en français.`,
               {topPlayers.length} PÉPITE{topPlayers.length > 1 ? "S" : ""} DÉTECTÉE{topPlayers.length > 1 ? "S" : ""} !
             </div>
             <div style={{ fontSize: 14, color: C.muted }}>
-              {topPlayers.map(p => p.name).join(", ")} — score JARVIS ≥ 88
+              {topPlayers.map((p, i) => (
+                <span key={p.name}>
+                  {i > 0 && ", "}
+                  <span
+                    onClick={() => analyzePlayer(p)}
+                    style={{ cursor: "pointer", textDecoration: "underline", textDecorationStyle: "dotted", opacity: loading[p.name] ? 0.5 : 1 }}
+                    title="Cliquer pour l'analyse JARVIS individuelle"
+                  >{p.name}{loading[p.name] ? " ⏳" : ""}</span>
+                </span>
+              ))} — score JARVIS ≥ 88 · clique un nom pour l'analyse détaillée
             </div>
           </div>
         </div>

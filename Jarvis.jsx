@@ -63,7 +63,7 @@ export default function Jarvis() {
   const [loading, setLoading] = useState(false);
   const [history, setHistory] = useState([]);
   const [time, setTime] = useState(new Date());
-  const [pulse, setPulse] = useState(false);
+  const [, setPulse] = useState(false);
   const bottomRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -131,7 +131,7 @@ export default function Jarvis() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "claude-haiku-4-5-20251001",
+          model: "claude-3-5-haiku-latest",
           max_tokens: 1000,
           system: JARVIS_SYSTEM,
           messages: newHistory,

@@ -104,7 +104,7 @@ export default function Leaderboard() {
           <span>#</span><span>Joueur</span><span style={{ textAlign: "right" }}>Points</span><span style={{ textAlign: "right" }}>Corrects</span><span style={{ textAlign: "center" }}>Série</span><span style={{ textAlign: "center" }}>Évol.</span>
         </div>
 
-        {[...WEEKLY_DATA, ME].sort((a, b) => a.rank - b.rank).map((p, i) => {
+        {[...WEEKLY_DATA, ME].sort((a, b) => a.rank - b.rank).map((p) => {
           if (p.rank === 11 && !p.isMe) return (
             <div key="sep" style={{ padding: "8px 20px", fontSize: 11, color: C.muted, textAlign: "center", borderBottom: `1px solid ${C.border}` }}>• • •</div>
           );

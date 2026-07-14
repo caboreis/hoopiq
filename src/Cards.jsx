@@ -101,6 +101,7 @@ const NBA_TEAMS = [
   { id: "LAL", name: "Los Angeles Lakers", city: "Los Angeles", conf: "Ouest", color: "#552583", players: [
     { id: 421, espnId: 1966, name: "LeBron James", pos: "SF", pts: 25.7, ast: 8.3, reb: 7.3, fg: 54, score: 98, rarity: "legendary", trait: "KING JAMES" },
     { id: 422, espnId: 6583, name: "Anthony Davis", pos: "C", pts: 24.7, ast: 3.5, reb: 12.6, fg: 56, score: 95, rarity: "legendary", trait: "THE BROW" },
+    { id: 423, espnId: null, photo: "/players/shareef.jpg", name: "Shareef O'Neal", pos: "PF", pts: 4.2, ast: 0.8, reb: 3.1, fg: 48, score: 62, rarity: "rare", trait: "SON OF SHAQ" },
   ]},
   { id: "PHX", name: "Phoenix Suns", city: "Phoenix", conf: "Ouest", color: "#1D1160", players: [
     { id: 431, espnId: 3202, name: "Kevin Durant", pos: "SF", pts: 27.1, ast: 5.0, reb: 6.6, fg: 52, score: 96, rarity: "legendary", trait: "SLIM REAPER" },
@@ -134,7 +135,7 @@ const LEGEND_CARDS = [
   { id: 107, espnId: null,  photo: "/players/pippen.jpg",  name: "Scottie Pippen",      pos: "SF", team: "Chicago Bulls",   era: "1987-2004", pts: 16.1, ast: 5.2, reb: 6.4,  fg: 47.8, score: 96,  rarity: "gold", trait: "NO BULLS WITHOUT PIP", titles: 6 },
   { id: 108, espnId: null,  photo: "/players/rodman.jpg",  name: "Dennis Rodman",       pos: "PF", team: "Chicago Bulls",   era: "1986-2000", pts: 7.3,  ast: 1.8, reb: 13.1, fg: 52.0, score: 94,  rarity: "gold", trait: "THE WORM",             titles: 5 },
   { id: 102, espnId: 2334,  photo: "/players/magic.jpg",   name: "Magic Johnson",       pos: "PG", team: "L.A. Lakers",    era: "1979-1996", pts: 19.5, ast: 11.2,reb: 7.2,  fg: 52.0, score: 99,  rarity: "gold", trait: "SHOWTIME",             titles: 5 },
-  { id: 103, espnId: 2335,  photo: "/players/bird.jpg",    name: "Larry Bird",          pos: "SF", team: "Boston Celtics", era: "1979-1992", pts: 24.3, ast: 6.3, reb: 10.0, fg: 49.6, score: 98,  rarity: "gold", trait: "THE HICK",              titles: 3 },
+  { id: 103, espnId: 2335,  photo: null,                    name: "Larry Bird",          pos: "SF", team: "Boston Celtics", era: "1979-1992", pts: 24.3, ast: 6.3, reb: 10.0, fg: 49.6, score: 98,  rarity: "gold", trait: "THE HICK",              titles: 3 },
   { id: 104, espnId: 110,   photo: "/players/kobe.jpg",    name: "Kobe Bryant",         pos: "SG", team: "L.A. Lakers",    era: "1996-2016", pts: 25.0, ast: 4.7, reb: 5.2,  fg: 44.7, score: 98,  rarity: "gold", trait: "MAMBA",                titles: 5 },
   { id: 105, espnId: 614,   photo: "/players/shaq.jpg",    name: "Shaquille O'Neal",    pos: "C",  team: "L.A. Lakers",    era: "1992-2011", pts: 23.7, ast: 2.5, reb: 10.9, fg: 58.2, score: 97,  rarity: "gold", trait: "SUPERMAN",             titles: 4 },
   { id: 106, espnId: 4145,  photo: "/players/kareem.jpg",  name: "Kareem Abdul-Jabbar", pos: "C",  team: "L.A. Lakers",    era: "1969-1989", pts: 24.6, ast: 3.6, reb: 11.2, fg: 55.9, score: 99,  rarity: "gold", trait: "SKYHOOK",              titles: 6 },
@@ -151,8 +152,8 @@ const PACKS = [
 
 // ── LÉGENDES WNBA (cartes OR) ──
 const WNBA_LEGEND_CARDS = [
-  { id: 801, espnId: null, league: "wnba", name: "Sue Bird", pos: "PG", team: "Seattle Storm", era: "2002-2022", pts: 13.0, ast: 5.8, reb: 3.1, fg: 44, score: 100, rarity: "gold", trait: "LA PLUS GRANDE", titles: 4 },
-  { id: 802, espnId: null, league: "wnba", name: "Diana Taurasi", pos: "PG", team: "Phoenix Mercury", era: "2004-2023", pts: 19.9, ast: 4.5, reb: 3.9, fg: 43, score: 99, rarity: "gold", trait: "WHITE MAMBA", titles: 3 },
+  { id: 801, espnId: null, photo: "/players/sue_bird.jpg", league: "wnba", name: "Sue Bird", pos: "PG", team: "Seattle Storm", era: "2002-2022", pts: 13.0, ast: 5.8, reb: 3.1, fg: 44, score: 100, rarity: "gold", trait: "LA PLUS GRANDE", titles: 4 },
+  { id: 802, espnId: null, photo: "/players/diana.jpg", league: "wnba", name: "Diana Taurasi", pos: "PG", team: "Phoenix Mercury", teamColor: "#e56020", era: "2004-2023", pts: 19.9, ast: 4.5, reb: 3.9, fg: 43, score: 99, rarity: "gold", trait: "WHITE MAMBA", titles: 3 },
 ];
 
 // ── CARTES EXCLUSIVES ELITE (variantes Black Edition réservées au plan Elite) ──
@@ -376,10 +377,20 @@ function PackOpening({ pack, onClose, onDone, legendaryUnlocked = false, isElite
   );
 }
 
-export default function Cards({ plan = "scout", legendaryUnlocked = false, isElite = false, onUpgrade }) {
+export default function Cards({ legendaryUnlocked = false, isElite = false, onUpgrade }) {
   const [view, setView] = useState("teams");
   const [selectedTeam, setSelectedTeam] = useState(null);
-  const [collection, setCollection] = useState([ALL_PLAYERS[0], ALL_PLAYERS[5]]);
+  const [collection, setCollection] = useState(() => {
+    // On recharge la collection sauvegardée pour qu'elle NE DISPARAISSE PLUS.
+    try {
+      const saved = localStorage.getItem("hoopiq_collection_v1");
+      if (saved) {
+        const arr = JSON.parse(saved);
+        if (Array.isArray(arr) && arr.length) return arr;
+      }
+    } catch { /* ignore */ }
+    return [ALL_PLAYERS[0], ALL_PLAYERS[5]];
+  });
   const [selectedCard, setSelectedCard] = useState(null);
   const [lockedCard, setLockedCard] = useState(null); // carte OR verrouillée cliquée (plan Scout)
   const [openPack, setOpenPack] = useState(null);
@@ -392,6 +403,10 @@ export default function Cards({ plan = "scout", legendaryUnlocked = false, isEli
     const t = setInterval(() => setArenaIdx(i => (i + 1) % ARENA_PHOTOS.length), 8000);
     return () => clearInterval(t);
   }, []);
+  // Sauvegarde la collection à chaque ajout → elle reste pour toujours.
+  useEffect(() => {
+    try { localStorage.setItem("hoopiq_collection_v1", JSON.stringify(collection)); } catch { /* ignore */ }
+  }, [collection]);
 
   const showNotif = (msg) => { setNotif(msg); setTimeout(() => setNotif(null), 4000); };
 
