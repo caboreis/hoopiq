@@ -71,7 +71,7 @@ function StatBar({ value, max = 100, color }) {
   );
 }
 
-function FighterCard({ fighter, onClick }) {
+function FighterCard({ fighter, onClick, locked }) {
   const r = RARITY[fighter.rarity];
   const [hovered, setHovered] = useState(false);
   return (
@@ -161,6 +161,21 @@ function FighterCard({ fighter, onClick }) {
         </div>
         <StatBar value={fighter.score} color={r.color} />
       </div>
+
+      {/* Cadenas plan : la carte OR reste visible et brille dessous, mais verrouillée (même règle que les cartes NBA) */}
+      {locked && (
+        <div style={{
+          position: "absolute", inset: 0, zIndex: 5, borderRadius: 20,
+          background: "rgba(2,2,8,0.6)", backdropFilter: "blur(1.5px)", display: "flex", flexDirection: "column",
+          alignItems: "center", justifyContent: "center", gap: 8,
+        }}>
+          <div style={{ fontSize: 34, filter: "drop-shadow(0 0 10px rgba(255,215,0,0.6))" }}>🔒</div>
+          <div style={{
+            fontSize: 10, fontWeight: 900, letterSpacing: 1, color: "#ffd700",
+            background: "rgba(0,0,0,0.7)", padding: "3px 10px", borderRadius: 10, border: "1px solid rgba(255,215,0,0.5)",
+          }}>PRO / ELITE</div>
+        </div>
+      )}
     </div>
   );
 }
@@ -285,7 +300,26 @@ function FighterModal({ fighter, onClose }) {
   );
 }
 
-export default function MMA() {
+function LockedFighterModal({ fighter, onClose, onUpgrade }) {
+  return createPortal(
+    <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 3600, background: "rgba(0,0,0,0.9)", backdropFilter: "blur(16px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
+      <div onClick={e => e.stopPropagation()} style={{ maxWidth: 400, width: "100%", textAlign: "center", background: "linear-gradient(160deg,#1a1000,#0d0700)", border: "1px solid rgba(255,215,0,0.4)", borderRadius: 22, padding: "40px 30px", boxShadow: "0 0 60px rgba(255,215,0,0.2)" }}>
+        <div style={{ fontSize: 56, marginBottom: 12, filter: "drop-shadow(0 0 16px rgba(255,215,0,0.6))" }}>🔒</div>
+        <h2 style={{ fontFamily: "'Permanent Marker',cursive", fontSize: 30, letterSpacing: 1, color: "#ffd700", margin: "0 0 10px" }}>CARTE OR LÉGENDAIRE</h2>
+        <p style={{ fontSize: 14, color: "rgba(255,255,255,0.75)", lineHeight: 1.6, marginBottom: 26 }}>
+          Débloque les fiches complètes des champions UFC comme <b style={{ color: "#ffd700" }}>{fighter.name}</b> avec le plan <b>Pro</b> ou <b>Elite</b> 🚀
+        </p>
+        <button onClick={onUpgrade} style={{ width: "100%", padding: "14px", borderRadius: 12, border: "none", cursor: "pointer", background: "linear-gradient(135deg,#ffd700,#ff8c00)", color: "#1a0800", fontWeight: 900, fontSize: 15, fontFamily: "inherit", marginBottom: 10 }}>
+          💎 Passer à Pro / Elite →
+        </button>
+        <button onClick={onClose} style={{ width: "100%", padding: "11px", borderRadius: 12, border: "1px solid rgba(255,255,255,0.15)", background: "transparent", color: "#888", cursor: "pointer", fontFamily: "inherit" }}>Plus tard</button>
+      </div>
+    </div>,
+    document.body
+  );
+}
+
+export default function MMA({ legendaryUnlocked = false, onUpgrade }) {
   const [fighters, setFighters] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -294,6 +328,10 @@ export default function MMA() {
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState("score");
   const [selected, setSelected] = useState(null);
+  const [lockedFighter, setLockedFighter] = useState(null);
+
+  const isLocked = (f) => f.rarity === "gold" && !legendaryUnlocked;
+  const openFighter = (f) => { if (isLocked(f)) setLockedFighter(f); else setSelected(f); };
 
   useEffect(() => {
     let active = true;
@@ -389,13 +427,20 @@ export default function MMA() {
             <div style={{ textAlign: "center", color: C.muted, padding: "60px 0", fontSize: 15 }}>Aucun combattant trouvé.</div>
           ) : (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px,1fr))", gap: 18 }}>
-              {filtered.map(f => <FighterCard key={`${f.id}:${f.weightClass}`} fighter={f} onClick={setSelected} />)}
+              {filtered.map(f => <FighterCard key={`${f.id}:${f.weightClass}`} fighter={f} onClick={openFighter} locked={isLocked(f)} />)}
             </div>
           )}
         </>
       )}
 
       {selected && <FighterModal fighter={selected} onClose={() => setSelected(null)} />}
+      {lockedFighter && (
+        <LockedFighterModal
+          fighter={lockedFighter}
+          onClose={() => setLockedFighter(null)}
+          onUpgrade={() => { setLockedFighter(null); onUpgrade?.(); }}
+        />
+      )}
     </div>
   );
 }

@@ -2240,7 +2240,7 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
     <Vestiaire user={user} />
   </div>
 )}
-        {tab === "mma" && <MMA />}
+        {tab === "mma" && <MMA legendaryUnlocked={legendaryUnlocked} onUpgrade={() => setPaywallTab("cards-legendary")} />}
 
         {/* ── ACCOUNT ── */}
         {tab === "account" && (
