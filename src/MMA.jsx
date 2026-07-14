@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
+
+const API = import.meta.env.DEV ? "http://localhost:3001" : "";
 
 const C = {
   bg: "#06060f", bg2: "#0d0d1f",
@@ -23,74 +25,28 @@ const RARITY = {
   common:    { label: "Commun",        color: "#9ca3af", glow: "rgba(156,163,175,0.3)", bg: "linear-gradient(160deg,#0a0a0a,#1c1c1c,#0a0a0a)", border: "#4b5563", stars: 1 },
 };
 
-const FIGHTERS = [
-  // ── HEAVYWEIGHT ──
-  { id: 1,  espnId: 2335639, name: "Jon Jones",             nickname: "BONES",         org: "UFC", belt: true,  weightClass: "Heavyweight",       record: "27-1-0", wins: 27, losses: 1, draws: 0, koPct: 48, subPct: 19, winStreak: 3,  rank: 1,  score: 99, rarity: "gold",      trait: "GOAT",          country: "🇺🇸", style: "Wrestling/BJJ" },
-  { id: 2,  espnId: 4010976, name: "Tom Aspinall",          nickname: "THE TERMINATOR",org: "UFC", belt: true,  weightClass: "Heavyweight",       record: "15-3-0", wins: 15, losses: 3, draws: 0, koPct: 67, subPct: 13, winStreak: 5,  rank: 2,  score: 93, rarity: "legendary", trait: "KO MACHINE",    country: "🇬🇧", style: "Boxing/BJJ" },
-  { id: 3,  espnId: 4426000, name: "Ciryl Gane",            nickname: "BON GAMIN",     org: "UFC", belt: false, weightClass: "Heavyweight",       record: "12-2-0", wins: 12, losses: 2, draws: 0, koPct: 42, subPct: 8,  winStreak: 2,  rank: 3,  score: 88, rarity: "epic",      trait: "TECHNIQUE",     country: "🇫🇷", style: "Kickboxing" },
-  { id: 4,  espnId: 2504951, name: "Stipe Miocic",          nickname: "STIPE",         org: "UFC", belt: false, weightClass: "Heavyweight",       record: "20-4-0", wins: 20, losses: 4, draws: 0, koPct: 65, subPct: 5,  winStreak: 0,  rank: 4,  score: 85, rarity: "epic",      trait: "LÉGENDE",       country: "🇺🇸", style: "Boxing" },
-  // ── LIGHT HEAVYWEIGHT ──
-  { id: 5,  espnId: 4705658, name: "Alex Pereira",          nickname: "POATAN",        org: "UFC", belt: true,  weightClass: "Light Heavyweight", record: "11-2-0", wins: 11, losses: 2, draws: 0, koPct: 91, subPct: 0,  winStreak: 4,  rank: 1,  score: 98, rarity: "gold",      trait: "KO ARTISTE",    country: "🇧🇷", style: "Kickboxing" },
-  { id: 6,  espnId: 3156612, name: "Jiří Procházka",        nickname: "DENISA",        org: "UFC", belt: false, weightClass: "Light Heavyweight", record: "30-4-1", wins: 30, losses: 4, draws: 1, koPct: 87, subPct: 3,  winStreak: 1,  rank: 2,  score: 91, rarity: "legendary", trait: "BERSERK",       country: "🇨🇿", style: "Kickboxing" },
-  { id: 7,  espnId: 4425355, name: "Jamahal Hill",          nickname: "SWEET DREAMS",  org: "UFC", belt: false, weightClass: "Light Heavyweight", record: "12-2-0", wins: 12, losses: 2, draws: 0, koPct: 75, subPct: 0,  winStreak: 0,  rank: 3,  score: 87, rarity: "epic",      trait: "PUISSANCE",     country: "🇺🇸", style: "Boxing" },
-  { id: 8,  espnId: 4273399, name: "Magomed Ankalaev",      nickname: "EAGLE",         org: "UFC", belt: false, weightClass: "Light Heavyweight", record: "20-1-1", wins: 20, losses: 1, draws: 1, koPct: 50, subPct: 30, winStreak: 8,  rank: 4,  score: 90, rarity: "legendary", trait: "INVAINCU",      country: "🇷🇺", style: "MMA" },
-  // ── MIDDLEWEIGHT ──
-  { id: 9,  espnId: 3166126, name: "Dricus Du Plessis",     nickname: "STILLKNOCKS",   org: "UFC", belt: true,  weightClass: "Middleweight",      record: "22-2-0", wins: 22, losses: 2, draws: 0, koPct: 59, subPct: 23, winStreak: 6,  rank: 1,  score: 94, rarity: "gold",      trait: "DUREZA",        country: "🇿🇦", style: "Boxing/BJJ" },
-  { id: 10, espnId: 4285679, name: "Israel Adesanya",       nickname: "THE LAST STYLEBENDER", org: "UFC", belt: false, weightClass: "Middleweight", record: "24-3-0", wins: 24, losses: 3, draws: 0, koPct: 54, subPct: 0,  winStreak: 0,  rank: 2,  score: 93, rarity: "legendary", trait: "MAESTRO",       country: "🇳🇿", style: "Kickboxing" },
-  { id: 11, espnId: 3093653, name: "Sean Strickland",       nickname: "TARZAN",        org: "UFC", belt: false, weightClass: "Middleweight",      record: "28-6-0", wins: 28, losses: 6, draws: 0, koPct: 39, subPct: 21, winStreak: 0,  rank: 3,  score: 86, rarity: "epic",      trait: "GUERRIER",      country: "🇺🇸", style: "Boxing" },
-  { id: 12, espnId: 3009717, name: "Robert Whittaker",      nickname: "THE REAPER",    org: "UFC", belt: false, weightClass: "Middleweight",      record: "25-7-0", wins: 25, losses: 7, draws: 0, koPct: 40, subPct: 24, winStreak: 3,  rank: 4,  score: 87, rarity: "epic",      trait: "VÉTÉRAN",       country: "🇦🇺", style: "Boxing" },
-  // ── WELTERWEIGHT ──
-  { id: 13, espnId: 3332412, name: "Islam Makhachev",       nickname: "MAKHACHEV",     org: "UFC", belt: true,  weightClass: "Lightweight",       record: "26-1-0", wins: 26, losses: 1, draws: 0, koPct: 31, subPct: 54, winStreak: 12, rank: 1,  score: 99, rarity: "gold",      trait: "DOMINANT",      country: "🇷🇺", style: "Sambo/Grappling" },
-  { id: 14, espnId: 3152929, name: "Leon Edwards",          nickname: "ROCKY",         org: "UFC", belt: true,  weightClass: "Welterweight",      record: "22-3-0", wins: 22, losses: 3, draws: 0, koPct: 41, subPct: 18, winStreak: 12, rank: 1,  score: 93, rarity: "gold",      trait: "CHAMPION",      country: "🇬🇧", style: "MMA" },
-  { id: 15, espnId: 3088812, name: "Kamaru Usman",          nickname: "THE NIGERIAN NIGHTMARE", org: "UFC", belt: false, weightClass: "Welterweight", record: "20-4-0", wins: 20, losses: 4, draws: 0, koPct: 45, subPct: 30, winStreak: 0, rank: 2,  score: 91, rarity: "legendary", trait: "DOMINANT",      country: "🇳🇬", style: "Wrestling" },
-  { id: 16, espnId: 3172112, name: "Belal Muhammad",        nickname: "REMEMBER THE NAME", org: "UFC", belt: false, weightClass: "Welterweight", record: "23-3-0", wins: 23, losses: 3, draws: 0, koPct: 30, subPct: 35, winStreak: 7, rank: 3,  score: 88, rarity: "epic",      trait: "GRIND",         country: "🇺🇸", style: "Wrestling" },
-  // ── LIGHTWEIGHT ──
-  { id: 17, espnId: 2504169, name: "Charles Oliveira",      nickname: "DO BRONX",      org: "UFC", belt: false, weightClass: "Lightweight",       record: "34-9-0", wins: 34, losses: 9, draws: 0, koPct: 35, subPct: 62, winStreak: 0,  rank: 2,  score: 94, rarity: "legendary", trait: "SUBMISSION KING", country: "🇧🇷", style: "BJJ" },
-  { id: 18, espnId: 2506549, name: "Dustin Poirier",        nickname: "THE DIAMOND",   org: "UFC", belt: false, weightClass: "Lightweight",       record: "30-8-0", wins: 30, losses: 8, draws: 0, koPct: 57, subPct: 23, winStreak: 1,  rank: 4,  score: 88, rarity: "epic",      trait: "CŒUR",          country: "🇺🇸", style: "Boxing/BJJ" },
-  { id: 19, espnId: 3022345, name: "Justin Gaethje",        nickname: "THE HIGHLIGHT", org: "UFC", belt: false, weightClass: "Lightweight",       record: "25-5-0", wins: 25, losses: 5, draws: 0, koPct: 76, subPct: 4,  winStreak: 1,  rank: 3,  score: 90, rarity: "legendary", trait: "WAR",           country: "🇺🇸", style: "Wrestling/Boxing" },
-  // ── FEATHERWEIGHT ──
-  { id: 20, espnId: 4350812, name: "Ilia Topuria",          nickname: "EL MATADOR",    org: "UFC", belt: true,  weightClass: "Featherweight",     record: "15-0-0", wins: 15, losses: 0, draws: 0, koPct: 87, subPct: 13, winStreak: 15, rank: 1,  score: 97, rarity: "gold",      trait: "INVAINCU",      country: "🇬🇪", style: "Boxing/BJJ" },
-  { id: 21, espnId: 3949584, name: "Alex Volkanovski",      nickname: "THE GREAT",     org: "UFC", belt: false, weightClass: "Featherweight",     record: "26-4-0", wins: 26, losses: 4, draws: 0, koPct: 42, subPct: 19, winStreak: 0,  rank: 2,  score: 95, rarity: "legendary", trait: "LÉGENDE",       country: "🇦🇺", style: "Wrestling/Boxing" },
-  { id: 22, espnId: 3045737, name: "Brian Ortega",          nickname: "T-CITY",        org: "UFC", belt: false, weightClass: "Featherweight",     record: "16-3-0", wins: 16, losses: 3, draws: 0, koPct: 25, subPct: 56, winStreak: 1,  rank: 5,  score: 83, rarity: "rare",      trait: "FINISHER",      country: "🇺🇸", style: "BJJ" },
-  // ── BANTAMWEIGHT ──
-  { id: 23, espnId: 3948572, name: "Merab Dvalishvili",     nickname: "THE MACHINE",   org: "UFC", belt: true,  weightClass: "Bantamweight",      record: "18-4-0", wins: 18, losses: 4, draws: 0, koPct: 22, subPct: 33, winStreak: 9,  rank: 1,  score: 92, rarity: "gold",      trait: "ROBOT",         country: "🇬🇪", style: "Wrestling" },
-  { id: 24, espnId: 4205093, name: "Sean O'Malley",         nickname: "SUGAR",         org: "UFC", belt: false, weightClass: "Bantamweight",      record: "18-2-0", wins: 18, losses: 2, draws: 0, koPct: 67, subPct: 6,  winStreak: 0,  rank: 2,  score: 89, rarity: "epic",      trait: "STYLE",         country: "🇺🇸", style: "Boxing" },
-  { id: 25, espnId: 4294504, name: "Cory Sandhagen",        nickname: "THE SANDMAN",   org: "UFC", belt: false, weightClass: "Bantamweight",      record: "18-5-0", wins: 18, losses: 5, draws: 0, koPct: 50, subPct: 11, winStreak: 2,  rank: 3,  score: 85, rarity: "epic",      trait: "CRÉATIF",       country: "🇺🇸", style: "Kickboxing" },
-  // ── FLYWEIGHT ──
-  { id: 26, espnId: 2560746, name: "Alexandre Pantoja",     nickname: "THE CANNIBAL",  org: "UFC", belt: true,  weightClass: "Flyweight",         record: "27-5-0", wins: 27, losses: 5, draws: 0, koPct: 30, subPct: 56, winStreak: 5,  rank: 1,  score: 91, rarity: "gold",      trait: "CHAMPION",      country: "🇧🇷", style: "BJJ" },
-  { id: 27, espnId: 3027545, name: "Brandon Moreno",        nickname: "THE ASSASSIN BABY", org: "UFC", belt: false, weightClass: "Flyweight",    record: "22-7-2", wins: 22, losses: 7, draws: 2, koPct: 36, subPct: 41, winStreak: 0,  rank: 2,  score: 86, rarity: "epic",      trait: "VÉTÉRAN",       country: "🇲🇽", style: "BJJ/Boxing" },
-  // ── WOMEN STRAWWEIGHT ──
-  { id: 28, espnId: 4350762, name: "Zhang Weili",           nickname: "MAGNUM",        org: "UFC", belt: true,  weightClass: "W. Strawweight",   record: "24-3-0", wins: 24, losses: 3, draws: 0, koPct: 58, subPct: 25, winStreak: 5,  rank: 1,  score: 95, rarity: "gold",      trait: "WUSHU",         country: "🇨🇳", style: "Wushu/BJJ" },
-  { id: 29, espnId: 2559934, name: "Carla Esparza",         nickname: "COOKIE MONSTER",org: "UFC", belt: false, weightClass: "W. Strawweight",   record: "19-7-0", wins: 19, losses: 7, draws: 0, koPct: 5,  subPct: 58, winStreak: 0,  rank: 3,  score: 79, rarity: "rare",      trait: "GRAPPLER",      country: "🇺🇸", style: "Wrestling" },
-  // ── WOMEN BANTAMWEIGHT ──
-  { id: 30, espnId: 2951361, name: "Julianna Peña",         nickname: "THE VENEZUELAN VIXEN", org: "UFC", belt: true, weightClass: "W. Bantamweight", record: "12-5-0", wins: 12, losses: 5, draws: 0, koPct: 25, subPct: 50, winStreak: 1,  rank: 1,  score: 87, rarity: "legendary", trait: "SLAYER",        country: "🇻🇪", style: "BJJ/Boxing" },
-  { id: 31, espnId: 2554705, name: "Valentina Shevchenko",  nickname: "BULLET",        org: "UFC", belt: false, weightClass: "W. Flyweight",     record: "24-5-0", wins: 24, losses: 5, draws: 0, koPct: 50, subPct: 17, winStreak: 0,  rank: 2,  score: 96, rarity: "gold",      trait: "LÉGENDE",       country: "🇰🇬", style: "Muay Thai" },
-  { id: 32, espnId: 3136287, name: "Alexa Grasso",          nickname: "ALEXA",         org: "UFC", belt: true,  weightClass: "W. Flyweight",     record: "16-3-2", wins: 16, losses: 3, draws: 2, koPct: 31, subPct: 38, winStreak: 2,  rank: 1,  score: 88, rarity: "epic",      trait: "SURPRISE",      country: "🇲🇽", style: "BJJ/Boxing" },
-];
-
 const WEIGHT_CLASSES = [
   "Tous", "Heavyweight", "Light Heavyweight", "Middleweight",
   "Welterweight", "Lightweight", "Featherweight", "Bantamweight",
-  "Flyweight", "W. Strawweight", "W. Bantamweight", "W. Flyweight",
+  "Flyweight", "Women's Strawweight", "Women's Bantamweight", "Women's Flyweight",
 ];
 
 const RARITY_FILTERS = ["Tous", "gold", "legendary", "epic", "rare", "common"];
 
-function FighterPhoto({ espnId, name, size }) {
+function FighterPhoto({ src, name, size }) {
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
   const initials = name.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
-  const url = espnId ? `https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/${espnId}.png&w=350&h=254` : null;
-  const showPlaceholder = !url || error || !loaded;
+  const showPlaceholder = !src || error || !loaded;
   return (
     <div style={{ width: size, height: size * 0.85, position: "relative", overflow: "hidden" }}>
       {showPlaceholder && (
         <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <div style={{ fontSize: size * 0.28, fontWeight: 900, color: (!url || error) ? "rgba(255,255,255,0.55)" : "rgba(255,255,255,0.2)", fontFamily: "'Permanent Marker',cursive", letterSpacing: 2, textShadow: "0 2px 12px rgba(0,0,0,0.8)" }}>{initials}</div>
+          <div style={{ fontSize: size * 0.28, fontWeight: 900, color: (!src || error) ? "rgba(255,255,255,0.55)" : "rgba(255,255,255,0.2)", fontFamily: "'Permanent Marker',cursive", letterSpacing: 2, textShadow: "0 2px 12px rgba(0,0,0,0.8)" }}>{initials}</div>
         </div>
       )}
-      {url && !error && (
-        <img src={url} alt={name} onLoad={() => setLoaded(true)} onError={() => setError(true)}
+      {src && !error && (
+        <img src={src} alt={name} onLoad={() => setLoaded(true)} onError={() => setError(true)}
           style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top center", opacity: loaded ? 1 : 0, transition: "opacity 0.3s ease", filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.8))", position: "absolute", inset: 0 }} />
       )}
     </div>
@@ -153,17 +109,17 @@ function FighterCard({ fighter, onClick }) {
       <div style={{ flex: 1, borderRadius: 12, overflow: "hidden", marginBottom: 12, background: "rgba(0,0,0,0.4)", border: `1px solid ${r.color}30`, position: "relative", display: "flex", alignItems: "flex-end", justifyContent: "center", minHeight: 110 }}>
         <div style={{ position: "absolute", inset: 0, background: `radial-gradient(ellipse at 50% 110%, ${r.color}15 0%, transparent 60%)` }} />
         <div style={{ position: "absolute", top: 6, right: 6, width: 30, height: 30, borderRadius: "50%", background: `${r.color}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 900, color: "#fff", fontFamily: "monospace", zIndex: 2 }}>{fighter.score}</div>
-        <FighterPhoto espnId={fighter.espnId} name={fighter.name} size={160} />
+        <FighterPhoto src={fighter.headshot} name={fighter.name} size={160} />
       </div>
 
       {/* Nom + nickname */}
       <div style={{ marginBottom: 10, position: "relative", zIndex: 1 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 6 }}>
           <div style={{ fontSize: 14, fontWeight: 800, color: C.text, lineHeight: 1.2 }}>{fighter.name}</div>
-          <span style={{ fontSize: 10, flexShrink: 0 }}>{fighter.country}</span>
+          {fighter.flag && <img src={fighter.flag} alt={fighter.country} style={{ width: 16, height: 12, objectFit: "cover", borderRadius: 2, flexShrink: 0 }} />}
         </div>
-        <div style={{ fontSize: 10, color: r.color, fontWeight: 700, letterSpacing: 0.5, marginTop: 2, marginBottom: 4 }}>"{fighter.nickname}"</div>
-        <Stars count={RARITY[fighter.rarity].stars} color={r.color} />
+        {fighter.nickname && <div style={{ fontSize: 10, color: r.color, fontWeight: 700, letterSpacing: 0.5, marginTop: 2, marginBottom: 4 }}>"{fighter.nickname}"</div>}
+        <Stars count={r.stars} color={r.color} />
       </div>
 
       {/* Badges */}
@@ -175,7 +131,7 @@ function FighterCard({ fighter, onClick }) {
           {fighter.weightClass}
         </span>
         <span style={{ fontSize: 9, fontWeight: 800, padding: "3px 8px", borderRadius: 99, background: "rgba(232,0,45,0.15)", color: C.red, border: "1px solid rgba(232,0,45,0.3)" }}>
-          {fighter.trait}
+          #{fighter.rank}
         </span>
       </div>
 
@@ -192,47 +148,50 @@ function FighterCard({ fighter, onClick }) {
         </div>
         <div style={{ width: 1, background: "rgba(255,255,255,0.08)" }} />
         <div style={{ flex: 1, textAlign: "center" }}>
-          <div style={{ fontSize: 18, fontFamily: "'Permanent Marker', cursive", color: r.color }}>{fighter.winStreak}</div>
-          <div style={{ fontSize: 9, color: C.muted, letterSpacing: 1 }}>SÉRIE</div>
+          <div style={{ fontSize: 18, fontFamily: "'Permanent Marker', cursive", color: r.color }}>{fighter.defenses}</div>
+          <div style={{ fontSize: 9, color: C.muted, letterSpacing: 1 }}>DÉFENSES</div>
         </div>
       </div>
 
-      {/* Stats bars */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 8, position: "relative", zIndex: 1 }}>
-        <div>
-          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-            <span style={{ fontSize: 10, color: C.muted }}>KO / TKO</span>
-            <span style={{ fontSize: 10, fontWeight: 700, color: C.red }}>{fighter.koPct}%</span>
-          </div>
-          <StatBar value={fighter.koPct} color={C.red} />
+      {/* Score HoopIQ */}
+      <div style={{ position: "relative", zIndex: 1 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+          <span style={{ fontSize: 10, color: C.muted }}>Niveau HoopIQ</span>
+          <span style={{ fontSize: 10, fontWeight: 700, color: r.color }}>{fighter.score}/100</span>
         </div>
-        <div>
-          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-            <span style={{ fontSize: 10, color: C.muted }}>Soumissions</span>
-            <span style={{ fontSize: 10, fontWeight: 700, color: C.blue }}>{fighter.subPct}%</span>
-          </div>
-          <StatBar value={fighter.subPct} color={C.blue} />
-        </div>
-        <div>
-          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-            <span style={{ fontSize: 10, color: C.muted }}>Niveau HoopIQ</span>
-            <span style={{ fontSize: 10, fontWeight: 700, color: r.color }}>{fighter.score}/100</span>
-          </div>
-          <StatBar value={fighter.score} color={r.color} />
-        </div>
-      </div>
-
-      {/* Style */}
-      <div style={{ marginTop: 12, fontSize: 10, color: C.muted, textAlign: "right", position: "relative", zIndex: 1 }}>
-        🥊 {fighter.style}
+        <StatBar value={fighter.score} color={r.color} />
       </div>
     </div>
   );
 }
 
 function FighterModal({ fighter, onClose }) {
+  const [stats, setStats] = useState(null);
+  const [statsLoading, setStatsLoading] = useState(true);
+  const [statsErr, setStatsErr] = useState(false);
+
+  useEffect(() => {
+    if (!fighter) return;
+    let active = true;
+    setStats(null);
+    setStatsErr(false);
+    setStatsLoading(true);
+    fetch(`${API}/api/mma/fighter/${fighter.espnId}/stats`)
+      .then(r => { if (!r.ok) throw new Error(); return r.json(); })
+      .then(d => { if (active) { setStats(d.stats); setStatsLoading(false); } })
+      .catch(() => { if (active) { setStatsErr(true); setStatsLoading(false); } });
+    return () => { active = false; };
+  }, [fighter]);
+
   if (!fighter) return null;
   const r = RARITY[fighter.rarity];
+
+  const statRows = stats ? [
+    { label: "Précision de frappe", val: stats.strikeAccuracy, unit: "%", color: C.red },
+    { label: "Précision takedowns", val: stats.takedownAccuracy, unit: "%", color: C.blue },
+    { label: "Soumissions tentées / 15min", val: stats.submissionAvg, unit: "", color: r.color },
+  ].filter(s => s.val != null) : [];
+
   return createPortal(
     <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 3500, background: "rgba(0,0,0,0.85)", backdropFilter: "blur(14px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
       <div onClick={e => e.stopPropagation()} style={{
@@ -247,12 +206,15 @@ function FighterModal({ fighter, onClose }) {
         {/* Header modal */}
         <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 24 }}>
           <div style={{ width: 90, height: 76, borderRadius: 14, overflow: "hidden", background: `${r.color}15`, border: `2px solid ${r.color}44`, flexShrink: 0, display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
-            <FighterPhoto espnId={fighter.espnId} name={fighter.name} size={90} />
+            <FighterPhoto src={fighter.headshot} name={fighter.name} size={90} />
           </div>
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 20, fontFamily: "'Permanent Marker', cursive", letterSpacing: 1, color: C.text }}>{fighter.name}</div>
-            <div style={{ fontSize: 12, color: r.color, fontWeight: 700, marginBottom: 6 }}>"{fighter.nickname}" {fighter.country}</div>
-            <Stars count={RARITY[fighter.rarity].stars} color={r.color} />
+            <div style={{ fontSize: 12, color: r.color, fontWeight: 700, marginBottom: 6, display: "flex", alignItems: "center", gap: 6 }}>
+              {fighter.nickname && <span>"{fighter.nickname}"</span>}
+              {fighter.flag && <img src={fighter.flag} alt={fighter.country} style={{ width: 16, height: 12, objectFit: "cover", borderRadius: 2 }} />}
+            </div>
+            <Stars count={r.stars} color={r.color} />
           </div>
           <div style={{ textAlign: "center", flexShrink: 0 }}>
             <div style={{ fontSize: 42, fontFamily: "'Permanent Marker', cursive", color: r.color }}>{fighter.score}</div>
@@ -265,7 +227,6 @@ function FighterModal({ fighter, onClose }) {
           {fighter.belt && <span style={{ fontSize: 11, fontWeight: 800, padding: "4px 12px", borderRadius: 99, background: G.gold, color: "#1a0e00" }}>🥋 CHAMPION</span>}
           <span style={{ fontSize: 11, fontWeight: 800, padding: "4px 12px", borderRadius: 99, background: `${r.color}22`, color: r.color, border: `1px solid ${r.color}44` }}>{r.label}</span>
           <span style={{ fontSize: 11, padding: "4px 12px", borderRadius: 99, background: "rgba(255,255,255,0.06)", color: C.muted, border: "1px solid rgba(255,255,255,0.1)" }}>{fighter.weightClass}</span>
-          <span style={{ fontSize: 11, fontWeight: 800, padding: "4px 12px", borderRadius: 99, background: "rgba(232,0,45,0.15)", color: C.red, border: "1px solid rgba(232,0,45,0.25)" }}>{fighter.trait}</span>
         </div>
 
         {/* Bilan */}
@@ -273,7 +234,7 @@ function FighterModal({ fighter, onClose }) {
           {[
             { label: "Victoires", val: fighter.wins, color: C.green },
             { label: "Défaites", val: fighter.losses, color: C.red },
-            { label: "Série W.", val: fighter.winStreak, color: r.color },
+            { label: "Défenses", val: fighter.defenses, color: r.color },
           ].map(({ label, val, color }) => (
             <div key={label} style={{ textAlign: "center", padding: 14, background: "rgba(255,255,255,0.04)", borderRadius: 12, border: "1px solid rgba(255,255,255,0.07)" }}>
               <div style={{ fontSize: 28, fontFamily: "'Permanent Marker', cursive", color }}>{val}</div>
@@ -282,21 +243,25 @@ function FighterModal({ fighter, onClose }) {
           ))}
         </div>
 
-        {/* Stats */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 20 }}>
-          {[
-            { label: "KO / TKO", val: fighter.koPct, color: C.red },
-            { label: "Soumissions", val: fighter.subPct, color: C.blue },
-            { label: "Score HoopIQ", val: fighter.score, color: r.color },
-          ].map(({ label, val, color }) => (
-            <div key={label}>
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-                <span style={{ fontSize: 12, color: C.muted }}>{label}</span>
-                <span style={{ fontSize: 13, fontWeight: 700, color }}>{val}%</span>
+        {/* Stats réelles ESPN (chargées à l'ouverture) */}
+        <div style={{ marginBottom: 20 }}>
+          <div style={{ fontSize: 11, color: C.muted, letterSpacing: 1, marginBottom: 10 }}>STATS DE CAGE (ESPN)</div>
+          {statsLoading && <div style={{ fontSize: 12, color: C.muted, padding: "8px 0" }}>Chargement…</div>}
+          {statsErr && <div style={{ fontSize: 12, color: C.muted, padding: "8px 0" }}>Stats indisponibles pour ce combattant.</div>}
+          {!statsLoading && !statsErr && statRows.length === 0 && (
+            <div style={{ fontSize: 12, color: C.muted, padding: "8px 0" }}>Pas encore de stats de cage ESPN pour ce combattant.</div>
+          )}
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {statRows.map(({ label, val, unit, color }) => (
+              <div key={label}>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+                  <span style={{ fontSize: 12, color: C.muted }}>{label}</span>
+                  <span style={{ fontSize: 13, fontWeight: 700, color }}>{val}{unit}</span>
+                </div>
+                <StatBar value={val} max={unit === "%" ? 100 : 5} color={color} />
               </div>
-              <StatBar value={val} color={color} />
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
 
         {/* Infos */}
@@ -309,11 +274,7 @@ function FighterModal({ fighter, onClose }) {
             <div style={{ color: C.muted, fontSize: 10, marginBottom: 4 }}>ORGANISATION</div>
             <div style={{ fontWeight: 700, color: C.text }}>{fighter.org}</div>
           </div>
-          <div style={{ padding: "10px 14px", background: "rgba(255,255,255,0.04)", borderRadius: 10 }}>
-            <div style={{ color: C.muted, fontSize: 10, marginBottom: 4 }}>STYLE</div>
-            <div style={{ fontWeight: 700, color: C.text }}>{fighter.style}</div>
-          </div>
-          <div style={{ padding: "10px 14px", background: "rgba(255,255,255,0.04)", borderRadius: 10 }}>
+          <div style={{ padding: "10px 14px", background: "rgba(255,255,255,0.04)", borderRadius: 10, gridColumn: "1 / -1" }}>
             <div style={{ color: C.muted, fontSize: 10, marginBottom: 4 }}>CLASSEMENT</div>
             <div style={{ fontWeight: 700, color: r.color }}>#{fighter.rank} {fighter.weightClass}</div>
           </div>
@@ -325,19 +286,31 @@ function FighterModal({ fighter, onClose }) {
 }
 
 export default function MMA() {
+  const [fighters, setFighters] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [weightFilter, setWeightFilter] = useState("Tous");
   const [rarityFilter, setRarityFilter] = useState("Tous");
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState("score");
   const [selected, setSelected] = useState(null);
 
-  const filtered = FIGHTERS
+  useEffect(() => {
+    let active = true;
+    fetch(`${API}/api/mma/rankings`)
+      .then(r => { if (!r.ok) throw new Error(); return r.json(); })
+      .then(d => { if (active) { setFighters(d.fighters || []); setLoading(false); } })
+      .catch(() => { if (active) { setError(true); setLoading(false); } });
+    return () => { active = false; };
+  }, []);
+
+  const filtered = fighters
     .filter(f => weightFilter === "Tous" || f.weightClass === weightFilter)
     .filter(f => rarityFilter === "Tous" || f.rarity === rarityFilter)
     .filter(f => !search || f.name.toLowerCase().includes(search.toLowerCase()) || f.nickname.toLowerCase().includes(search.toLowerCase()))
-    .sort((a, b) => sort === "score" ? b.score - a.score : sort === "wins" ? b.wins - a.wins : sort === "ko" ? b.koPct - a.koPct : b.winStreak - a.winStreak);
+    .sort((a, b) => sort === "score" ? b.score - a.score : sort === "wins" ? b.wins - a.wins : sort === "rank" ? a.rank - b.rank : b.defenses - a.defenses);
 
-  const counts = { total: FIGHTERS.length, champs: FIGHTERS.filter(f => f.belt).length, gold: FIGHTERS.filter(f => f.rarity === "gold").length };
+  const counts = { total: fighters.length, champs: fighters.filter(f => f.belt).length, gold: fighters.filter(f => f.rarity === "gold").length };
 
   return (
     <div className="fade-in">
@@ -354,60 +327,72 @@ export default function MMA() {
           🥊 MMA <span style={{ background: G.red, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>FIGHTERS</span>
         </h1>
         <p style={{ color: C.muted, fontSize: 14, marginTop: 8 }}>
-          {counts.total} combattants · {counts.champs} champions UFC · {counts.gold} cartes OR
+          {loading ? "Chargement du classement UFC en direct…" : `${counts.total} combattants classés · ${counts.champs} champions UFC · ${counts.gold} cartes OR`}
         </p>
       </div>
 
-      {/* KPIs */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(120px,1fr))", gap: 12, marginBottom: 24 }}>
-        {[
-          { label: "Combattants", val: counts.total, color: C.red },
-          { label: "Champions", val: counts.champs, color: C.gold },
-          { label: "Cartes OR", val: counts.gold, color: "#ffd700" },
-          { label: "Ligues", val: 1, color: C.blue },
-        ].map(({ label, val, color }) => (
-          <div key={label} style={{ padding: "14px 18px", background: C.surface, borderRadius: 14, border: `1px solid ${C.border}` }}>
-            <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 28, color }}>{val}</div>
-            <div style={{ fontSize: 11, color: C.muted, marginTop: 4 }}>{label}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* Filtres */}
-      <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center", marginBottom: 20 }}>
-        <input
-          placeholder="🔍 Rechercher un combattant..."
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          style={{ padding: "9px 14px", borderRadius: 10, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: C.text, fontSize: 13, outline: "none", fontFamily: "inherit", minWidth: 220 }}
-        />
-        <select className="mma-select" value={sort} onChange={e => setSort(e.target.value)}>
-          <option value="score">Score ↓</option>
-          <option value="wins">Victoires ↓</option>
-          <option value="ko">KO% ↓</option>
-          <option value="streak">Série ↓</option>
-        </select>
-        <select className="mma-select" value={weightFilter} onChange={e => setWeightFilter(e.target.value)}>
-          {WEIGHT_CLASSES.map(w => <option key={w} value={w}>{w}</option>)}
-        </select>
-      </div>
-
-      {/* Rarity filters */}
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 28 }}>
-        {RARITY_FILTERS.map(r => (
-          <button key={r} className={`mma-filter${rarityFilter === r ? " active" : ""}`} onClick={() => setRarityFilter(r)}>
-            {r === "Tous" ? "Tous" : r === "gold" ? "⭐ OR" : r === "legendary" ? "🔴 Légendaire" : r === "epic" ? "🟣 Épique" : r === "rare" ? "🔵 Rare" : "⚪ Commun"}
-          </button>
-        ))}
-      </div>
-
-      {/* Grille cartes */}
-      {filtered.length === 0 ? (
-        <div style={{ textAlign: "center", color: C.muted, padding: "60px 0", fontSize: 15 }}>Aucun combattant trouvé.</div>
-      ) : (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px,1fr))", gap: 18 }}>
-          {filtered.map(f => <FighterCard key={f.id} fighter={f} onClick={setSelected} />)}
+      {error && (
+        <div style={{ padding: 20, background: "rgba(232,0,45,0.08)", border: "1px solid rgba(232,0,45,0.3)", borderRadius: 14, color: C.text, marginBottom: 24, fontSize: 14 }}>
+          Impossible de charger le classement UFC pour le moment. Réessaie dans un instant.
         </div>
+      )}
+
+      {!error && (
+        <>
+          {/* KPIs */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(120px,1fr))", gap: 12, marginBottom: 24 }}>
+            {[
+              { label: "Combattants", val: counts.total, color: C.red },
+              { label: "Champions", val: counts.champs, color: C.gold },
+              { label: "Cartes OR", val: counts.gold, color: "#ffd700" },
+              { label: "Ligues", val: 1, color: C.blue },
+            ].map(({ label, val, color }) => (
+              <div key={label} style={{ padding: "14px 18px", background: C.surface, borderRadius: 14, border: `1px solid ${C.border}` }}>
+                <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 28, color }}>{loading ? "…" : val}</div>
+                <div style={{ fontSize: 11, color: C.muted, marginTop: 4 }}>{label}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Filtres */}
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center", marginBottom: 20 }}>
+            <input
+              placeholder="🔍 Rechercher un combattant..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              style={{ padding: "9px 14px", borderRadius: 10, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: C.text, fontSize: 13, outline: "none", fontFamily: "inherit", minWidth: 220 }}
+            />
+            <select className="mma-select" value={sort} onChange={e => setSort(e.target.value)}>
+              <option value="score">Score ↓</option>
+              <option value="wins">Victoires ↓</option>
+              <option value="rank">Classement ↑</option>
+              <option value="defenses">Défenses ↓</option>
+            </select>
+            <select className="mma-select" value={weightFilter} onChange={e => setWeightFilter(e.target.value)}>
+              {WEIGHT_CLASSES.map(w => <option key={w} value={w}>{w}</option>)}
+            </select>
+          </div>
+
+          {/* Rarity filters */}
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 28 }}>
+            {RARITY_FILTERS.map(r => (
+              <button key={r} className={`mma-filter${rarityFilter === r ? " active" : ""}`} onClick={() => setRarityFilter(r)}>
+                {r === "Tous" ? "Tous" : r === "gold" ? "⭐ OR" : r === "legendary" ? "🔴 Légendaire" : r === "epic" ? "🟣 Épique" : r === "rare" ? "🔵 Rare" : "⚪ Commun"}
+              </button>
+            ))}
+          </div>
+
+          {/* Grille cartes */}
+          {loading ? (
+            <div style={{ textAlign: "center", color: C.muted, padding: "60px 0", fontSize: 15 }}>Chargement des combattants…</div>
+          ) : filtered.length === 0 ? (
+            <div style={{ textAlign: "center", color: C.muted, padding: "60px 0", fontSize: 15 }}>Aucun combattant trouvé.</div>
+          ) : (
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px,1fr))", gap: 18 }}>
+              {filtered.map(f => <FighterCard key={`${f.id}:${f.weightClass}`} fighter={f} onClick={setSelected} />)}
+            </div>
+          )}
+        </>
       )}
 
       {selected && <FighterModal fighter={selected} onClose={() => setSelected(null)} />}
