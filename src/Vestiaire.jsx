@@ -92,6 +92,15 @@ export default function Vestiaire({ user }) {
   const [loadingMsgs, setLoadingMsgs] = useState(false);
   const endRef = useRef(null);
 
+  // Mobile : barre des salons en tiroir (sinon elle écrase le chat)
+  const [isMobile, setIsMobile] = useState(typeof window !== "undefined" && window.innerWidth < 768);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
   const scrollDown = () => setTimeout(() => endRef.current?.scrollIntoView({ behavior: "smooth" }), 60);
 
   // Today's games → match rooms
@@ -212,14 +221,28 @@ export default function Vestiaire({ user }) {
   const otherGames = games.filter(g => g.status !== "live");
 
   return (
-    <div style={{ height: "100%", display: "grid", gridTemplateColumns: "240px 1fr", background: C.bg, color: C.text, fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ height: "100%", position: "relative", display: "grid", gridTemplateColumns: isMobile ? "1fr" : "240px 1fr", background: C.bg, color: C.text, fontFamily: "'DM Sans', sans-serif" }}>
       <style>{`
         @keyframes msgIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
         .vest-scroll::-webkit-scrollbar { width: 6px; } .vest-scroll::-webkit-scrollbar-thumb { background: rgba(255,92,0,0.4); border-radius: 4px; }
       `}</style>
 
-      {/* Sidebar */}
-      <div className="vest-scroll" style={{ background: C.bg2, borderRight: `1px solid ${C.border}`, overflowY: "auto", padding: 12 }}>
+      {/* Voile sombre derrière le tiroir (mobile) */}
+      {isMobile && drawerOpen && (
+        <div onClick={() => setDrawerOpen(false)} style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.55)", zIndex: 9 }} />
+      )}
+
+      {/* Sidebar — tiroir coulissant sur mobile */}
+      <div className="vest-scroll" style={{
+        background: C.bg2, borderRight: `1px solid ${C.border}`, overflowY: "auto", padding: 12,
+        ...(isMobile ? {
+          position: "absolute", top: 0, bottom: 0, left: 0, width: 250, zIndex: 10,
+          paddingTop: "calc(12px + env(safe-area-inset-top, 0px))",
+          transform: drawerOpen ? "translateX(0)" : "translateX(-105%)",
+          transition: "transform .25s ease", boxShadow: drawerOpen ? "4px 0 24px rgba(0,0,0,0.5)" : "none",
+        } : {}),
+      }}
+      onClickCapture={() => { if (isMobile) setTimeout(() => setDrawerOpen(false), 120); }}>
         <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 20, letterSpacing: 2, background: `linear-gradient(135deg,${C.orange},${C.gold})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", padding: "6px 8px 10px", borderBottom: `1px solid ${C.border}` }}>
           🏀 LE VESTIAIRE
         </div>
@@ -270,10 +293,17 @@ export default function Vestiaire({ user }) {
       {/* Main */}
       <div style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
         {/* Header */}
-        <div style={{ height: 52, borderBottom: `1px solid ${C.border}`, display: "flex", alignItems: "center", gap: 10, padding: "0 18px", background: "rgba(6,6,15,0.6)" }}>
+        <div style={{ minHeight: 52, boxSizing: "content-box", borderBottom: `1px solid ${C.border}`, display: "flex", alignItems: "center", gap: 10, padding: isMobile ? "env(safe-area-inset-top, 0px) 14px 0" : "0 18px", background: "rgba(6,6,15,0.6)" }}>
+          {isMobile && (
+            <button onClick={() => setDrawerOpen(true)} aria-label="Salons" style={{
+              background: "rgba(255,255,255,0.06)", border: `1px solid ${C.border}`, color: C.text,
+              borderRadius: 8, width: 36, height: 36, flexShrink: 0, cursor: "pointer", fontSize: 17,
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>☰</button>
+          )}
           <span style={{ color: C.muted, fontSize: 18 }}>{room.startsWith("match:") ? "🔴" : "#"}</span>
-          <span style={{ fontWeight: 800, fontSize: 15 }}>{roomLabel}</span>
-          <span style={{ color: C.muted, fontSize: 12, marginLeft: 6 }}>· mentionne <strong style={{ color: C.orange }}>@hoopiq</strong> pour l'IA</span>
+          <span style={{ fontWeight: 800, fontSize: 15, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{roomLabel}</span>
+          {!isMobile && <span style={{ color: C.muted, fontSize: 12, marginLeft: 6 }}>· mentionne <strong style={{ color: C.orange }}>@hoopiq</strong> pour l'IA</span>}
         </div>
 
         {/* Config banner */}

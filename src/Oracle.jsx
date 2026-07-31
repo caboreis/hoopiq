@@ -91,7 +91,7 @@ export default function Oracle() {
         </div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "320px 1fr", gap: 20, marginTop: 22, alignItems: "start" }}>
+      <div className="oracle-grid" style={{ display: "grid", gridTemplateColumns: "320px 1fr", gap: 20, marginTop: 22, alignItems: "start" }}>
         {/* Game picker */}
         <div>
           <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: 2, color: C.muted, textTransform: "uppercase", marginBottom: 12 }}>Choisis un match</div>
@@ -199,7 +199,7 @@ export default function Oracle() {
                 <p style={{ margin: 0, fontSize: 14, color: "#e8e8ff", lineHeight: 1.6 }}>{pred.verdict}</p>
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+              <div className="oracle-grid2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
                 {/* Key factors */}
                 <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 14, padding: 18 }}>
                   <div style={{ fontSize: 10, fontWeight: 800, color: C.orange, letterSpacing: 1.5, marginBottom: 12, textTransform: "uppercase" }}>📊 Facteurs clés</div>
