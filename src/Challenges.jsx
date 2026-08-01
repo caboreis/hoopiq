@@ -1,4 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+
+const API_BASE = import.meta.env.DEV ? "http://localhost:3001" : "";
 
 const ARENA_PHOTOS = [
   "/jc-gellidon-XmYSlYrupL8-unsplash.jpg",
@@ -13,158 +15,183 @@ const C = {
   blue: "#4fa3ff", purple: "#c084fc", text: "#f0f0ff", muted: "#6b6b88",
 };
 
-const TODAY = new Date().toISOString().split("T")[0];
-const STORAGE_KEY = `hoopiq_challenges_${TODAY}`;
+const POINTS_PER_PICK = 100;
+const PICKS_KEY = "hoopiq_picks_v1";
+const todayKey = () => new Date().toISOString().split("T")[0];
 
-const DAILY_CHALLENGES = [
-  {
-    id: "top_scorer",
-    icon: "🏆",
-    title: "Top Scorer ce soir",
-    question: "Quel joueur marquera le plus de points ce soir ?",
-    type: "choice",
-    options: ["LeBron James", "Nikola Jokic", "Stephen Curry", "Kevin Durant"],
-    answer: "Nikola Jokic",
-    points: 150,
-    color: C.gold,
-  },
-  {
-    id: "team_winner",
-    icon: "🏀",
-    title: "Vainqueur du soir",
-    question: "Lakers vs Warriors — qui gagne ce soir ?",
-    type: "choice",
-    options: ["Los Angeles Lakers", "Golden State Warriors"],
-    answer: "Los Angeles Lakers",
-    points: 100,
-    color: C.orange,
-  },
-  {
-    id: "points_lebron",
-    icon: "🎯",
-    title: "Points LeBron",
-    question: "Combien de points LeBron James ce soir ? (fourchette)",
-    type: "choice",
-    options: ["Moins de 20", "20–25", "26–30", "Plus de 30"],
-    answer: "26–30",
-    points: 200,
-    color: C.blue,
-  },
-];
-
-const BONUS_CHALLENGE = {
-  id: "bonus",
-  icon: "⚡",
-  title: "Défi Bonus",
-  question: "Combien de triple-doubles cette nuit NBA ?",
-  type: "choice",
-  options: ["0", "1", "2", "3+"],
-  answer: "1",
-  points: 300,
-  color: C.purple,
-};
-
-function loadProgress() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch { return {}; }
+// Les pronos sont conservés par match (et pas par jour) : un match commencé
+// hier et fini cette nuit doit rester comptabilisé.
+function loadPicks() {
+  try { return JSON.parse(localStorage.getItem(PICKS_KEY)) || {}; } catch { return {}; }
 }
-function saveProgress(p) {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(p)); } catch {}
+function savePicks(p) {
+  try { localStorage.setItem(PICKS_KEY, JSON.stringify(p)); } catch { /* quota plein : le prono reste valable pour la session */ }
 }
 
-function ChallengeCard({ challenge, progress, onAnswer, revealed }) {
-  const state = progress[challenge.id];
-  const answered = !!state;
-  const correct = answered && state === challenge.answer;
+// Série = nombre de jours consécutifs, en remontant depuis aujourd'hui,
+// où au moins un prono a été posé. Calculée sur l'historique réel.
+function computeStreak(picks) {
+  const days = new Set(Object.values(picks).map(p => p.day));
+  let streak = 0;
+  const d = new Date();
+  for (;;) {
+    const key = d.toISOString().split("T")[0];
+    if (!days.has(key)) break;
+    streak++;
+    d.setDate(d.getDate() - 1);
+  }
+  return streak;
+}
+
+function TeamButton({ side, game, pick, onPick }) {
+  const team = game[side];
+  const locked = game.state !== "pre" || !!pick;
+  const isPick = pick === side;
+  const resolved = game.state === "final" && game.winner;
+  const isWinner = resolved && game.winner === side;
+  const pickWasRight = resolved && pick && game.winner === pick;
+
+  const border = isWinner ? "rgba(34,211,122,0.5)"
+    : isPick && resolved && !pickWasRight ? "rgba(255,77,109,0.5)"
+    : isPick ? "rgba(255,92,0,0.5)" : C.border;
+  const bg = isWinner ? "rgba(34,211,122,0.14)"
+    : isPick && resolved && !pickWasRight ? "rgba(255,77,109,0.14)"
+    : isPick ? "rgba(255,92,0,0.12)" : "rgba(255,255,255,0.04)";
+
+  return (
+    <button
+      disabled={locked}
+      onClick={() => onPick(game.id, side)}
+      style={{
+        display: "flex", alignItems: "center", gap: 10, flex: 1, minWidth: 0,
+        padding: "12px 14px", borderRadius: 12, border: `1px solid ${border}`,
+        background: bg, cursor: locked ? "default" : "pointer",
+        fontFamily: "inherit", textAlign: "left",
+        transition: "background .2s, border-color .2s",
+      }}>
+      {team.logo
+        ? <img src={team.logo} alt="" width={26} height={26} style={{ objectFit: "contain", flexShrink: 0 }} />
+        : <span style={{ fontSize: 18, flexShrink: 0 }}>🏀</span>}
+      <span style={{
+        flex: 1, minWidth: 0, fontSize: 13, fontWeight: isPick || isWinner ? 800 : 500,
+        color: isWinner ? C.green : isPick ? C.orange : C.text,
+        overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+      }}>{team.name}</span>
+      {team.score != null && game.state !== "pre" && (
+        <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 20, color: isWinner ? C.green : C.muted, flexShrink: 0 }}>
+          {team.score}
+        </span>
+      )}
+      {isPick && <span style={{ fontSize: 11, color: C.orange, flexShrink: 0 }}>★</span>}
+    </button>
+  );
+}
+
+function GameCard({ game, pick, onPick }) {
+  const resolved = game.state === "final" && game.winner;
+  const won = resolved && pick && game.winner === pick;
+  const lost = resolved && pick && game.winner !== pick;
+
+  const tag = game.state === "live" ? { label: "EN DIRECT", color: C.red }
+    : game.state === "final" ? { label: "TERMINÉ", color: C.muted }
+    : { label: "À VENIR", color: C.blue };
 
   return (
     <div style={{
-      background: answered
-        ? correct ? "rgba(34,211,122,0.07)" : "rgba(255,77,109,0.07)"
-        : C.surface,
-      border: `1px solid ${answered ? (correct ? "rgba(34,211,122,0.3)" : "rgba(255,77,109,0.3)") : C.border}`,
-      borderRadius: 18, padding: "22px 24px",
-      transition: "all 0.3s",
+      background: won ? "rgba(34,211,122,0.06)" : lost ? "rgba(255,77,109,0.06)" : C.surface,
+      border: `1px solid ${won ? "rgba(34,211,122,0.3)" : lost ? "rgba(255,77,109,0.3)" : C.border}`,
+      borderRadius: 18, padding: "18px 20px",
+      transition: "background .3s, border-color .3s",
     }}>
-      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 16 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <div style={{
-            width: 48, height: 48, borderRadius: 14, fontSize: 22,
-            background: `${challenge.color}18`, border: `1px solid ${challenge.color}40`,
-            display: "flex", alignItems: "center", justifyContent: "center",
-          }}>{challenge.icon}</div>
-          <div>
-            <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 18, letterSpacing: 1, color: challenge.color }}>{challenge.title}</div>
-            <div style={{ fontSize: 11, color: C.muted, marginTop: 2 }}>+{challenge.points} pts</div>
-          </div>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14, gap: 10 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
+          <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: 1, color: C.orange, background: "rgba(255,92,0,0.12)", padding: "3px 8px", borderRadius: 6 }}>
+            {game.league}
+          </span>
+          <span style={{ fontSize: 11, color: C.muted, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{game.detail}</span>
         </div>
-        {answered && (
-          <div style={{
-            padding: "4px 12px", borderRadius: 20, fontSize: 11, fontWeight: 800,
-            background: correct ? "rgba(34,211,122,0.15)" : "rgba(255,77,109,0.15)",
-            color: correct ? C.green : C.red,
-          }}>
-            {correct ? "✓ CORRECT" : "✗ RATÉ"}
-          </div>
-        )}
+        <span style={{ fontSize: 10, fontWeight: 800, color: tag.color, flexShrink: 0 }}>{tag.label}</span>
       </div>
 
-      <p style={{ fontSize: 14, color: C.text, marginBottom: 18, lineHeight: 1.5 }}>{challenge.question}</p>
-
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-        {challenge.options.map(opt => {
-          const isSelected = state === opt;
-          const isCorrect = revealed && opt === challenge.answer;
-          const isWrong = revealed && isSelected && !isCorrect;
-          return (
-            <button
-              key={opt}
-              disabled={answered}
-              onClick={() => onAnswer(challenge.id, opt)}
-              style={{
-                padding: "10px 14px", borderRadius: 10, fontSize: 13, fontWeight: 600,
-                cursor: answered ? "default" : "pointer",
-                fontFamily: "inherit", textAlign: "left", transition: "all .2s",
-                background: isCorrect ? "rgba(34,211,122,0.18)" : isWrong ? "rgba(255,77,109,0.18)" : isSelected ? `${challenge.color}18` : "rgba(255,255,255,0.04)",
-                border: `1px solid ${isCorrect ? "rgba(34,211,122,0.5)" : isWrong ? "rgba(255,77,109,0.5)" : isSelected ? `${challenge.color}50` : C.border}`,
-                color: isCorrect ? C.green : isWrong ? C.red : isSelected ? challenge.color : C.text,
-              }}
-            >
-              {isCorrect && "✓ "}{isWrong && "✗ "}{opt}
-            </button>
-          );
-        })}
+      <div style={{ display: "flex", gap: 8, marginBottom: pick || game.state !== "pre" ? 12 : 0 }}>
+        <TeamButton side="away" game={game} pick={pick} onPick={onPick} />
+        <TeamButton side="home" game={game} pick={pick} onPick={onPick} />
       </div>
+
+      {!pick && game.state === "pre" && (
+        <div style={{ fontSize: 11, color: C.muted, marginTop: 12 }}>Choisis le vainqueur pour valider ton prono.</div>
+      )}
+      {pick && !resolved && (
+        <div style={{ fontSize: 11, color: C.orange }}>
+          ★ Ton prono est posé — résultat à la fin du match.
+        </div>
+      )}
+      {resolved && pick && (
+        <div style={{ fontSize: 12, fontWeight: 700, color: won ? C.green : C.red }}>
+          {won ? `✓ Bien vu — +${POINTS_PER_PICK} pts` : "✗ Raté cette fois"}
+        </div>
+      )}
+      {resolved && !pick && (
+        <div style={{ fontSize: 11, color: C.muted }}>Match terminé — pas de prono posé.</div>
+      )}
+      {!pick && game.state === "live" && (
+        <div style={{ fontSize: 11, color: C.muted }}>Match déjà commencé — trop tard pour pronostiquer.</div>
+      )}
     </div>
   );
 }
 
-export default function Challenges() {
-  const [progress, setProgress] = useState(loadProgress);
-  const [revealed, setRevealed] = useState(false);
-  const [showBonus, setShowBonus] = useState(false);
+export default function Challenges({ user }) {
+  const [games, setGames] = useState(null);
+  const [state, setState] = useState("loading"); // loading | ready | error
+  const [picks, setPicks] = useState(loadPicks);
   const [arenaIdx, setArenaIdx] = useState(0);
+
   useEffect(() => {
     const t = setInterval(() => setArenaIdx(i => (i + 1) % ARENA_PHOTOS.length), 8000);
     return () => clearInterval(t);
   }, []);
 
-  const allChallenges = [...DAILY_CHALLENGES, ...(showBonus ? [BONUS_CHALLENGE] : [])];
-  const answeredCount = Object.keys(progress).length;
-  const totalPoints = allChallenges.reduce((sum, c) => {
-    return progress[c.id] === c.answer ? sum + c.points : sum;
-  }, 0);
-  const maxPoints = allChallenges.reduce((sum, c) => sum + c.points, 0);
-  const allAnswered = allChallenges.every(c => progress[c.id]);
+  const loadGames = useCallback(() => {
+    fetch(`${API_BASE}/api/challenges/today`)
+      .then(r => r.json())
+      .then(d => { setGames(d.games || []); setState("ready"); })
+      .catch(() => setState("error"));
+  }, []);
 
-  const handleAnswer = (id, opt) => {
-    const next = { ...progress, [id]: opt };
-    setProgress(next);
-    saveProgress(next);
-    const challenge = allChallenges.find(c => c.id === id);
-    if (challenge && Object.keys(next).length === DAILY_CHALLENGES.length) setRevealed(true);
+  useEffect(() => {
+    loadGames();
+    // Un match peut se terminer pendant que la page est ouverte : on rafraîchit
+    // pour que les pronos se résolvent sans rechargement manuel.
+    const t = setInterval(loadGames, 60000);
+    return () => clearInterval(t);
+  }, [loadGames]);
+
+  const resolvedGames = (games || []).filter(g => g.state === "final" && g.winner);
+  const correct = resolvedGames.filter(g => picks[g.id]?.side === g.winner).length;
+  const points = correct * POINTS_PER_PICK;
+  const settled = resolvedGames.filter(g => picks[g.id]).length;
+  const streak = computeStreak(picks);
+
+  // Le score part au serveur pour alimenter le classement — uniquement quand
+  // au moins un prono a été tranché, sinon on écrirait des lignes vides.
+  useEffect(() => {
+    if (!user?.email || !settled) return;
+    fetch(`${API_BASE}/api/challenge-score`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: user.email, points, correct }),
+    }).catch(() => { /* le score local reste affiché ; il repartira au prochain passage */ });
+  }, [user?.email, points, correct, settled]);
+
+  const handlePick = (gameId, side) => {
+    const next = { ...picks, [gameId]: { side, day: todayKey() } };
+    setPicks(next);
+    savePicks(next);
   };
 
-  const completionPct = Math.round((answeredCount / allChallenges.length) * 100);
+  const openGames = (games || []).filter(g => g.state === "pre");
+  const pendingPicks = (games || []).filter(g => picks[g.id] && g.state !== "final").length;
 
   return (
     <div className="fade-in">
@@ -188,71 +215,73 @@ export default function Challenges() {
             DÉFIS <span style={{ color: C.orange }}>QUOTIDIENS</span>
           </h1>
           <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 13, marginTop: 6 }}>
-            3 défis · Réinitialisés chaque jour à minuit · {new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })}
+            Pronostique les vrais matchs du jour · {new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })}
           </p>
         </div>
       </div>
 
-
       {/* Score bar */}
       <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 16, padding: "18px 22px", marginBottom: 28, display: "flex", alignItems: "center", gap: 20, flexWrap: "wrap" }}>
-        <div style={{ flex: 1 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 8 }}>
-            <span style={{ color: C.muted }}>Progression — {answeredCount}/{allChallenges.length} défis</span>
-            <span style={{ color: C.orange, fontWeight: 700 }}>{completionPct}%</span>
+        <div style={{ flex: 1, minWidth: 200 }}>
+          <div style={{ fontSize: 12, color: C.muted, marginBottom: 4 }}>
+            {settled > 0
+              ? `${correct} bon${correct > 1 ? "s" : ""} prono${correct > 1 ? "s" : ""} sur ${settled} match${settled > 1 ? "s" : ""} terminé${settled > 1 ? "s" : ""}`
+              : "Aucun prono tranché pour l'instant"}
           </div>
-          <div style={{ height: 8, background: "rgba(255,255,255,0.06)", borderRadius: 5, overflow: "hidden" }}>
-            <div style={{ width: `${completionPct}%`, height: "100%", background: `linear-gradient(90deg, ${C.orange}, ${C.gold})`, borderRadius: 5, transition: "width 0.5s ease" }} />
+          <div style={{ fontSize: 12, color: C.muted }}>
+            {pendingPicks > 0 ? `${pendingPicks} prono${pendingPicks > 1 ? "s" : ""} en attente de résultat` : " "}
           </div>
         </div>
         <div style={{ textAlign: "center", padding: "0 20px", borderLeft: `1px solid ${C.border}` }}>
-          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 36, color: C.gold, lineHeight: 1 }}>{totalPoints}</div>
-          <div style={{ fontSize: 11, color: C.muted }}>/ {maxPoints} pts</div>
+          <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 36, color: C.gold, lineHeight: 1 }}>{points}</div>
+          <div style={{ fontSize: 11, color: C.muted }}>points gagnés</div>
         </div>
-        {allAnswered && (
-          <div style={{ padding: "8px 16px", borderRadius: 12, background: "rgba(255,215,0,0.1)", border: `1px solid rgba(255,215,0,0.3)`, fontSize: 13, color: C.gold, animation: "shimmer 2s infinite" }}>
-            🏆 Défis du jour complétés !
+        {streak > 1 && (
+          <div style={{ padding: "8px 16px", borderRadius: 12, background: "rgba(255,92,0,0.1)", border: `1px solid rgba(255,92,0,0.3)`, fontSize: 13, color: C.orange }}>
+            🔥 {streak} jours de suite
           </div>
         )}
       </div>
 
-      {/* Challenges */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(380px, 1fr))", gap: 16, marginBottom: 20 }}>
-        {allChallenges.map(c => (
-          <ChallengeCard key={c.id} challenge={c} progress={progress} onAnswer={handleAnswer} revealed={revealed} />
-        ))}
-      </div>
-
-      {/* Bonus unlock */}
-      {!showBonus && answeredCount >= DAILY_CHALLENGES.length && (
-        <div
-          onClick={() => setShowBonus(true)}
-          style={{
-            padding: "20px 24px", borderRadius: 18, cursor: "pointer",
-            background: "rgba(192,132,252,0.07)", border: `1px dashed rgba(192,132,252,0.4)`,
-            textAlign: "center", animation: "popIn 0.4s ease",
-          }}
-        >
-          <div style={{ fontSize: 28, marginBottom: 8 }}>⚡</div>
-          <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 20, color: C.purple, letterSpacing: 1 }}>DÉFI BONUS DÉBLOQUÉ</div>
-          <div style={{ fontSize: 13, color: C.muted, marginTop: 4 }}>Clique pour tenter le défi bonus +300 pts</div>
+      {state === "loading" && (
+        <div style={{ textAlign: "center", padding: 60, color: C.muted }}>
+          <div style={{ fontSize: 32, marginBottom: 12 }}>🏀</div>
+          Chargement des matchs du jour...
         </div>
       )}
 
-      {/* Streak */}
-      <div style={{ marginTop: 24, display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 8 }}>
-        {["L", "M", "M", "J", "V", "S", "D"].map((d, i) => (
-          <div key={i} style={{
-            padding: "10px 4px", borderRadius: 10, textAlign: "center",
-            background: i < 5 ? "rgba(255,92,0,0.12)" : C.surface,
-            border: `1px solid ${i < 5 ? "rgba(255,92,0,0.3)" : C.border}`,
-          }}>
-            <div style={{ fontSize: 10, color: C.muted, marginBottom: 4 }}>{d}</div>
-            <div style={{ fontSize: 16 }}>{i < 5 ? "🔥" : "○"}</div>
+      {state === "error" && (
+        <div style={{ textAlign: "center", padding: 50, color: C.muted, fontSize: 13 }}>
+          Impossible de charger les matchs. Réessaie dans un instant.
+        </div>
+      )}
+
+      {state === "ready" && games.length === 0 && (
+        <div style={{ textAlign: "center", padding: 50, color: C.muted, fontSize: 13, background: C.surface, border: `1px solid ${C.border}`, borderRadius: 18 }}>
+          <div style={{ fontSize: 32, marginBottom: 12, opacity: 0.6 }}>🗓️</div>
+          Aucun match NBA ou WNBA programmé aujourd'hui.<br />
+          Reviens demain pour de nouveaux pronos.
+        </div>
+      )}
+
+      {state === "ready" && games.length > 0 && (
+        <>
+          {openGames.length === 0 && (
+            <div style={{ fontSize: 12, color: C.muted, marginBottom: 14 }}>
+              Tous les matchs du jour ont déjà commencé — les pronos rouvrent demain.
+            </div>
+          )}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: 16 }}>
+            {games.map(g => (
+              <GameCard key={g.id} game={g} pick={picks[g.id]?.side} onPick={handlePick} />
+            ))}
           </div>
-        ))}
+        </>
+      )}
+
+      <div style={{ marginTop: 20, fontSize: 11, color: C.muted, textAlign: "center" }}>
+        🏀 {POINTS_PER_PICK} points par prono gagné · Matchs et résultats fournis par ESPN
       </div>
-      <div style={{ fontSize: 11, color: C.muted, textAlign: "center", marginTop: 8 }}>🔥 5 jours de série — continue comme ça !</div>
     </div>
   );
 }

@@ -135,14 +135,10 @@ const VIP_EMAILS = [
 ];
 const isVipEmail = (email) => !!email && VIP_EMAILS.includes(email.trim().toLowerCase());
 
-const PLAYERS = [
-  { id: 1,  name: "Caitlin Clark",     pos: "PG", team: "Indiana Fever",      pts: 19.2, ast: 8.4, reb: 5.7,  fg: 40, score: 97, trend: +5, hot: true,  league: "wnba", espnId: 4433403 },
-  { id: 2,  name: "A'ja Wilson",       pos: "C",  team: "Las Vegas Aces",     pts: 26.4, ast: 3.5, reb: 11.9, fg: 52, score: 98, trend: +3, hot: true,  league: "wnba", espnId: 3149391 },
-  { id: 3,  name: "Breanna Stewart",   pos: "PF", team: "New York Liberty",   pts: 19.3, ast: 3.3, reb: 9.3,  fg: 45, score: 94, trend: +2, hot: true,  league: "wnba", espnId: 2998928 },
-  { id: 4,  name: "Sabrina Ionescu",   pos: "PG", team: "New York Liberty",   pts: 17.4, ast: 8.1, reb: 4.5,  fg: 42, score: 92, trend: +1, hot: false, league: "wnba", espnId: 4066533 },
-  { id: 5,  name: "Napheesa Collier",  pos: "PF", team: "Minnesota Lynx",     pts: 20.1, ast: 3.1, reb: 9.8,  fg: 51, score: 91, trend: +4, hot: true,  league: "wnba", espnId: 3917450 },
-  { id: 6,  name: "Angel Reese",       pos: "PF", team: "Atlanta Dream",      pts: 13.1, ast: 2.2, reb: 13.1, fg: 44, score: 89, trend: +3, hot: true,  league: "wnba", espnId: 4433402 },
-];
+// (Une liste de joueuses WNBA était ici, avec des stats figées d'une saison passée
+// et un "score" inventé, servant de repli quand l'API ESPN ne répondait pas. Elle
+// affichait donc de vieux chiffres comme s'ils étaient ceux du jour : supprimée au
+// profit d'un état vide honnête. Les vrais leaders viennent de /api/wnba/leaders.)
 
 const NBA_TEAMS = [
   { id: 1,  name: "Atlanta Hawks",          abbr: "ATL", color: "#E03A3E" },
@@ -220,6 +216,17 @@ function Badge({ children, color = C.orange }) {
 
 function Ring({ score, size = 68 }) {
   const r = size / 2 - 6, c = 2 * Math.PI * r;
+  // Pas de stats disponibles pour ce joueur : on affiche un anneau vide plutôt
+  // qu'un score calculé sur du vide.
+  if (score == null) {
+    return (
+      <svg width={size} height={size} style={{ flexShrink: 0 }} aria-label="Score indisponible">
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth={5} />
+        <text x={size / 2} y={size / 2 + 5} textAnchor="middle" fill={C.muted}
+          fontSize={size * 0.22} fontWeight={800} fontFamily="'Permanent Marker', cursive">—</text>
+      </svg>
+    );
+  }
   const col = score >= 90 ? C.orange : score >= 80 ? C.gold : C.green;
   return (
     <svg width={size} height={size} style={{ transform: "rotate(-90deg)", flexShrink: 0 }}>
@@ -1013,6 +1020,7 @@ function App({ user, onLogout }) {
   };
   const [liveScores, setLiveScores] = useState([]);
   const [wnbaScores, setWnbaScores] = useState([]);
+  const [wnbaLeaders, setWnbaLeaders] = useState(null);
   const [wnbaLiveCount, setWnbaLiveCount] = useState(0);
   const [nbaLoading, setNbaLoading] = useState(true);
   const [nbaError, setNbaError] = useState(null);
@@ -1047,8 +1055,7 @@ function App({ user, onLogout }) {
   // Auto-analyse le meilleur joueur quand on ouvre l'onglet Joueurs ou quand les joueurs chargent
   useEffect(() => {
     if (tab === "players" && !selectedPlayer) {
-      const list = bullsPlayers.length ? bullsPlayers : PLAYERS;
-      const best = list.reduce((a, b) => (b.score > a.score ? b : a), list[0]);
+      const best = bullsPlayers.reduce((a, b) => ((b.score ?? -1) > (a.score ?? -1) ? b : a), bullsPlayers[0]);
       if (best) analyzePlayer(best);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1060,6 +1067,10 @@ function App({ user, onLogout }) {
       setNbaError(null)
       const apiBase = import.meta.env.DEV ? 'http://localhost:3001' : ''
       try {
+        fetch(`${apiBase}/api/wnba/leaders`)
+          .then(r => r.json())
+          .then(d => setWnbaLeaders(d.players || []))
+          .catch(() => setWnbaLeaders([]))
         const [playersRes, scoresRes] = await Promise.all([
           fetch(`${apiBase}/api/nba/players?teamId=${favoriteTeam.id}`),
           fetch(`${apiBase}/api/nba/live-scores`),
@@ -1130,9 +1141,13 @@ function App({ user, onLogout }) {
 Analyse ${player.name} en exactement 4 bullets (•), en français, max 2 lignes par bullet. Format :
 • [TITRE EN MAJUSCULES] : analyse percutante avec une référence NBA si pertinent
 
-Données :
+Données réelles (saison en cours, source ESPN) :
 Poste: ${player.pos} | Équipe: ${player.team}
-${typeof player.pts === "number" ? `${player.pts} pts | ${player.ast} ast | ${player.reb} reb | ${player.fg}% au tir\n` : ""}Score HoopIQ: ${player.score}/100${typeof player.trend === "number" ? ` | Tendance: ${player.trend > 0 ? "🔥 +" : "📉 "}${player.trend}` : ""}
+${typeof player.pts === "number"
+  ? `${player.games} matchs joués | ${player.pts} pts | ${player.ast} ast | ${player.reb} reb | ${player.fg}% au tir | ${player.min} min de moyenne`
+  : "Aucune statistique par match disponible pour ce joueur cette saison."}
+
+N'invente aucun chiffre, aucun titre et aucun transfert : appuie-toi uniquement sur les données ci-dessus. Si elles sont absentes, parle du profil et du poste sans citer de statistiques.
 
 Termine par une phrase signature unique qui résume ce joueur en une image forte. Pas de blabla, que du feu.`
           }]
@@ -1701,12 +1716,20 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
 
             {/* KPI Row */}
             <div className="kpi-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: isMobile ? 10 : 16, marginBottom: 24 }}>
-              {[
-                { label: "Matchs analysés", val: "248", icon: "📊", sub: "+12 ce mois", color: C.blue },
-                { label: "Joueurs suivis", val: "94", icon: "🏀", sub: "5 ligues actives", color: C.green },
-                { label: "Précision IA", val: "89%", icon: "🎯", sub: "Sur 248 matchs", color: C.orange },
-                { label: "Alertes actives", val: "7", icon: "🔔", sub: "Performance haute", color: C.gold },
-              ].map((k, i) => (
+              {/* Chiffres réels issus des données déjà chargées — pas d'estimation.
+                  (Les anciens compteurs "248 matchs analysés / 89% de précision IA"
+                  étaient inventés et ne correspondaient à aucune mesure.) */}
+              {(() => {
+                const allGames = [...liveScores, ...wnbaScores];
+                const liveNow = allGames.filter(g =>
+                  g.status === "live" || g.status?.toLowerCase?.().includes("live")).length;
+                return [
+                  { label: "Matchs aujourd'hui", val: String(allGames.length), icon: "📊", sub: "NBA + WNBA", color: C.blue },
+                  { label: "En direct", val: String(liveNow), icon: "🔴", sub: liveNow ? "Suis-les dans Live" : "Aucun pour l'instant", color: C.red },
+                  { label: `Effectif ${favoriteTeam.abbr}`, val: String(bullsPlayers.length), icon: "🏀", sub: favoriteTeam.name, color: C.green },
+                  { label: "Ligues couvertes", val: "4", icon: "🌍", sub: "NBA · WNBA · Euroleague · MMA", color: C.gold },
+                ];
+              })().map((k, i) => (
                 <div key={k.label} className="stat-card kpi-card" style={{
                   background: C.surface, border: `1px solid ${C.border}`, borderRadius: 16,
                   padding: "18px 20px", transition: "all .25s", animationDelay: `${i * .08}s`,
@@ -1847,8 +1870,13 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
             <div className="dash-grid" style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 20 }}>
               {/* Top performers */}
               <Card>
-                <SectionTitle>🏆 Top Performers IA</SectionTitle>
-                {(bullsPlayers.length ? bullsPlayers.slice(0, 4) : PLAYERS.slice(0, 4)).map((p, i) => (
+                <SectionTitle>🏆 Meilleurs joueurs {favoriteTeam.abbr}</SectionTitle>
+                {!bullsPlayers.length && (
+                  <div style={{ fontSize: 12, color: C.muted, padding: "8px 0" }}>
+                    {nbaLoading ? "Chargement de l'effectif…" : `Effectif ${favoriteTeam.name} indisponible pour le moment.`}
+                  </div>
+                )}
+                {bullsPlayers.slice(0, 4).map((p, i) => (
                   <div key={p.id} className="player-row" onClick={() => { setTab("players"); analyzePlayer(p); }} style={{
                     display: "flex", alignItems: "center", gap: 14, padding: "12px 8px",
                     borderRadius: 10, transition: "all .15s",
@@ -1947,7 +1975,7 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
 
         {/* ── PLAYERS ── */}
         {tab === "players" && (() => {
-          const allPlayers = bullsPlayers.length ? bullsPlayers : PLAYERS;
+          const allPlayers = bullsPlayers;
           const q = playerSearch.toLowerCase();
           const filteredPlayers = q
             ? allPlayers.filter(p =>
@@ -2005,7 +2033,9 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
                       </div>
                       <div style={{ textAlign: "center" }}>
                         <Ring score={selectedPlayer.score} size={72} />
-                        <div style={{ fontSize: 11, color: C.muted, marginTop: 4 }}>Score HoopIQ</div>
+                        <div style={{ fontSize: 11, color: C.muted, marginTop: 4 }} title="Efficacité NBA (pts + reb + ast + int + contres − ballons perdus), ramenée sur 100">
+                          Score HoopIQ
+                        </div>
                       </div>
                     </div>
 
@@ -2154,7 +2184,10 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
                     )}
                     {aiDone && (
                       <>
-                        <div style={{ marginTop: 12, padding: "8px 12px", background: "rgba(255,92,0,0.08)", borderRadius: 8, fontSize: 11, color: C.muted }}>✅ Généré par Claude · Score HoopIQ : <strong style={{ color: C.orange }}>{selectedPlayer?.score}/100</strong></div>
+                        <div style={{ marginTop: 12, padding: "8px 12px", background: "rgba(255,92,0,0.08)", borderRadius: 8, fontSize: 11, color: C.muted }}>
+                          ✅ Généré par Claude à partir des stats ESPN
+                          {selectedPlayer?.score != null && <> · Score HoopIQ : <strong style={{ color: C.orange }}>{selectedPlayer.score}/100</strong></>}
+                        </div>
                         <button
                           onClick={() => setShowAnalysisModal(true)}
                           style={{
@@ -2253,13 +2286,16 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
               {/* Sidebar info */}
               <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
                 <Card>
-                  <SectionTitle>🏀 Joueurs en forme</SectionTitle>
-                  {PLAYERS.filter(p => p.hot).map(p => (
+                  <SectionTitle>🏀 Meilleures marqueuses WNBA</SectionTitle>
+                  {/* Vrais leaders de la saison en cours (ESPN), pas une liste figée. */}
+                  {wnbaLeaders === null && <div style={{ fontSize: 12, color: C.muted }}>Chargement…</div>}
+                  {wnbaLeaders?.length === 0 && <div style={{ fontSize: 12, color: C.muted }}>Classement des marqueuses indisponible pour le moment.</div>}
+                  {wnbaLeaders?.map(p => (
                     <div key={p.id} style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 10 }}>
-                      <Avatar name={p.name} size={32} espnId={p.espnId} headshot={p.headshot} league={p.league} />
-                      <div>
-                        <div style={{ fontSize: 13, fontWeight: 600 }}>{p.name} 🔥</div>
-                        <div style={{ fontSize: 11, color: C.muted }}>{p.pts} pts · Score {p.score}</div>
+                      <Avatar name={p.name} size={32} headshot={p.headshot} league="wnba" />
+                      <div style={{ minWidth: 0 }}>
+                        <div style={{ fontSize: 13, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.name}</div>
+                        <div style={{ fontSize: 11, color: C.muted }}>{p.pts} pts · {p.team}</div>
                       </div>
                     </div>
                   ))}
@@ -2267,8 +2303,8 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
                 <Card>
                   <SectionTitle>📊 Stats rapides</SectionTitle>
                   {(() => {
-                    // Uniquement les joueurs avec de vraies stats par match (pas le roster ESPN, qui n'en a pas).
-                    const pool = (bullsPlayers.length ? bullsPlayers : PLAYERS).filter(p => typeof p.pts === "number");
+                    // Uniquement les joueurs avec de vraies stats par match (le roster ESPN n'en a pas).
+                    const pool = bullsPlayers.filter(p => typeof p.pts === "number");
                     if (!pool.length) return <div style={{ fontSize: 12, color: C.muted }}>Stats par match indisponibles pour {favoriteTeam.name}.</div>;
                     const scorer = pool.reduce((a, b) => b.pts > a.pts ? b : a, pool[0]);
                     const passer = pool.reduce((a, b) => b.ast > a.ast ? b : a, pool[0]);
@@ -2322,8 +2358,8 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
 {tab === "oracle" && <Oracle />}
         {tab === "duel" && <Duel />}
         {tab === "prematch" && <PreMatch />}
-        {tab === "challenges" && <Challenges />}
-        {tab === "leaderboard" && <Leaderboard />}
+        {tab === "challenges" && <Challenges user={user} />}
+        {tab === "leaderboard" && <Leaderboard user={user} />}
 {tab === "vestiaire" && (
   <div className="fade-in" style={isMobile
     ? { height: "calc(100vh - 114px)", marginTop: "calc(-16px - env(safe-area-inset-top, 0px))", marginLeft: -14, marginRight: -14 }
