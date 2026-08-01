@@ -3,6 +3,13 @@ import { useState, useRef, useEffect } from "react";
 // En dev l'API tourne sur le port 3001 ; en prod elle est servie sur le même domaine.
 const API_BASE = import.meta.env.DEV ? "http://localhost:3001" : "";
 
+// Règle commune aux trois assistants : sans elle, le modèle sort des stats et des
+// palmarès inventés avec assurance, ce qui décrédibilise tout le produit.
+const NO_FABRICATION = `RÈGLE ABSOLUE : n'invente jamais une statistique chiffrée, un score, un classement, un surnom de joueur, un palmarès ou un transfert.
+Tu n'as pas accès aux stats en direct. Tu peux expliquer le jeu, la tactique, les concepts et donner ton avis sans restriction,
+mais dès qu'on te demande un chiffre précis ou un fait récent que tu n'as pas, dis-le franchement et propose l'onglet du site où l'info se trouve.
+Un chiffre inventé est une faute grave.`;
+
 // Un assistant par plan d'abonnement — son prompt système définit sa personnalité et son niveau.
 // Le plan vient de Supabase (via user.plan), donc l'assistant affiché suit l'abonnement réel.
 export const ASSISTANTS = {
@@ -109,7 +116,7 @@ export default function PlanAssistant({ plan = "scout" }) {
         body: JSON.stringify({
           provider: "groq", // tous les assistants par plan tournent sur Groq (gratuit)
           max_tokens: plan === "elite" ? 1200 : plan === "pro" ? 900 : 500,
-          system: cfg.system,
+          system: cfg.system + "\n\n" + NO_FABRICATION,
           messages: history.slice(-8),
         }),
       });

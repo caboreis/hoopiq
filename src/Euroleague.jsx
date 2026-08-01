@@ -2,27 +2,6 @@ import { useState, useEffect } from "react";
 
 const API_BASE = import.meta.env.DEV ? "http://localhost:3001" : "";
 
-const EURO_TEAMS = [
-  { name: "Real Madrid",         abbr: "MAD", country: "🇪🇸", color: "#FEBE10" },
-  { name: "FC Barcelona",        abbr: "BAR", country: "🇪🇸", color: "#A50044" },
-  { name: "Panathinaikos",       abbr: "PAN", country: "🇬🇷", color: "#007A33" },
-  { name: "Olympiacos",          abbr: "OLY", country: "🇬🇷", color: "#CE1141" },
-  { name: "Fenerbahce Beko",     abbr: "FEN", country: "🇹🇷", color: "#003087" },
-  { name: "Anadolu Efes",        abbr: "EFE", country: "🇹🇷", color: "#F7A700" },
-  { name: "Bayern Munich",       abbr: "BAY", country: "🇩🇪", color: "#DC052D" },
-  { name: "Maccabi Tel Aviv",    abbr: "MAC", country: "🇮🇱", color: "#FFD700" },
-  { name: "Monaco",              abbr: "MON", country: "🇲🇨", color: "#CE1141" },
-  { name: "Virtus Bologna",      abbr: "VIR", country: "🇮🇹", color: "#000000" },
-  { name: "ALBA Berlin",         abbr: "ALB", country: "🇩🇪", color: "#E2001A" },
-  { name: "Baskonia",            abbr: "BAS", country: "🇪🇸", color: "#003DA5" },
-  { name: "Partizan",            abbr: "PAR", country: "🇷🇸", color: "#231F20" },
-  { name: "Paris Basketball",    abbr: "PAR", country: "🇫🇷", color: "#0055A4" },
-  { name: "ASVEL Villeurbanne",  abbr: "ASV", country: "🇫🇷", color: "#003DA5" },
-  { name: "Zalgiris",            abbr: "ZAL", country: "🇱🇹", color: "#007A33" },
-  { name: "Red Star",            abbr: "RED", country: "🇷🇸", color: "#CE1141" },
-  { name: "Maccabi Ra'anana",    abbr: "RAA", country: "🇮🇱", color: "#FFD700" },
-];
-
 const G = {
   orange: "linear-gradient(135deg, #ff5c00, #ff8c42)",
   surface: "rgba(255,255,255,0.03)",
@@ -32,74 +11,31 @@ const G = {
   bg: "#06060f",
 };
 
-function ask(prompt) {
-  return fetch(`${API_BASE}/api/anthropic`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      provider: "groq",
-      max_tokens: 900,
-      system: "Tu es un expert Euroleague. Réponds UNIQUEMENT en JSON valide, rien d'autre.",
-      messages: [{ role: "user", content: prompt }],
-    }),
-  })
-    .then(r => r.json())
-    .then(d => {
-      const raw = (d.content || []).map(b => b.text || "").join("").trim();
-      const m = raw.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
-      return m ? JSON.parse(m[0]) : null;
-    });
-}
+const fmtDate = (iso) =>
+  new Date(iso).toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
 
-// ── Standings ──────────────────────────────────────────────────────────────────
-function Standings() {
-  const [rows, setRows] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    ask(`Génère le classement actuel Euroleague 2024-2025 (saison régulière terminée).
-Retourne un tableau JSON de 18 équipes triées par rang :
-[{"pos":1,"team":"Real Madrid","country":"🇪🇸","wins":26,"losses":8,"ptsFor":87,"ptsAgainst":78,"streak":"W3","form":"WWLWW"},...]
-Utilise les vraies équipes Euroleague 2024-2025.`)
-      .then(d => setRows(Array.isArray(d) ? d : null))
-      .catch(() => setRows(null))
-      .finally(() => setLoading(false));
-  }, []);
-
-  if (loading) return (
-    <div style={{ textAlign: "center", padding: 60, color: G.muted }}>
-      <div style={{ fontSize: 32, marginBottom: 12 }}>🏀</div>
-      Chargement du classement...
-    </div>
-  );
-
-  const fallback = EURO_TEAMS.slice(0, 10).map((t, i) => ({
-    pos: i + 1, team: t.name, country: t.country,
-    wins: 26 - i * 2, losses: 8 + i * 2,
-    ptsFor: 88 - i, ptsAgainst: 76 + i,
-    streak: i < 3 ? "W3" : "L1", form: "WWLWW",
-  }));
-
-  const data = rows || fallback;
+// ── Classement ─────────────────────────────────────────────────────────────────
+function Standings({ data }) {
+  const rows = data.standings || [];
+  if (!rows.length) return <Empty label="Classement indisponible pour cette saison." />;
 
   return (
     <div style={{ overflowX: "auto" }}>
       <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
         <thead>
           <tr style={{ color: G.muted, borderBottom: `1px solid ${G.border}` }}>
-            {["#", "Équipe", "V", "D", "Pts+", "Pts-", "Série", "Forme"].map(h => (
+            {["#", "Équipe", "J", "V", "D", "Pts+", "Pts-", "Diff"].map(h => (
               <th key={h} style={{ padding: "10px 8px", textAlign: h === "Équipe" ? "left" : "center", fontWeight: 600, fontSize: 11, letterSpacing: 1 }}>{h}</th>
             ))}
           </tr>
         </thead>
         <tbody>
-          {data.map((r, i) => {
+          {rows.map(r => {
             const isTop8 = r.pos <= 8;
             return (
-              <tr key={i} style={{
+              <tr key={r.code || r.pos} style={{
                 borderBottom: `1px solid ${G.border}`,
-                background: r.pos === 1 ? "rgba(255,215,0,0.04)" : r.pos <= 8 ? "rgba(255,92,0,0.03)" : "transparent",
-                transition: "background .15s",
+                background: r.pos === 1 ? "rgba(255,215,0,0.04)" : isTop8 ? "rgba(255,92,0,0.03)" : "transparent",
               }}>
                 <td style={{ padding: "12px 8px", textAlign: "center" }}>
                   <span style={{
@@ -116,23 +52,13 @@ Utilise les vraies équipes Euroleague 2024-2025.`)
                     <span style={{ color: G.text, fontWeight: 600 }}>{r.team}</span>
                   </div>
                 </td>
+                <td style={{ textAlign: "center", color: G.muted, fontFamily: "'Bebas Neue',cursive", fontSize: 14 }}>{r.played}</td>
                 <td style={{ textAlign: "center", color: "#22d37a", fontFamily: "'Bebas Neue',cursive", fontSize: 15 }}>{r.wins}</td>
                 <td style={{ textAlign: "center", color: "#ff6b6b", fontFamily: "'Bebas Neue',cursive", fontSize: 15 }}>{r.losses}</td>
                 <td style={{ textAlign: "center", color: G.muted, fontFamily: "'Bebas Neue',cursive", fontSize: 14 }}>{r.ptsFor}</td>
                 <td style={{ textAlign: "center", color: G.muted, fontFamily: "'Bebas Neue',cursive", fontSize: 14 }}>{r.ptsAgainst}</td>
-                <td style={{ textAlign: "center" }}>
-                  <span style={{ color: r.streak?.startsWith("W") ? "#22d37a" : "#ff6b6b", fontWeight: 700, fontSize: 12 }}>{r.streak}</span>
-                </td>
-                <td style={{ textAlign: "center" }}>
-                  <div style={{ display: "flex", gap: 2, justifyContent: "center" }}>
-                    {(r.form || "WWLWW").split("").map((f, fi) => (
-                      <span key={fi} style={{
-                        width: 12, height: 12, borderRadius: "50%",
-                        background: f === "W" ? "#22d37a" : "#ff6b6b",
-                        display: "inline-block",
-                      }} />
-                    ))}
-                  </div>
+                <td style={{ textAlign: "center", fontFamily: "'Bebas Neue',cursive", fontSize: 14, color: r.diff > 0 ? "#22d37a" : r.diff < 0 ? "#ff6b6b" : G.muted }}>
+                  {r.diff > 0 ? "+" : ""}{r.diff}
                 </td>
               </tr>
             );
@@ -147,105 +73,112 @@ Utilise les vraies équipes Euroleague 2024-2025.`)
   );
 }
 
-// ── Matchs récents ─────────────────────────────────────────────────────────────
-function Matchs() {
-  const [matchs, setMatchs] = useState(null);
-  const [loading, setLoading] = useState(true);
+// ── Matchs ─────────────────────────────────────────────────────────────────────
+function Crest({ url, name }) {
+  if (!url) return <span style={{ fontSize: 16 }}>🏀</span>;
+  return <img src={url} alt={name} width={22} height={22} style={{ objectFit: "contain", flexShrink: 0 }} />;
+}
 
-  useEffect(() => {
-    ask(`Génère 6 matchs récents Euroleague 2024-2025 (journée 34 environ).
-JSON : [{"home":"Real Madrid","away":"Panathinaikos","scoreHome":89,"scoreAway":76,"date":"12 Jun","round":"J34","mvp":"Sergio Llull","mvpPts":22},...]`)
-      .then(d => setMatchs(Array.isArray(d) ? d : null))
-      .catch(() => setMatchs(null))
-      .finally(() => setLoading(false));
-  }, []);
-
-  if (loading) return <div style={{ textAlign: "center", padding: 40, color: G.muted }}>Chargement des matchs...</div>;
-
-  const data = matchs || [
-    { home: "Real Madrid", away: "FC Barcelona", scoreHome: 91, scoreAway: 82, date: "12 Jun", round: "J34", mvp: "Sergio Llull", mvpPts: 24 },
-    { home: "Panathinaikos", away: "Fenerbahce", scoreHome: 78, scoreAway: 71, date: "11 Jun", round: "J34", mvp: "Kendrick Nunn", mvpPts: 21 },
-    { home: "Monaco", away: "ASVEL", scoreHome: 85, scoreAway: 79, date: "11 Jun", round: "J34", mvp: "Mike James", mvpPts: 28 },
-  ];
+function Matchs({ data }) {
+  const [view, setView] = useState(data.upcoming?.length ? "upcoming" : "recent");
+  const games = view === "recent" ? (data.recent || []) : (data.upcoming || []);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-      {data.map((m, i) => {
-        const homeWin = m.scoreHome > m.scoreAway;
-        return (
-          <div key={i} style={{
-            background: G.surface, border: `1px solid ${G.border}`,
-            borderRadius: 14, padding: "14px 18px",
-          }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-              <span style={{ fontSize: 11, color: G.muted }}>{m.date} · {m.round}</span>
-              <span style={{ fontSize: 11, color: "#ff5c00", fontWeight: 700 }}>TERMINÉ</span>
-            </div>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <span style={{ fontWeight: homeWin ? 800 : 400, color: homeWin ? G.text : G.muted, flex: 1 }}>{m.home}</span>
-              <div style={{ display: "flex", gap: 12, alignItems: "center", padding: "6px 16px", background: "rgba(255,92,0,0.1)", borderRadius: 10 }}>
-                <span style={{ fontFamily: "'Bebas Neue',cursive", fontSize: 22, color: homeWin ? "#22d37a" : G.text }}>{m.scoreHome}</span>
-                <span style={{ color: G.muted, fontSize: 12 }}>-</span>
-                <span style={{ fontFamily: "'Bebas Neue',cursive", fontSize: 22, color: !homeWin ? "#22d37a" : G.text }}>{m.scoreAway}</span>
+    <div>
+      <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+        {[
+          { id: "recent", label: "Derniers résultats", n: data.recent?.length || 0 },
+          { id: "upcoming", label: "À venir", n: data.upcoming?.length || 0 },
+        ].map(v => (
+          <button key={v.id} onClick={() => setView(v.id)} disabled={!v.n} style={{
+            padding: "6px 16px", borderRadius: 20, border: "none",
+            cursor: v.n ? "pointer" : "not-allowed", fontSize: 12, fontWeight: 700,
+            background: view === v.id ? "#ff5c00" : "rgba(255,255,255,0.06)",
+            color: view === v.id ? "#fff" : G.muted, opacity: v.n ? 1 : 0.4,
+          }}>{v.label}</button>
+        ))}
+      </div>
+
+      {!games.length ? (
+        <Empty label={view === "upcoming" ? "Aucun match programmé pour le moment." : "Aucun résultat disponible."} />
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {games.map(m => {
+            const played = m.homeScore != null;
+            const homeWin = played && m.homeScore > m.awayScore;
+            return (
+              <div key={m.id} style={{
+                background: G.surface, border: `1px solid ${G.border}`,
+                borderRadius: 14, padding: "14px 18px",
+              }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+                  <span style={{ fontSize: 11, color: G.muted }}>{fmtDate(m.date)} · {m.round}</span>
+                  <span style={{ fontSize: 11, color: played ? "#ff5c00" : "#4fa3ff", fontWeight: 700 }}>
+                    {played ? "TERMINÉ" : "À VENIR"}
+                  </span>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, flex: 1, minWidth: 0 }}>
+                    <Crest url={m.homeCrest} name={m.home} />
+                    <span style={{ fontWeight: homeWin ? 800 : 400, color: homeWin || !played ? G.text : G.muted, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.home}</span>
+                  </div>
+                  <div style={{ display: "flex", gap: 12, alignItems: "center", padding: "6px 16px", background: "rgba(255,92,0,0.1)", borderRadius: 10, flexShrink: 0 }}>
+                    {played ? (
+                      <>
+                        <span style={{ fontFamily: "'Bebas Neue',cursive", fontSize: 22, color: homeWin ? "#22d37a" : G.text }}>{m.homeScore}</span>
+                        <span style={{ color: G.muted, fontSize: 12 }}>-</span>
+                        <span style={{ fontFamily: "'Bebas Neue',cursive", fontSize: 22, color: !homeWin ? "#22d37a" : G.text }}>{m.awayScore}</span>
+                      </>
+                    ) : (
+                      <span style={{ fontSize: 12, color: G.muted, fontWeight: 700 }}>
+                        {new Date(m.date).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+                      </span>
+                    )}
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, flex: 1, minWidth: 0, justifyContent: "flex-end" }}>
+                    <span style={{ fontWeight: played && !homeWin ? 800 : 400, color: (played && !homeWin) || !played ? G.text : G.muted, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.away}</span>
+                    <Crest url={m.awayCrest} name={m.away} />
+                  </div>
+                </div>
               </div>
-              <span style={{ fontWeight: !homeWin ? 800 : 400, color: !homeWin ? G.text : G.muted, flex: 1, textAlign: "right" }}>{m.away}</span>
-            </div>
-            {m.mvp && (
-              <div style={{ marginTop: 8, fontSize: 11, color: G.muted }}>
-                🏆 MVP · <span style={{ color: "#FFD700", fontWeight: 600 }}>{m.mvp}</span> — <span style={{ fontFamily: "'Bebas Neue',cursive", fontSize: 13, color: "#ff5c00" }}>{m.mvpPts} PTS</span>
-              </div>
-            )}
-          </div>
-        );
-      })}
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
 
 // ── Top joueurs ────────────────────────────────────────────────────────────────
-function TopJoueurs() {
-  const [players, setPlayers] = useState(null);
-  const [loading, setLoading] = useState(true);
+function TopJoueurs({ data }) {
   const [cat, setCat] = useState("pts");
 
   const cats = [
-    { id: "pts", label: "Marqueurs", color: "#ff5c00" },
-    { id: "ast", label: "Passeurs",  color: "#4fa3ff" },
-    { id: "reb", label: "Rebondeurs",color: "#22d37a" },
+    { id: "pts", label: "Marqueurs",  color: "#ff5c00", unit: "PTS" },
+    { id: "ast", label: "Passeurs",   color: "#4fa3ff", unit: "AST" },
+    { id: "reb", label: "Rebondeurs", color: "#22d37a", unit: "REB" },
+    { id: "pir", label: "Évaluation", color: "#FFD700", unit: "PIR" },
   ];
-
-  useEffect(() => {
-    ask(`Top 5 joueurs Euroleague 2024-2025 par statistiques.
-JSON :
-{
-  "pts":[{"name":"Facundo Campazzo","team":"Real Madrid","country":"🇦🇷","val":18.4},{"name":"Mike James","team":"Monaco","country":"🇺🇸","val":17.9},{"name":"Scottie Wilbekin","team":"Maccabi","country":"🇺🇸","val":16.8},{"name":"Cory Higgins","team":"FC Barcelona","country":"🇺🇸","val":16.1},{"name":"Kendrick Nunn","team":"Panathinaikos","country":"🇺🇸","val":15.9}],
-  "ast":[{"name":"Facundo Campazzo","team":"Real Madrid","country":"🇦🇷","val":7.2},{"name":"Mike James","team":"Monaco","country":"🇺🇸","val":6.8},{"name":"Lorenzo Brown","team":"Maccabi","country":"🇺🇸","val":5.9},{"name":"Sloukas","team":"Olympiacos","country":"🇬🇷","val":5.5},{"name":"Thomas","team":"ALBA","country":"🇩🇪","val":5.1}],
-  "reb":[{"name":"Walter Tavares","team":"Real Madrid","country":"🇨🇻","val":8.9},{"name":"Nikola Milutinov","team":"Olympiacos","country":"🇷🇸","val":8.4},{"name":"Jan Vesely","team":"Fenerbahce","country":"🇨🇿","val":7.8},{"name":"Isaiah Hartenstein","team":"Fenerbahce","country":"🇩🇪","val":7.2},{"name":"Moustapha Fall","team":"ASVEL","country":"🇸🇳","val":7.1}]
-}`)
-      .then(d => setPlayers(d && typeof d === "object" ? d : null))
-      .catch(() => setPlayers(null))
-      .finally(() => setLoading(false));
-  }, []);
-
   const catDef = cats.find(c => c.id === cat);
+  const list = data.leaders?.[cat] || [];
 
   return (
     <div>
-      <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+      <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
         {cats.map(c => (
           <button key={c.id} onClick={() => setCat(c.id)} style={{
             padding: "6px 16px", borderRadius: 20, border: "none", cursor: "pointer", fontSize: 12, fontWeight: 700,
             background: cat === c.id ? c.color : "rgba(255,255,255,0.06)",
-            color: cat === c.id ? "#fff" : G.muted, transition: "all .15s",
+            color: cat === c.id ? "#fff" : G.muted, transition: "background .15s, color .15s",
           }}>{c.label}</button>
         ))}
       </div>
-      {loading ? (
-        <div style={{ textAlign: "center", padding: 40, color: G.muted }}>Chargement...</div>
+      {!list.length ? (
+        <Empty label="Statistiques joueurs pas encore publiées pour cette saison." />
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          {((players || {})[cat] || []).map((p, i) => (
-            <div key={i} style={{
+          {list.map((p, i) => (
+            <div key={p.name} style={{
               display: "flex", alignItems: "center", gap: 12,
               background: G.surface, border: `1px solid ${G.border}`, borderRadius: 12, padding: "12px 16px",
             }}>
@@ -253,17 +186,20 @@ JSON :
                 width: 28, height: 28, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
                 background: i === 0 ? "rgba(255,215,0,0.15)" : "rgba(255,255,255,0.05)",
                 color: i === 0 ? "#FFD700" : G.muted, fontFamily: "'Bebas Neue',cursive", fontSize: 16, fontWeight: 800,
+                flexShrink: 0,
               }}>{i + 1}</span>
-              <span style={{ fontSize: 16 }}>{p.country}</span>
-              <div style={{ flex: 1 }}>
+              {p.photo
+                ? <img src={p.photo} alt="" width={34} height={34} style={{ borderRadius: "50%", objectFit: "cover", background: "rgba(255,255,255,0.06)", flexShrink: 0 }} />
+                : <span style={{ fontSize: 20, width: 34, textAlign: "center", flexShrink: 0 }}>🏀</span>}
+              <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontWeight: 700, color: G.text, fontSize: 14 }}>{p.name}</div>
-                <div style={{ fontSize: 11, color: G.muted }}>{p.team}</div>
+                <div style={{ fontSize: 11, color: G.muted }}>{p.team} · {p.games} matchs</div>
               </div>
               <span style={{
                 fontFamily: "'Bebas Neue',cursive", fontSize: 26, color: catDef.color,
-                background: `${catDef.color}18`, padding: "2px 12px", borderRadius: 8,
+                background: `${catDef.color}18`, padding: "2px 12px", borderRadius: 8, flexShrink: 0,
               }}>{p.val}</span>
-              <span style={{ fontSize: 10, color: G.muted, fontWeight: 700 }}>{cat.toUpperCase()}</span>
+              <span style={{ fontSize: 10, color: G.muted, fontWeight: 700, flexShrink: 0 }}>{catDef.unit}</span>
             </div>
           ))}
         </div>
@@ -273,21 +209,41 @@ JSON :
 }
 
 // ── Analyse IA ─────────────────────────────────────────────────────────────────
-function AnalyseIA() {
+function AnalyseIA({ data }) {
   const [analyse, setAnalyse] = useState("");
   const [loading, setLoading] = useState(false);
 
   const genAnalyse = () => {
     setLoading(true);
     setAnalyse("");
+
+    // On donne à l'IA les vraies données de la page pour qu'elle commente ce qui est
+    // affiché, au lieu d'inventer un classement de mémoire.
+    const top = (data.standings || []).slice(0, 8)
+      .map(t => `${t.pos}. ${t.team} ${t.wins}V-${t.losses}D (diff ${t.diff > 0 ? "+" : ""}${t.diff})`).join("\n");
+    const scorers = (data.leaders?.pts || []).map(p => `${p.name} (${p.team}) ${p.val} pts`).join(", ");
+    const pir = (data.leaders?.pir || []).map(p => `${p.name} ${p.val}`).join(", ");
+    const results = (data.recent || []).slice(0, 5)
+      .map(g => `${g.home} ${g.homeScore}-${g.awayScore} ${g.away}`).join("\n");
+
     fetch(`${API_BASE}/api/anthropic`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         provider: "groq",
         max_tokens: 600,
-        system: "Tu es un expert Euroleague. Réponds en français, style premium, concis.",
-        messages: [{ role: "user", content: "Donne une analyse tactique de la saison Euroleague 2024-2025 en cours. Les tendances, l'équipe la plus forte, le joueur à surveiller, et un pronostic pour les playoffs. 4-5 phrases maximum." }],
+        system: "Tu es un analyste Euroleague. Tu commentes UNIQUEMENT les données fournies par l'utilisateur. "
+          + "N'invente jamais un score, une statistique, un classement ou un transfert qui ne figure pas dans ces données. "
+          + "Si une information manque, dis-le simplement. Réponds en français, ton passionné mais factuel.",
+        messages: [{
+          role: "user", content:
+            `Voici les données réelles de la saison Euroleague ${data.season} :\n\n`
+            + `CLASSEMENT (top 8) :\n${top}\n\n`
+            + `DERNIERS RÉSULTATS :\n${results}\n\n`
+            + `MEILLEURS MARQUEURS : ${scorers}\n`
+            + `MEILLEURES ÉVALUATIONS (PIR) : ${pir}\n\n`
+            + `Analyse cette saison en 4-5 phrases : la hiérarchie qui se dégage, le joueur le plus décisif, et ce que ça dit pour la suite.`,
+        }],
       }),
     })
       .then(r => r.json())
@@ -302,13 +258,15 @@ function AnalyseIA() {
         <span style={{ fontSize: 24 }}>🤖</span>
         <div>
           <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 18, color: "#ff5c00" }}>ANALYSE IA EUROLEAGUE</div>
-          <div style={{ fontSize: 12, color: G.muted }}>Powered by HoopIQ Intelligence</div>
+          <div style={{ fontSize: 12, color: G.muted }}>Basée sur les données officielles de la saison {data.season}</div>
         </div>
       </div>
       {analyse ? (
         <p style={{ color: G.text, lineHeight: 1.7, fontSize: 14, margin: "0 0 14px" }}>{analyse}</p>
       ) : (
-        <p style={{ color: G.muted, fontSize: 13, marginBottom: 14 }}>Clique pour générer une analyse tactique de la saison en cours.</p>
+        <p style={{ color: G.muted, fontSize: 13, marginBottom: 14 }}>
+          L'IA lit le classement, les résultats et les stats affichés sur cette page, puis en tire une lecture tactique.
+        </p>
       )}
       <button onClick={genAnalyse} disabled={loading} style={{
         padding: "10px 24px", borderRadius: 10, border: "none", cursor: loading ? "not-allowed" : "pointer",
@@ -319,9 +277,34 @@ function AnalyseIA() {
   );
 }
 
+function Empty({ label }) {
+  return (
+    <div style={{ textAlign: "center", padding: 40, color: G.muted, fontSize: 13 }}>
+      <div style={{ fontSize: 28, marginBottom: 10, opacity: 0.5 }}>🏀</div>
+      {label}
+    </div>
+  );
+}
+
 // ── Main ───────────────────────────────────────────────────────────────────────
 export default function Euroleague() {
   const [tab, setTab] = useState("standings");
+  const [data, setData] = useState(null);
+  const [state, setState] = useState("loading"); // loading | ready | empty | error
+
+  useEffect(() => {
+    let alive = true;
+    fetch(`${API_BASE}/api/euroleague`)
+      .then(r => r.json())
+      .then(d => {
+        if (!alive) return;
+        if (!d.available) { setState("empty"); return; }
+        setData(d);
+        setState("ready");
+      })
+      .catch(() => alive && setState("error"));
+    return () => { alive = false; };
+  }, []);
 
   const tabs = [
     { id: "standings", label: "Classement", icon: "🏆" },
@@ -332,7 +315,6 @@ export default function Euroleague() {
 
   return (
     <div className="fade-in">
-      {/* Header */}
       <div style={{ marginBottom: 24 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 6 }}>
           <span style={{ fontSize: 36 }}>🏀</span>
@@ -340,10 +322,13 @@ export default function Euroleague() {
             <h1 style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 36, margin: 0, letterSpacing: 2 }}>
               EUROLEAGUE
             </h1>
-            <div style={{ fontSize: 12, color: G.muted, letterSpacing: 1 }}>SAISON 2024-2025 · ANALYSE IA</div>
+            <div style={{ fontSize: 12, color: G.muted, letterSpacing: 1 }}>
+              {data
+                ? `SAISON ${data.season} · ${data.finished ? "TERMINÉE" : "EN COURS"} · DONNÉES OFFICIELLES`
+                : "DONNÉES OFFICIELLES EUROLEAGUE"}
+            </div>
           </div>
         </div>
-        {/* Drapeaux des nations */}
         <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 8 }}>
           {["🇪🇸","🇬🇷","🇹🇷","🇩🇪","🇮🇹","🇫🇷","🇷🇸","🇮🇱","🇲🇨","🇱🇹"].map((f, i) => (
             <span key={i} style={{ fontSize: 18 }}>{f}</span>
@@ -351,25 +336,37 @@ export default function Euroleague() {
         </div>
       </div>
 
-      {/* Sous-onglets */}
-      <div style={{ display: "flex", gap: 6, marginBottom: 20, overflowX: "auto", paddingBottom: 4 }}>
-        {tabs.map(t => (
-          <button key={t.id} onClick={() => setTab(t.id)} style={{
-            padding: "8px 18px", borderRadius: 20, border: "none", cursor: "pointer",
-            background: tab === t.id ? "linear-gradient(135deg, #ff5c00, #ff8c42)" : "rgba(255,255,255,0.06)",
-            color: tab === t.id ? "#fff" : G.muted, fontWeight: 700, fontSize: 12,
-            whiteSpace: "nowrap", transition: "all .15s",
-          }}>{t.icon} {t.label}</button>
-        ))}
-      </div>
+      {state === "loading" && (
+        <div style={{ textAlign: "center", padding: 60, color: G.muted }}>
+          <div style={{ fontSize: 32, marginBottom: 12 }}>🏀</div>
+          Chargement des données Euroleague...
+        </div>
+      )}
 
-      {/* Contenu */}
-      <div style={{ background: G.surface, border: `1px solid ${G.border}`, borderRadius: 18, padding: 20 }}>
-        {tab === "standings" && <Standings />}
-        {tab === "matchs"    && <Matchs />}
-        {tab === "joueurs"   && <TopJoueurs />}
-        {tab === "analyse"   && <AnalyseIA />}
-      </div>
+      {state === "error" && <Empty label="Impossible de joindre les données Euroleague. Réessaie dans un instant." />}
+      {state === "empty" && <Empty label="La saison Euroleague n'a pas encore commencé. Les données arriveront dès le premier match." />}
+
+      {state === "ready" && (
+        <>
+          <div style={{ display: "flex", gap: 6, marginBottom: 20, overflowX: "auto", paddingBottom: 4 }}>
+            {tabs.map(t => (
+              <button key={t.id} onClick={() => setTab(t.id)} style={{
+                padding: "8px 18px", borderRadius: 20, border: "none", cursor: "pointer",
+                background: tab === t.id ? "linear-gradient(135deg, #ff5c00, #ff8c42)" : "rgba(255,255,255,0.06)",
+                color: tab === t.id ? "#fff" : G.muted, fontWeight: 700, fontSize: 12,
+                whiteSpace: "nowrap", transition: "background .15s, color .15s",
+              }}>{t.icon} {t.label}</button>
+            ))}
+          </div>
+
+          <div style={{ background: G.surface, border: `1px solid ${G.border}`, borderRadius: 18, padding: 20 }}>
+            {tab === "standings" && <Standings data={data} />}
+            {tab === "matchs"    && <Matchs data={data} />}
+            {tab === "joueurs"   && <TopJoueurs data={data} />}
+            {tab === "analyse"   && <AnalyseIA data={data} />}
+          </div>
+        </>
+      )}
     </div>
   );
 }

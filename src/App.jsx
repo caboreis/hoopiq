@@ -922,6 +922,7 @@ function App({ user, onLogout }) {
   const [tab, setTab] = useState("dashboard");
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [openNavGroups, setOpenNavGroups] = useState({});
   const [selectedPlayer, setSelectedPlayer] = useState(null);
   const [aiAnalysis, setAiAnalysis] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
@@ -1164,6 +1165,26 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
     }
   };
 
+  // Contexte réel injecté dans le chat : sans ça le modèle invente des stats et des
+  // surnoms de joueurs avec aplomb, ce qui est pire que de ne pas répondre.
+  const buildChatContext = () => {
+    const games = [...liveScores, ...wnbaScores]
+      .slice(0, 12)
+      .map(g => `${g.away?.name || g.away?.abbreviation} ${g.away?.score} @ ${g.home?.name || g.home?.abbreviation} ${g.home?.score} (${g.status})`)
+      .join("\n");
+    // Le roster ESPN ne fournit que l'identité des joueurs, aucune stat par match :
+    // on le dit explicitement pour que le modèle ne comble pas le vide.
+    const roster = bullsPlayers
+      .slice(0, 18)
+      .map(p => `${p.name}${p.pos && p.pos !== "N/A" ? ` (${p.pos})` : ""}`)
+      .join(", ");
+    return [
+      `Date du jour : ${new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}.`,
+      games ? `MATCHS DU JOUR (données live NBA/WNBA) :\n${games}` : "Aucun match en cours ou programmé aujourd'hui dans les données chargées.",
+      roster ? `EFFECTIF ${favoriteTeam.name.toUpperCase()} : ${roster}.\n(Aucune statistique par match n'est disponible pour ces joueurs — ne pas en inventer.)` : "",
+    ].filter(Boolean).join("\n\n");
+  };
+
   const sendChat = async () => {
     if (!chatInput.trim() || chatLoading) return;
     const msg = chatInput.trim(); setChatInput("");
@@ -1174,7 +1195,13 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           model: "claude-haiku-4-5-20251001", max_tokens: 1000,
-          system: "Tu es HoopIQ IA, analyste basket expert. Reponds en francais, de facon concise et passionnee.",
+          system: "Tu es HoopIQ IA, analyste basket. Réponds en français, concis et passionné.\n\n"
+            + "RÈGLE ABSOLUE : n'invente jamais une statistique, un score, un surnom, un palmarès ou un transfert. "
+            + "Utilise les données ci-dessous quand elles répondent à la question. "
+            + "Pour tout le reste, tu peux expliquer le jeu, la tactique, l'histoire du basket et donner ton avis, "
+            + "mais dès qu'un chiffre précis ou un fait récent t'est demandé et qu'il n'est pas dans les données, "
+            + "dis clairement que tu ne l'as pas plutôt que de deviner. Un chiffre inventé est une faute grave.\n\n"
+            + "=== DONNÉES RÉELLES DISPONIBLES ===\n" + buildChatContext(),
           messages: chatHistory.slice(-4).concat({ role: "user", content: msg }).filter(m => m.text || m.content).map(m => ({ role: m.role, content: m.text || m.content })),
         })
       });
@@ -1219,9 +1246,16 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
     { id: "scout",     label: "Scout",     icon: "🔍" },
     { id: "trade",      label: "Trade IA",  icon: "🔀" },
     { id: "calendrier", label: "Calendrier", icon: "📅" },
-    { id: "euroleague", label: "Euroleague", icon: "🇪🇺" },
-    { id: "nfl-soon",  label: "NFL",        icon: "🏈", soon: true },
-    { id: "mma",       label: "MMA",       icon: "🥊" },
+    // Les autres sports vivent dans un menu repliable : la liste s'allongera
+    // (NFL, futurs sports) sans transformer la sidebar en mur de boutons.
+    {
+      group: "sports", label: "Autres sports", icon: "🌍",
+      items: [
+        { id: "euroleague", label: "Euroleague", icon: "🇪🇺" },
+        { id: "nfl-soon",   label: "NFL",        icon: "🏈", soon: true },
+        { id: "mma",        label: "MMA",        icon: "🥊" },
+      ],
+    },
     { sep: true },
     { id: "vestiaire", label: "Vestiaire", icon: "💬" },
     { id: "cards",     label: "Cartes",    icon: "🎴" },
@@ -1236,6 +1270,40 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
     { id: "account",   label: "Compte",    icon: "👤" },
   ];
   const TABS = ALL_TABS;
+
+  const navItem = (t) => t.soon ? (
+    <button key={t.id} onClick={() => setShowNflTeaser(true)} style={{
+      position: "relative", width: "100%", padding: "9px 12px", borderRadius: 10,
+      border: "1px solid rgba(200,16,46,0.25)", cursor: "pointer",
+      background: "rgba(200,16,46,0.07)", color: "#ff6b6b",
+      fontWeight: 700, fontSize: 13, fontFamily: "'DM Sans', sans-serif",
+      display: "flex", alignItems: "center", gap: 10, marginBottom: 2, textAlign: "left",
+      animation: "nflTabPulse 3s ease-in-out infinite",
+    }}>
+      <span style={{ fontSize: 16, flexShrink: 0 }}>{t.icon}</span>
+      <span style={{ flex: 1 }}>{t.label}</span>
+      <span style={{ fontSize: 8, fontWeight: 900, background: "#C8102E", color: "#fff", padding: "2px 5px", borderRadius: 5, letterSpacing: 0.5 }}>SOON</span>
+    </button>
+  ) : (
+    <button key={t.id} className="nav-tab" onClick={() => openTab(t.id)} style={{
+      position: "relative", width: "100%", padding: "9px 12px", borderRadius: 10, border: "none",
+      cursor: "pointer", display: "flex", alignItems: "center", gap: 10, marginBottom: 2,
+      background: tab === t.id ? "rgba(255,92,0,0.13)" : "transparent",
+      color: tab === t.id ? C.orange : C.muted,
+      fontWeight: tab === t.id ? 700 : 500,
+      fontSize: 13, transition: "background .2s, color .2s", fontFamily: "'DM Sans', sans-serif", textAlign: "left",
+      borderLeft: tab === t.id ? `3px solid ${C.orange}` : "3px solid transparent",
+      opacity: isTabLocked(t.id) ? 0.55 : 1,
+    }}>
+      <span style={{ fontSize: 16, flexShrink: 0 }}>{t.icon}</span>
+      <span style={{ flex: 1 }}>{t.label}</span>
+      {isTabLocked(t.id) && <span style={{ fontSize: 11, flexShrink: 0 }}>🔒</span>}
+      {!isTabLocked(t.id) && t.badge > 0 && (
+        <span style={{ width: 18, height: 18, borderRadius: "50%", background: C.red, color: "#fff", fontSize: 9, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center", lineHeight: 1, animation: "glow-pulse 2s infinite", flexShrink: 0 }}>{t.badge}</span>
+      )}
+    </button>
+  );
+
   return (
     <div style={{ minHeight: "100vh", background: C.bg, color: C.text, fontFamily: "'DM Sans', sans-serif" }}>
       <style>{`
@@ -1452,40 +1520,43 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
 
         {/* Nav items */}
         <div style={{ flex: 1, padding: "12px 10px" }}>
-          {TABS.map((t, i) => t.sep ? (
-            <div key={`sep-${i}`} style={{ height: 1, background: "rgba(255,255,255,0.06)", margin: "8px 6px" }} />
-          ) : t.soon ? (
-            <button key={t.id} onClick={() => setShowNflTeaser(true)} style={{
-              position: "relative", width: "100%", padding: "9px 12px", borderRadius: 10,
-              border: "1px solid rgba(200,16,46,0.25)", cursor: "pointer",
-              background: "rgba(200,16,46,0.07)", color: "#ff6b6b",
-              fontWeight: 700, fontSize: 13, transition: "all .2s", fontFamily: "'DM Sans', sans-serif",
-              display: "flex", alignItems: "center", gap: 10, marginBottom: 2, textAlign: "left",
-              animation: "nflTabPulse 3s ease-in-out infinite",
-            }}>
-              <span style={{ fontSize: 16, flexShrink: 0 }}>{t.icon}</span>
-              <span style={{ flex: 1 }}>{t.label}</span>
-              <span style={{ fontSize: 8, fontWeight: 900, background: "#C8102E", color: "#fff", padding: "2px 5px", borderRadius: 5, letterSpacing: 0.5 }}>SOON</span>
-            </button>
-          ) : (
-            <button key={t.id} className="nav-tab" onClick={() => openTab(t.id)} style={{
-              position: "relative", width: "100%", padding: "9px 12px", borderRadius: 10, border: "none",
-              cursor: "pointer", display: "flex", alignItems: "center", gap: 10, marginBottom: 2,
-              background: tab === t.id ? "rgba(255,92,0,0.13)" : "transparent",
-              color: tab === t.id ? C.orange : C.muted,
-              fontWeight: tab === t.id ? 700 : 500,
-              fontSize: 13, transition: "all .2s", fontFamily: "'DM Sans', sans-serif", textAlign: "left",
-              borderLeft: tab === t.id ? `3px solid ${C.orange}` : "3px solid transparent",
-              opacity: isTabLocked(t.id) ? 0.55 : 1,
-            }}>
-              <span style={{ fontSize: 16, flexShrink: 0 }}>{t.icon}</span>
-              <span style={{ flex: 1 }}>{t.label}</span>
-              {isTabLocked(t.id) && <span style={{ fontSize: 11, flexShrink: 0 }}>🔒</span>}
-              {!isTabLocked(t.id) && t.badge > 0 && (
-                <span style={{ width: 18, height: 18, borderRadius: "50%", background: C.red, color: "#fff", fontSize: 9, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center", lineHeight: 1, animation: "glow-pulse 2s infinite", flexShrink: 0 }}>{t.badge}</span>
-              )}
-            </button>
-          ))}
+          {TABS.map((t, i) => {
+            if (t.sep) return <div key={`sep-${i}`} style={{ height: 1, background: "rgba(255,255,255,0.06)", margin: "8px 6px" }} />;
+
+            if (t.items) {
+              // Un groupe reste ouvert tant qu'on est sur un de ses onglets.
+              const holdsActive = t.items.some(s => s.id === tab);
+              const open = openNavGroups[t.group] ?? holdsActive;
+              return (
+                <div key={t.group} style={{ marginBottom: 2 }}>
+                  <button
+                    className="nav-tab"
+                    aria-expanded={open}
+                    onClick={() => setOpenNavGroups(g => ({ ...g, [t.group]: !open }))}
+                    style={{
+                      width: "100%", padding: "9px 12px", borderRadius: 10, border: "none", cursor: "pointer",
+                      display: "flex", alignItems: "center", gap: 10,
+                      background: holdsActive && !open ? "rgba(255,92,0,0.08)" : "transparent",
+                      color: holdsActive ? C.orange : C.muted,
+                      fontWeight: holdsActive ? 700 : 500, fontSize: 13,
+                      transition: "background .2s, color .2s", fontFamily: "'DM Sans', sans-serif", textAlign: "left",
+                      borderLeft: "3px solid transparent",
+                    }}>
+                    <span style={{ fontSize: 16, flexShrink: 0 }}>{t.icon}</span>
+                    <span style={{ flex: 1 }}>{t.label}</span>
+                    <span style={{ fontSize: 10, flexShrink: 0, transform: open ? "rotate(90deg)" : "none", transition: "transform .2s" }}>▶</span>
+                  </button>
+                  {open && (
+                    <div style={{ marginLeft: 10, paddingLeft: 8, borderLeft: `1px solid rgba(255,255,255,0.07)` }}>
+                      {t.items.map(navItem)}
+                    </div>
+                  )}
+                </div>
+              );
+            }
+
+            return navItem(t);
+          })}
         </div>
 
         {/* User footer */}
@@ -1550,8 +1621,8 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
                   maxHeight: "70vh", overflowY: "auto",
                 }}>
                   <div style={{ width: 36, height: 4, background: "rgba(255,255,255,0.15)", borderRadius: 2, margin: "0 auto 16px" }} />
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 }}>
-                    {TABS.filter(t => !t.sep).map(t => {
+                  {(() => {
+                    const cell = (t) => {
                       const isActive = tab === t.id;
                       return (
                         <button key={t.id} onClick={() => { setShowMobileMenu(false); if (t.soon) { setShowNflTeaser(true); } else { openTab(t.id); } }} style={{
@@ -1566,8 +1637,23 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
                           <span style={{ textAlign: "center", lineHeight: 1.2 }}>{t.label}{isTabLocked(t.id) ? " 🔒" : ""}</span>
                         </button>
                       );
-                    })}
-                  </div>
+                    };
+                    const grid = { display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 };
+                    const groups = TABS.filter(t => t.items);
+                    return (
+                      <>
+                        <div style={grid}>{TABS.filter(t => !t.sep && !t.items).map(cell)}</div>
+                        {groups.map(g => (
+                          <div key={g.group}>
+                            <div style={{ fontSize: 10, color: C.muted, letterSpacing: 1.2, fontWeight: 700, margin: "16px 0 8px" }}>
+                              {g.icon} {g.label.toUpperCase()}
+                            </div>
+                            <div style={grid}>{g.items.map(cell)}</div>
+                          </div>
+                        ))}
+                      </>
+                    );
+                  })()}
                   <div style={{ padding: "12px 0 4px", borderTop: "1px solid rgba(255,255,255,0.06)", marginTop: 12, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                       <Avatar name={user.name} size={28} />
@@ -2153,7 +2239,12 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
                   <Btn onClick={sendChat} disabled={chatLoading}>{chatLoading ? "..." : "→"}</Btn>
                 </div>
                 <div style={{ display: "flex", gap: 8, marginTop: 10, flexWrap: "wrap" }}>
-                  {["Analyse Marcus Johnson", "Prochain match ?", "Meilleur défenseur ?", "Prédiction finale de saison"].map(s => (
+                  {[
+                    bullsPlayers[0] ? `Parle-moi de ${bullsPlayers[0].name}` : `Présente-moi l'effectif des ${favoriteTeam.name}`,
+                    "Quels matchs se jouent aujourd'hui ?",
+                    "Explique-moi le pick and roll",
+                    "C'est quoi une bonne défense en zone ?",
+                  ].map(s => (
                     <button key={s} onClick={() => setChatInput(s)} style={{ padding: "5px 12px", borderRadius: 16, border: `1px solid rgba(255,92,0,0.3)`, background: "rgba(255,92,0,0.06)", color: C.orange, fontSize: 11, cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}>{s}</button>
                   ))}
                 </div>
