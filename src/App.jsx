@@ -2261,7 +2261,7 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
                 {[
                   { label: "Nom", val: user.name },
                   { label: "Email", val: user.email },
-                  { label: "Membre depuis", val: "Juin 2026" },
+                  { label: "Membre depuis", val: user.createdAt ? new Date(user.createdAt).toLocaleDateString("fr-FR", { month: "long", year: "numeric" }) : "—" },
                 ].map(f => (
                   <div key={f.label} style={{ padding: "10px 0", borderBottom: `1px solid ${C.border}`, display: "flex", justifyContent: "space-between", fontSize: 13 }}>
                     <span style={{ color: C.muted }}>{f.label}</span>

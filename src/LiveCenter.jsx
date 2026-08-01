@@ -15,6 +15,17 @@ const POLL_MS = 15000;
 const ESPN_WNBA = "https://site.api.espn.com/apis/site/v2/sports/basketball/wnba";
 const ESPN_NFL  = "https://site.api.espn.com/apis/site/v2/sports/football/nfl";
 
+// Même heuristique que le serveur NBA (lib/server-app.js) : écart de score
+// pondéré par l'avancement du match. Sert de repli pour WNBA/NFL quand ESPN
+// ne fournit pas de vraie probabilité de victoire — évite d'afficher un faux
+// 50/50 "Prédiction IA" alors qu'une équipe mène largement en direct.
+function scoreWeightedPrediction(homeScore, awayScore, status, period) {
+  if (status === "upcoming") return 50;
+  const diff = homeScore - awayScore;
+  const weight = status === "final" ? 7 : Math.min(6, (period || 0) + 1);
+  return Math.max(5, Math.min(95, Math.round(50 + diff * weight * 0.6)));
+}
+
 function parseNflGames(data) {
   return (data.events || []).map(ev => {
     const comp = ev.competitions?.[0] || {};
@@ -35,15 +46,16 @@ function parseNflGames(data) {
     });
     const homeTeam = mapTeam(home);
     const awayTeam = mapTeam(away);
+    const period = ev.status?.period || 0;
     return {
       id: ev.id,
       league: "nfl",
       status,
-      quarter: ev.status?.period || 0,
+      quarter: period,
       clock: ev.status?.displayClock || "",
       home: homeTeam,
       away: awayTeam,
-      prediction: 50,
+      prediction: scoreWeightedPrediction(parseInt(homeTeam.score, 10) || 0, parseInt(awayTeam.score, 10) || 0, status, period),
       ai_comment: `${awayTeam.abbr} @ ${homeTeam.abbr}${status === "live" ? ` — Q${ev.status?.period} ${ev.status?.displayClock}` : status === "final" ? " — Match terminé" : " — À venir"}.`,
       momentum: null,
     };
@@ -73,14 +85,17 @@ function parseWnbaGames(data) {
 
     const homeTeam = mapTeam(home);
     const awayTeam = mapTeam(away);
+    const period = ev.status?.period || 0;
     const winProb = home.probabilities?.[0]?.homeWinPercentage;
-    const prediction = winProb != null ? Math.round(winProb * 100) : 50;
+    const prediction = winProb != null
+      ? Math.round(winProb * 100)
+      : scoreWeightedPrediction(parseInt(homeTeam.score, 10) || 0, parseInt(awayTeam.score, 10) || 0, status, period);
 
     return {
       id: ev.id,
       league: "wnba",
       status,
-      quarter: ev.status?.period || 0,
+      quarter: period,
       clock: ev.status?.displayClock || "",
       home: homeTeam,
       away: awayTeam,

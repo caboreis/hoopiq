@@ -164,13 +164,6 @@ export default function Challenges() {
     if (challenge && Object.keys(next).length === DAILY_CHALLENGES.length) setRevealed(true);
   };
 
-  const resetDay = () => {
-    localStorage.removeItem(STORAGE_KEY);
-    setProgress({});
-    setRevealed(false);
-    setShowBonus(false);
-  };
-
   const completionPct = Math.round((answeredCount / allChallenges.length) * 100);
 
   return (
@@ -200,19 +193,6 @@ export default function Challenges() {
         </div>
       </div>
 
-      {/* Header */}
-      <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: 8, flexWrap: "wrap", gap: 12 }}>
-        <div>
-          <h1 style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 46, letterSpacing: 2, lineHeight: 1, margin: 0, display: "none" }}>
-            DÉFIS <span style={{ color: C.orange }}>QUOTIDIENS</span>
-          </h1>
-          <p style={{ display: "none" }} />
-        </div>
-        <button onClick={resetDay} style={{
-          background: "none", border: `1px solid ${C.border}`, color: C.muted,
-          fontSize: 12, padding: "6px 14px", borderRadius: 8, cursor: "pointer", fontFamily: "inherit",
-        }}>🔄 Reset (test)</button>
-      </div>
 
       {/* Score bar */}
       <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 16, padding: "18px 22px", marginBottom: 28, display: "flex", alignItems: "center", gap: 20, flexWrap: "wrap" }}>
