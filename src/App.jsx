@@ -16,6 +16,7 @@ import TradeSimulator from "./TradeSimulator.jsx";
 import Calendrier from "./Calendrier.jsx";
 import PlanAssistant, { ASSISTANTS } from "./PlanAssistant.jsx";
 import Euroleague from "./Euroleague.jsx";
+import { authHeaders } from "./authHeaders.js";
 /* ─────────────────────────────────────────
    DESIGN SYSTEM
 ───────────────────────────────────────── */
@@ -453,9 +454,11 @@ function Landing({ onAuth, onChoosePlan }) {
           <Btn variant="ghost" onClick={() => onAuth("login")}>Déjà membre ? Connexion</Btn>
         </div>
 
-        {/* Social proof */}
+        {/* Chiffres réels — pas d'estimation. (Les anciens "2 400+ Analystes / 89% Précision IA /
+            48 Ligues" étaient inventés, sans aucune mesure derrière — mêmes chiffres que
+            l'ancien compteur du tableau de bord, déjà corrigé le 01/08.) */}
         <div className="fade-in" style={{ marginTop: 48, display: "flex", gap: 32, alignItems: "center", animationDelay: ".4s" }}>
-          {[["2 400+", "Analystes"], ["89%", "Précision IA"], ["48", "Ligues"]].map(([v, l]) => (
+          {[["4", "Ligues couvertes"], ["24/7", "Données live"], ["100%", "Sources officielles"]].map(([v, l]) => (
             <div key={l} style={{ textAlign: "center" }}>
               <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 38, color: C.orange }}>{v}</div>
               <div style={{ fontSize: 12, color: C.muted, fontFamily: "'DM Sans', sans-serif" }}>{l}</div>
@@ -475,7 +478,7 @@ function Landing({ onAuth, onChoosePlan }) {
           {[
             { icon: "🤖", title: "IA Générative", desc: "Analyses textuelles détaillées générées par Claude pour chaque joueur et match." },
             { icon: "📊", title: "Stats Avancées", desc: "Plus de 120 métriques par joueur. Efficacité, impact, +/-, heat maps." },
-            { icon: "🎯", title: "Prédictions", desc: "Algorithme ML entraîné sur 10 ans de data. 89% de précision sur les résultats." },
+            { icon: "🎯", title: "Prédictions", desc: "Analyse IA du match : cotes, blessures, confrontations et stats en direct." },
             { icon: "⚡", title: "Temps Réel", desc: "Live scoring, notifications push, alertes de performance pendant les matchs." },
             { icon: "📁", title: "Rapports PDF", desc: "Export automatique de rapports personnalisés pour ton staff ou tes clients." },
             { icon: "🔗", title: "API Access", desc: "Intègre HoopIQ dans tes propres outils. Endpoints REST documentés." },
@@ -625,7 +628,7 @@ function AuthModal({ mode, onClose, onSuccess, initialPlan }) {
         setErrors({ general: d.error === "invalid_credentials" ? "Email ou mot de passe incorrect." : "Connexion indisponible — réessaie plus tard." });
         return;
       }
-      onSuccess({ name: d.name, email: d.email, plan: d.plan, planPaid: d.planPaid, createdAt: d.createdAt });
+      onSuccess({ name: d.name, email: d.email, plan: d.plan, planPaid: d.planPaid, createdAt: d.createdAt, _s: d._s });
     } catch {
       setLoading(false);
       setErrors({ general: "Connexion indisponible — vérifie ta connexion internet." });
@@ -665,7 +668,7 @@ function AuthModal({ mode, onClose, onSuccess, initialPlan }) {
       catch (e) { setErrors({ general: e.message }); }
     }
     setLoading(false);
-    onSuccess({ name: d.name, email: d.email, plan: d.plan, planPaid: d.planPaid, createdAt: d.createdAt });
+    onSuccess({ name: d.name, email: d.email, plan: d.plan, planPaid: d.planPaid, createdAt: d.createdAt, _s: d._s });
   };
 
   const selectedPlan = PLANS.find(p => p.id === form.plan);
@@ -787,7 +790,7 @@ function MatchesTab({ liveScores, wnbaScores, nbaLoading, nbaError, setTab }) {
     if (predictions[game.id] || loadingPred[game.id]) return;
     setLoadingPred(p => ({ ...p, [game.id]: true }));
     try {
-      const res = await fetch(`${API}/api/nba/predict/${game.id}`);
+      const res = await fetch(`${API}/api/nba/predict/${game.id}`, { headers: authHeaders() });
       const data = await res.json();
       if (data.prediction) setPredictions(p => ({ ...p, [game.id]: data.prediction }));
     } catch {}
@@ -1130,7 +1133,7 @@ function App({ user, onLogout }) {
     try {
       const res = await fetch(anthopicProxy, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...authHeaders() },
         body: JSON.stringify({
           model: "claude-haiku-4-5-20251001",
           max_tokens: 1000,
@@ -1207,7 +1210,7 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
     setChatLoading(true);
     try {
       const res = await fetch(anthopicProxy, {
-        method: "POST", headers: { "Content-Type": "application/json" },
+        method: "POST", headers: { "Content-Type": "application/json", ...authHeaders() },
         body: JSON.stringify({
           model: "claude-haiku-4-5-20251001", max_tokens: 1000,
           system: "Tu es HoopIQ IA, analyste basket. Réponds en français, concis et passionné.\n\n"
@@ -2476,8 +2479,13 @@ function loadStoredUser() {
     if (!raw) return null;
     const u = JSON.parse(raw);
     if (!u?.email || !u?.name || !u?._s) return null;
-    if (u._s !== btoa(`hiq:${u.email}:2025`)) return null;
-    // v2 = compte réel Supabase (ou accès admin) — les anciennes sessions simulées sont invalidées
+    // _s est maintenant un token signé HMAC par le serveur (SESSION_SECRET) — impossible à
+    // recalculer côté client (c'est tout le but : avant, _s = btoa(`hiq:${email}:2025`), une
+    // formule publique que n'importe qui pouvait reproduire dans la console pour usurper un
+    // compte). On ne peut donc plus le revérifier ici sans appeler le serveur ; on fait
+    // confiance au localStorage de l'utilisateur (son propre navigateur, sa propre session) —
+    // le serveur, lui, revérifie ce token sur chaque requête protégée (voir requireActiveUser).
+    // v2 = compte réel (ou accès admin) — les anciennes sessions simulées sont invalidées
     if (u._v !== 2 && !isAdminEmail(u.email)) return null;
     return u;
   } catch {
@@ -2546,7 +2554,9 @@ export default function Root() {
         localStorage.removeItem(PENDING_PLAN_KEY);
       }
     } catch { /* ignore */ }
-    const signed = { ...u, plan, _v: 2, _s: btoa(`hiq:${u.email}:2025`) };
+    // _s vient du serveur (signé HMAC, voir lib/server-app.js signUser) — on ne le recalcule
+    // plus côté client, une formule publique recalculable étant exactement la faille corrigée.
+    const signed = { ...u, plan, _v: 2, _s: u._s };
     try { localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(signed)); } catch { /* storage unavailable */ }
     setUser(signed); setAuthMode(null); setScreen("app");
   };

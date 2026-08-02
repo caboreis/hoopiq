@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { authHeaders } from "./authHeaders.js";
 
 const JARVIS_SYSTEM = `T'es JARVIS, l'assistant perso de Jorge fondateur de HoopIQ. T'es son pote IA — cool, drôle, direct, street. Tu parles COURT — max 3-4 phrases par réponse. Jamais de listes longues. Tu dis 'mon gars', 'chef', 'frère'. T'es fan de NBA. HoopIQ : 47 abonnés, MRR 1247€, site hoopiq-zeta.vercel.app. IMPORTANT : quand Jorge te demande de faire quelque chose sur le site, dis-lui exactement quoi dire à Claude Code pour le faire — sois son copilote technique. TOUJOURS EN FRANÇAIS. RÉPONSES COURTES ET DIRECTES.`;
 
@@ -94,7 +95,7 @@ export default function Jarvis() {
       const API = (import.meta.env.DEV ? 'http://localhost:3001' : '') + '/api/anthropic';
       const res = await fetch(API, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...authHeaders() },
         body: JSON.stringify({
           model: "claude-haiku-4-5-20251001",
           max_tokens: 1000,

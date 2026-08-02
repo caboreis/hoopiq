@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { authHeaders } from "./authHeaders.js";
 
 const API = import.meta.env.DEV ? "http://localhost:3001" : "";
 
@@ -66,7 +67,7 @@ export default function TradeSimulator() {
     try {
       const res = await fetch(`${API}/api/anthropic`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...authHeaders() },
         body: JSON.stringify({
           model: "claude-haiku-4-5-20251001",
           max_tokens: 1200,

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { supabase, isSupabaseConfigured } from "./supabaseClient";
+import { authHeaders } from "./authHeaders.js";
 
 const C = {
   bg: "#06060f", bg2: "#0d0d1f", bg3: "#11112a",
@@ -192,7 +193,7 @@ export default function Vestiaire({ user }) {
     try {
       const context = history.slice(-8).map(m => `${m.author}: ${m.text}`).join("\n");
       const res = await fetch(`${API_BASE}/api/anthropic`, {
-        method: "POST", headers: { "Content-Type": "application/json" },
+        method: "POST", headers: { "Content-Type": "application/json", ...authHeaders() },
         body: JSON.stringify({
           model: "claude-haiku-4-5-20251001", max_tokens: 250,
           system: `Tu es HoopIQ, l'assistant NBA d'un chat communautaire (le "Vestiaire"). Tu participes au salon "${roomLabel}". Réponds de façon courte (2-3 phrases max), fun et passionnée, en français, avec des emojis basket. Tu peux taquiner gentiment et donner des avis NBA.`,

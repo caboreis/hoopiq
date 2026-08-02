@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { authHeaders } from "./authHeaders.js";
 
 const C = {
   bg: "#06060f", bg2: "#0d0d1f",
@@ -683,7 +684,7 @@ export default function LiveCenter() {
       const liveInfo = games.filter(g => g.status === "live").map(g => `${g.home.abbr} ${g.home.score} - ${g.away.abbr} ${g.away.score} (Q${g.quarter} ${g.clock})`).join(", ") || "aucun match live actuellement";
       const selInfo = selectedGame ? `Match sélectionné: ${selectedGame.home.name} ${selectedGame.home.score} - ${selectedGame.away.score} ${selectedGame.away.name}.` : "";
       const res = await fetch(`${API}/api/anthropic`, {
-        method: "POST", headers: { "Content-Type": "application/json" },
+        method: "POST", headers: { "Content-Type": "application/json", ...authHeaders() },
         body: JSON.stringify({
           model: "claude-haiku-4-5-20251001", max_tokens: 300,
           system: `Tu es HoopIQ Live Analyst, commentateur NBA en direct. Tu analyses les matchs de façon passionnée et concise. ${selInfo} Matchs live: ${liveInfo}. Réponds en 2-3 phrases max, en français, avec des emojis basketball.`,

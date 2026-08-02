@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 
 const ARENA_PHOTOS = [
   "/jc-gellidon-XmYSlYrupL8-unsplash.jpg",
@@ -18,115 +18,115 @@ const RARITY = {
 const NBA_TEAMS = [
   // ATLANTIC
   { id: "BOS", name: "Boston Celtics", city: "Boston", conf: "Est", color: "#007A33", players: [
-    { id: 201, espnId: 4065648, name: "Jayson Tatum", pos: "SF", pts: 26.9, ast: 4.9, reb: 8.1, fg: 47, score: 96, rarity: "legendary", trait: "MVP CANDIDAT" },
-    { id: 202, espnId: 3917376, name: "Jaylen Brown", pos: "SG", pts: 23.0, ast: 3.6, reb: 5.5, fg: 47, score: 89, rarity: "epic", trait: "CLUTCH" },
+    { id: 201, espnId: 4065648, name: "Jayson Tatum", pos: "SF", trait: "MVP CANDIDAT" },
+    { id: 202, espnId: 3917376, name: "Jaylen Brown", pos: "SG", trait: "CLUTCH" },
   ]},
   { id: "BKN", name: "Brooklyn Nets", city: "Brooklyn", conf: "Est", color: "#000000", players: [
-    { id: 211, espnId: 4432174, name: "Cam Thomas", pos: "SG", pts: 22.1, ast: 3.4, reb: 3.6, fg: 45, score: 82, rarity: "rare", trait: "SCOREUR" },
+    { id: 211, espnId: 4432174, name: "Cam Thomas", pos: "SG", trait: "SCOREUR" },
   ]},
   { id: "NYK", name: "New York Knicks", city: "New York", conf: "Est", color: "#F58426", players: [
-    { id: 221, espnId: 3934672, name: "Jalen Brunson", pos: "PG", pts: 28.7, ast: 6.7, reb: 3.6, fg: 48, score: 93, rarity: "legendary", trait: "NYC KING" },
-    { id: 222, espnId: 3136195, name: "Karl-Anthony Towns", pos: "C", pts: 24.0, ast: 3.1, reb: 13.9, fg: 52, score: 90, rarity: "legendary", trait: "BIG MAN" },
+    { id: 221, espnId: 3934672, name: "Jalen Brunson", pos: "PG", trait: "NYC KING" },
+    { id: 222, espnId: 3136195, name: "Karl-Anthony Towns", pos: "C", trait: "BIG MAN" },
   ]},
   { id: "PHI", name: "Philadelphia 76ers", city: "Philadelphia", conf: "Est", color: "#006BB6", players: [
-    { id: 231, espnId: 3059318, name: "Joel Embiid", pos: "C", pts: 34.7, ast: 5.6, reb: 11.0, fg: 53, score: 97, rarity: "legendary", trait: "MVP" },
-    { id: 232, espnId: 4431678, name: "Tyrese Maxey", pos: "PG", pts: 25.9, ast: 6.2, reb: 3.9, fg: 47, score: 91, rarity: "legendary", trait: "EXPLOSIF" },
+    { id: 231, espnId: 3059318, name: "Joel Embiid", pos: "C", trait: "MVP" },
+    { id: 232, espnId: 4431678, name: "Tyrese Maxey", pos: "PG", trait: "EXPLOSIF" },
   ]},
   { id: "TOR", name: "Toronto Raptors", city: "Toronto", conf: "Est", color: "#CE1141", players: [
-    { id: 241, espnId: 4433134, name: "Scottie Barnes", pos: "SF", pts: 19.9, ast: 6.1, reb: 8.2, fg: 47, score: 85, rarity: "epic", trait: "POLYVALENT" },
+    { id: 241, espnId: 4433134, name: "Scottie Barnes", pos: "SF", trait: "POLYVALENT" },
   ]},
   // CENTRAL
   { id: "CHI", name: "Chicago Bulls", city: "Chicago", conf: "Est", color: "#CE1141", players: [
-    { id: 251, espnId: 3064440, name: "Zach LaVine", pos: "SG", pts: 24.8, ast: 4.2, reb: 4.5, fg: 47, score: 94, rarity: "legendary", trait: "ÉLECTRIQUE" },
-    { id: 252, espnId: 4395651, name: "Coby White", pos: "PG", pts: 19.1, ast: 5.1, reb: 3.8, fg: 44, score: 88, rarity: "epic", trait: "EN FEU" },
+    { id: 251, espnId: 3064440, name: "Zach LaVine", pos: "SG", trait: "ÉLECTRIQUE" },
+    { id: 252, espnId: 4395651, name: "Coby White", pos: "PG", trait: "EN FEU" },
   ]},
   { id: "CLE", name: "Cleveland Cavaliers", city: "Cleveland", conf: "Est", color: "#860038", players: [
-    { id: 261, espnId: 3908809, name: "Donovan Mitchell", pos: "SG", pts: 26.6, ast: 6.1, reb: 5.1, fg: 47, score: 93, rarity: "legendary", trait: "SPIDA" },
-    { id: 262, espnId: 4396907, name: "Darius Garland", pos: "PG", pts: 20.6, ast: 6.9, reb: 2.7, fg: 45, score: 87, rarity: "epic", trait: "CRÉATEUR" },
+    { id: 261, espnId: 3908809, name: "Donovan Mitchell", pos: "SG", trait: "SPIDA" },
+    { id: 262, espnId: 4396907, name: "Darius Garland", pos: "PG", trait: "CRÉATEUR" },
   ]},
   { id: "DET", name: "Detroit Pistons", city: "Detroit", conf: "Est", color: "#C8102E", players: [
-    { id: 271, espnId: 4432166, name: "Cade Cunningham", pos: "PG", pts: 22.7, ast: 9.0, reb: 4.4, fg: 43, score: 88, rarity: "epic", trait: "FRANCHISE" },
+    { id: 271, espnId: 4432166, name: "Cade Cunningham", pos: "PG", trait: "FRANCHISE" },
   ]},
   { id: "IND", name: "Indiana Pacers", city: "Indiana", conf: "Est", color: "#002D62", players: [
-    { id: 281, espnId: 4396993, name: "Tyrese Haliburton", pos: "PG", pts: 20.1, ast: 10.9, reb: 3.9, fg: 47, score: 91, rarity: "legendary", trait: "VISION" },
+    { id: 281, espnId: 4396993, name: "Tyrese Haliburton", pos: "PG", trait: "VISION" },
   ]},
   { id: "MIL", name: "Milwaukee Bucks", city: "Milwaukee", conf: "Est", color: "#00471B", players: [
-    { id: 291, espnId: 3032977, name: "Giannis Antetokounmpo", pos: "PF", pts: 30.4, ast: 6.5, reb: 11.5, fg: 61, score: 98, rarity: "legendary", trait: "GREEK FREAK" },
-    { id: 292, espnId: 6606, name: "Damian Lillard", pos: "PG", pts: 24.3, ast: 7.1, reb: 4.4, fg: 43, score: 91, rarity: "legendary", trait: "CLUTCH TIME" },
+    { id: 291, espnId: 3032977, name: "Giannis Antetokounmpo", pos: "PF", trait: "GREEK FREAK" },
+    { id: 292, espnId: 6606, name: "Damian Lillard", pos: "PG", trait: "CLUTCH TIME" },
   ]},
   // SOUTHEAST
   { id: "ATL", name: "Atlanta Hawks", city: "Atlanta", conf: "Est", color: "#C1D32F", players: [
-    { id: 301, espnId: 4277905, name: "Trae Young", pos: "PG", pts: 25.7, ast: 10.8, reb: 3.3, fg: 43, score: 90, rarity: "legendary", trait: "ICE TRAE" },
+    { id: 301, espnId: 4277905, name: "Trae Young", pos: "PG", trait: "ICE TRAE" },
   ]},
   { id: "CHA", name: "Charlotte Hornets", city: "Charlotte", conf: "Est", color: "#1D1160", players: [
-    { id: 311, espnId: 4432816, name: "LaMelo Ball", pos: "PG", pts: 23.9, ast: 8.0, reb: 5.8, fg: 43, score: 89, rarity: "epic", trait: "MELO" },
+    { id: 311, espnId: 4432816, name: "LaMelo Ball", pos: "PG", trait: "MELO" },
   ]},
   { id: "MIA", name: "Miami Heat", city: "Miami", conf: "Est", color: "#98002E", players: [
-    { id: 321, espnId: 6430, name: "Jimmy Butler", pos: "SF", pts: 20.8, ast: 5.3, reb: 5.3, fg: 48, score: 91, rarity: "legendary", trait: "PLAYOFF JIMMY" },
-    { id: 322, espnId: 4066261, name: "Bam Adebayo", pos: "C", pts: 19.3, ast: 3.9, reb: 10.4, fg: 55, score: 87, rarity: "epic", trait: "ANCHOR" },
+    { id: 321, espnId: 6430, name: "Jimmy Butler", pos: "SF", trait: "PLAYOFF JIMMY" },
+    { id: 322, espnId: 4066261, name: "Bam Adebayo", pos: "C", trait: "ANCHOR" },
   ]},
   { id: "ORL", name: "Orlando Magic", city: "Orlando", conf: "Est", color: "#0077C0", players: [
-    { id: 331, espnId: 4432573, name: "Paolo Banchero", pos: "PF", pts: 22.6, ast: 5.4, reb: 6.9, fg: 46, score: 88, rarity: "epic", trait: "PRIMO" },
+    { id: 331, espnId: 4432573, name: "Paolo Banchero", pos: "PF", trait: "PRIMO" },
   ]},
   { id: "WAS", name: "Washington Wizards", city: "Washington", conf: "Est", color: "#002B5C", players: [
-    { id: 341, espnId: 3134907, name: "Kyle Kuzma", pos: "PF", pts: 22.2, ast: 4.5, reb: 7.2, fg: 44, score: 79, rarity: "rare", trait: "KUZMA" },
+    { id: 341, espnId: 3134907, name: "Kyle Kuzma", pos: "PF", trait: "KUZMA" },
   ]},
   // NORTHWEST
   { id: "DEN", name: "Denver Nuggets", city: "Denver", conf: "Ouest", color: "#0E2240", players: [
-    { id: 351, espnId: 3112335, name: "Nikola Jokić", pos: "C", pts: 26.4, ast: 9.0, reb: 12.4, fg: 58, score: 99, rarity: "legendary", trait: "JOKER" },
-    { id: 352, espnId: 3936299, name: "Jamal Murray", pos: "PG", pts: 21.2, ast: 6.5, reb: 4.4, fg: 46, score: 88, rarity: "epic", trait: "MAP GOD" },
+    { id: 351, espnId: 3112335, name: "Nikola Jokić", pos: "C", trait: "JOKER" },
+    { id: 352, espnId: 3936299, name: "Jamal Murray", pos: "PG", trait: "MAP GOD" },
   ]},
   { id: "MIN", name: "Minnesota Timberwolves", city: "Minnesota", conf: "Ouest", color: "#0C2340", players: [
-    { id: 361, espnId: 4594268, name: "Anthony Edwards", pos: "SG", pts: 25.9, ast: 5.1, reb: 5.4, fg: 46, score: 94, rarity: "legendary", trait: "ANT MAN" },
-    { id: 362, espnId: 3136195, name: "Karl-Anthony Towns", pos: "C", pts: 21.4, ast: 3.0, reb: 8.3, fg: 50, score: 87, rarity: "epic", trait: "KAT" },
+    { id: 361, espnId: 4594268, name: "Anthony Edwards", pos: "SG", trait: "ANT MAN" },
+    { id: 362, espnId: 3136195, name: "Karl-Anthony Towns", pos: "C", trait: "KAT" },
   ]},
   { id: "OKC", name: "Oklahoma City Thunder", city: "Oklahoma City", conf: "Ouest", color: "#007AC1", players: [
-    { id: 371, espnId: 4278073, name: "Shai Gilgeous-Alexander", pos: "PG", pts: 30.1, ast: 6.2, reb: 5.5, fg: 53, score: 97, rarity: "legendary", trait: "SGA" },
+    { id: 371, espnId: 4278073, name: "Shai Gilgeous-Alexander", pos: "PG", trait: "SGA" },
   ]},
   { id: "POR", name: "Portland Trail Blazers", city: "Portland", conf: "Ouest", color: "#E03A3E", players: [
-    { id: 381, espnId: 4683678, name: "Scoot Henderson", pos: "PG", pts: 14.9, ast: 5.8, reb: 3.8, fg: 41, score: 75, rarity: "rare", trait: "FUTUR" },
+    { id: 381, espnId: 4683678, name: "Scoot Henderson", pos: "PG", trait: "FUTUR" },
   ]},
   { id: "UTA", name: "Utah Jazz", city: "Utah", conf: "Ouest", color: "#002B5C", players: [
-    { id: 391, espnId: 4066336, name: "Lauri Markkanen", pos: "PF", pts: 23.2, ast: 2.0, reb: 8.2, fg: 50, score: 84, rarity: "epic", trait: "FINNISHER" },
+    { id: 391, espnId: 4066336, name: "Lauri Markkanen", pos: "PF", trait: "FINNISHER" },
   ]},
   // PACIFIC
   { id: "GSW", name: "Golden State Warriors", city: "San Francisco", conf: "Ouest", color: "#1D428A", players: [
-    { id: 401, espnId: 3975, name: "Stephen Curry", pos: "PG", pts: 26.4, ast: 5.1, reb: 4.5, fg: 45, score: 97, rarity: "legendary", trait: "SPLASH BROTHER" },
-    { id: 402, espnId: 6589, name: "Draymond Green", pos: "PF", pts: 9.0, ast: 6.7, reb: 7.2, fg: 48, score: 83, rarity: "epic", trait: "IQ DÉFENSE" },
+    { id: 401, espnId: 3975, name: "Stephen Curry", pos: "PG", trait: "SPLASH BROTHER" },
+    { id: 402, espnId: 6589, name: "Draymond Green", pos: "PF", trait: "IQ DÉFENSE" },
   ]},
   { id: "LAC", name: "LA Clippers", city: "Los Angeles", conf: "Ouest", color: "#C8102E", players: [
-    { id: 411, espnId: 6450, name: "Kawhi Leonard", pos: "SF", pts: 23.7, ast: 3.6, reb: 6.1, fg: 52, score: 93, rarity: "legendary", trait: "THE CLAW" },
-    { id: 412, espnId: 4251, name: "Paul George", pos: "SF", pts: 22.6, ast: 3.5, reb: 5.2, fg: 45, score: 88, rarity: "epic", trait: "PG13" },
+    { id: 411, espnId: 6450, name: "Kawhi Leonard", pos: "SF", trait: "THE CLAW" },
+    { id: 412, espnId: 4251, name: "Paul George", pos: "SF", trait: "PG13" },
   ]},
   { id: "LAL", name: "Los Angeles Lakers", city: "Los Angeles", conf: "Ouest", color: "#552583", players: [
-    { id: 421, espnId: 1966, name: "LeBron James", pos: "SF", pts: 25.7, ast: 8.3, reb: 7.3, fg: 54, score: 98, rarity: "legendary", trait: "KING JAMES" },
-    { id: 422, espnId: 6583, name: "Anthony Davis", pos: "C", pts: 24.7, ast: 3.5, reb: 12.6, fg: 56, score: 95, rarity: "legendary", trait: "THE BROW" },
-    { id: 423, espnId: null, photo: "/players/shareef.jpg", name: "Shareef O'Neal", pos: "PF", pts: 4.2, ast: 0.8, reb: 3.1, fg: 48, score: 62, rarity: "rare", trait: "SON OF SHAQ" },
+    { id: 421, espnId: 1966, name: "LeBron James", pos: "SF", trait: "KING JAMES" },
+    { id: 422, espnId: 6583, name: "Anthony Davis", pos: "C", trait: "THE BROW" },
+    { id: 423, espnId: null, photo: "/players/shareef.jpg", name: "Shareef O'Neal", pos: "PF", trait: "SON OF SHAQ" },
   ]},
   { id: "PHX", name: "Phoenix Suns", city: "Phoenix", conf: "Ouest", color: "#1D1160", players: [
-    { id: 431, espnId: 3202, name: "Kevin Durant", pos: "SF", pts: 27.1, ast: 5.0, reb: 6.6, fg: 52, score: 96, rarity: "legendary", trait: "SLIM REAPER" },
-    { id: 432, espnId: 3136193, name: "Devin Booker", pos: "SG", pts: 27.1, ast: 6.9, reb: 4.5, fg: 47, score: 93, rarity: "legendary", trait: "BOOK" },
+    { id: 431, espnId: 3202, name: "Kevin Durant", pos: "SF", trait: "SLIM REAPER" },
+    { id: 432, espnId: 3136193, name: "Devin Booker", pos: "SG", trait: "BOOK" },
   ]},
   { id: "SAC", name: "Sacramento Kings", city: "Sacramento", conf: "Ouest", color: "#5A2D81", players: [
-    { id: 441, espnId: 4066259, name: "De'Aaron Fox", pos: "PG", pts: 26.6, ast: 5.9, reb: 4.4, fg: 50, score: 90, rarity: "legendary", trait: "SWIPA" },
+    { id: 441, espnId: 4066259, name: "De'Aaron Fox", pos: "PG", trait: "SWIPA" },
   ]},
   // SOUTHWEST
   { id: "DAL", name: "Dallas Mavericks", city: "Dallas", conf: "Ouest", color: "#00538C", players: [
-    { id: 451, espnId: 3945274, name: "Luka Dončić", pos: "PG", pts: 33.9, ast: 9.8, reb: 9.2, fg: 48, score: 99, rarity: "legendary", trait: "LUKA MAGIC" },
-    { id: 452, espnId: 6442, name: "Kyrie Irving", pos: "PG", pts: 25.6, ast: 5.2, reb: 5.0, fg: 49, score: 93, rarity: "legendary", trait: "UNCLE DREW" },
+    { id: 451, espnId: 3945274, name: "Luka Dončić", pos: "PG", trait: "LUKA MAGIC" },
+    { id: 452, espnId: 6442, name: "Kyrie Irving", pos: "PG", trait: "UNCLE DREW" },
   ]},
   { id: "HOU", name: "Houston Rockets", city: "Houston", conf: "Ouest", color: "#CE1141", players: [
-    { id: 461, espnId: 4871144, name: "Alperen Şengün", pos: "C", pts: 21.1, ast: 5.0, reb: 9.3, fg: 53, score: 86, rarity: "epic", trait: "TURK" },
-    { id: 462, espnId: 4437244, name: "Jalen Green", pos: "SG", pts: 22.9, ast: 4.3, reb: 4.2, fg: 43, score: 84, rarity: "epic", trait: "BABY FACE" },
+    { id: 461, espnId: 4871144, name: "Alperen Şengün", pos: "C", trait: "TURK" },
+    { id: 462, espnId: 4437244, name: "Jalen Green", pos: "SG", trait: "BABY FACE" },
   ]},
   { id: "MEM", name: "Memphis Grizzlies", city: "Memphis", conf: "Ouest", color: "#5D76A9", players: [
-    { id: 471, espnId: 4279888, name: "Ja Morant", pos: "PG", pts: 25.1, ast: 8.1, reb: 5.6, fg: 47, score: 92, rarity: "legendary", trait: "JA TIME" },
+    { id: 471, espnId: 4279888, name: "Ja Morant", pos: "PG", trait: "JA TIME" },
   ]},
   { id: "NOP", name: "New Orleans Pelicans", city: "New Orleans", conf: "Ouest", color: "#0C2340", players: [
-    { id: 481, espnId: 4395628, name: "Zion Williamson", pos: "PF", pts: 22.9, ast: 5.0, reb: 5.8, fg: 57, score: 88, rarity: "epic", trait: "ZANOS" },
+    { id: 481, espnId: 4395628, name: "Zion Williamson", pos: "PF", trait: "ZANOS" },
   ]},
   { id: "SAS", name: "San Antonio Spurs", city: "San Antonio", conf: "Ouest", color: "#C4CED4", players: [
-    { id: 491, espnId: 5104157, name: "Victor Wembanyama", pos: "C", pts: 21.4, ast: 3.9, reb: 10.6, fg: 46, score: 95, rarity: "legendary", trait: "WEMBY" },
+    { id: 491, espnId: 5104157, name: "Victor Wembanyama", pos: "C", trait: "WEMBY" },
   ]},
 ];
 
@@ -157,37 +157,61 @@ const WNBA_LEGEND_CARDS = [
 ];
 
 // ── CARTES EXCLUSIVES ELITE (variantes Black Edition réservées au plan Elite) ──
-const ELITE_EXCLUSIVE_CARDS = [
-  { id: 701, espnId: 1966, photo: null, name: "LeBron James", pos: "SF", team: "HoopIQ Black Edition", era: "EXCLUSIF ELITE", pts: 27.1, ast: 7.4, reb: 7.5, fg: 50, score: 100, rarity: "gold", trait: "✦ BLACK EDITION", titles: 4 },
-  { id: 702, espnId: 3975, photo: null, name: "Stephen Curry", pos: "PG", team: "HoopIQ Black Edition", era: "EXCLUSIF ELITE", pts: 24.6, ast: 6.5, reb: 4.7, fg: 47, score: 99, rarity: "gold", trait: "✦ BLACK EDITION", titles: 4 },
+// Identité uniquement — pts/ast/reb/score sont récupérés en direct (voir hydrateWithLiveStats).
+const ELITE_EXCLUSIVE_CARDS_META = [
+  { id: 701, espnId: 1966, photo: null, name: "LeBron James", pos: "SF", team: "HoopIQ Black Edition", era: "EXCLUSIF ELITE", trait: "✦ BLACK EDITION", titles: 4 },
+  { id: 702, espnId: 3975, photo: null, name: "Stephen Curry", pos: "PG", team: "HoopIQ Black Edition", era: "EXCLUSIF ELITE", trait: "✦ BLACK EDITION", titles: 4 },
 ];
 
 // ── ROSTER WNBA COMPLET ──
-const WNBA_PLAYERS = [
+// Identité uniquement — pts/ast/reb/score sont récupérés en direct (voir hydrateWithLiveStats).
+const WNBA_PLAYERS_META = [
   // ── LÉGENDAIRES ──
-  { id: 901, espnId: 4433403, league: "wnba", name: "Caitlin Clark",    pos: "PG", team: "Indiana Fever",      teamColor: "#C8102E", pts: 19.2, ast: 8.4, reb: 5.7,  fg: 40, score: 97, rarity: "legendary", trait: "ROY 2024"            },
-  { id: 902, espnId: 3149391, league: "wnba", name: "A'ja Wilson",       pos: "C",  team: "Las Vegas Aces",     teamColor: "#C8102E", pts: 26.4, ast: 3.5, reb: 11.9, fg: 52, score: 98, rarity: "legendary", trait: "MVP 2024"             },
+  { id: 901, espnId: 4433403, league: "wnba", name: "Caitlin Clark",    pos: "PG", team: "Indiana Fever",      teamColor: "#C8102E", trait: "ROY 2024"            },
+  { id: 902, espnId: 3149391, league: "wnba", name: "A'ja Wilson",       pos: "C",  team: "Las Vegas Aces",     teamColor: "#C8102E", trait: "MVP 2024"             },
   // ── ÉPIQUES ──
-  { id: 903, espnId: 2998928, league: "wnba", name: "Breanna Stewart",  pos: "PF", team: "New York Liberty",   teamColor: "#86CEBC", pts: 19.3, ast: 3.3, reb: 9.3,  fg: 45, score: 94, rarity: "epic",      trait: "STEWIE"              },
-  { id: 904, espnId: 4066533, league: "wnba", name: "Sabrina Ionescu",  pos: "PG", team: "New York Liberty",   teamColor: "#86CEBC", pts: 17.4, ast: 8.1, reb: 4.5,  fg: 42, score: 92, rarity: "epic",      trait: "TRIPLE-DOUBLE"       },
-  { id: 905, espnId: 4433402, league: "wnba", name: "Angel Reese",      pos: "PF", team: "Atlanta Dream",      teamColor: "#C41230", pts: 13.1, ast: 2.2, reb: 13.1, fg: 44, score: 89, rarity: "epic",      trait: "DOUBLE-DOUBLE QUEEN" },
-  { id: 906, espnId: 3065570, league: "wnba", name: "Kelsey Plum",      pos: "PG", team: "Los Angeles Sparks", teamColor: "#9d7bd8", pts: 17.8, ast: 4.4, reb: 2.5,  fg: 43, score: 88, rarity: "epic",      trait: "CLUTCH QUEEN"        },
-  { id: 907, espnId: 3917450, league: "wnba", name: "Napheesa Collier", pos: "PF", team: "Minnesota Lynx",     teamColor: "#236192", pts: 20.1, ast: 3.1, reb: 9.8,  fg: 51, score: 91, rarity: "epic",      trait: "PHEE"                },
-  { id: 908, espnId: 2529140, league: "wnba", name: "Alyssa Thomas",    pos: "PF", team: "Phoenix Mercury",    teamColor: "#e56020", pts: 14.0, ast: 7.9, reb: 9.2,  fg: 52, score: 90, rarity: "epic",      trait: "TRIPLE MENACE"       },
-  { id: 909, espnId: 2999101, league: "wnba", name: "Jonquel Jones",    pos: "PF", team: "New York Liberty",   teamColor: "#86CEBC", pts: 14.9, ast: 3.1, reb: 7.4,  fg: 50, score: 87, rarity: "epic",      trait: "MVP 2021"            },
-  { id: 910, espnId: 4398674, league: "wnba", name: "Rhyne Howard",     pos: "SG", team: "Atlanta Dream",      teamColor: "#C41230", pts: 17.7, ast: 3.9, reb: 4.2,  fg: 41, score: 86, rarity: "epic",      trait: "ROY 2022"            },
+  { id: 903, espnId: 2998928, league: "wnba", name: "Breanna Stewart",  pos: "PF", team: "New York Liberty",   teamColor: "#86CEBC",      trait: "STEWIE"              },
+  { id: 904, espnId: 4066533, league: "wnba", name: "Sabrina Ionescu",  pos: "PG", team: "New York Liberty",   teamColor: "#86CEBC",      trait: "TRIPLE-DOUBLE"       },
+  { id: 905, espnId: 4433402, league: "wnba", name: "Angel Reese",      pos: "PF", team: "Atlanta Dream",      teamColor: "#C41230",      trait: "DOUBLE-DOUBLE QUEEN" },
+  { id: 906, espnId: 3065570, league: "wnba", name: "Kelsey Plum",      pos: "PG", team: "Los Angeles Sparks", teamColor: "#9d7bd8",      trait: "CLUTCH QUEEN"        },
+  { id: 907, espnId: 3917450, league: "wnba", name: "Napheesa Collier", pos: "PF", team: "Minnesota Lynx",     teamColor: "#236192",      trait: "PHEE"                },
+  { id: 908, espnId: 2529140, league: "wnba", name: "Alyssa Thomas",    pos: "PF", team: "Phoenix Mercury",    teamColor: "#e56020",      trait: "TRIPLE MENACE"       },
+  { id: 909, espnId: 2999101, league: "wnba", name: "Jonquel Jones",    pos: "PF", team: "New York Liberty",   teamColor: "#86CEBC",      trait: "MVP 2021"            },
+  { id: 910, espnId: 4398674, league: "wnba", name: "Rhyne Howard",     pos: "SG", team: "Atlanta Dream",      teamColor: "#C41230",      trait: "ROY 2022"            },
   // ── RARES ──
-  { id: 911, espnId: 2529122, league: "wnba", name: "Chelsea Gray",     pos: "PG", team: "Las Vegas Aces",     teamColor: "#C8102E", pts: 12.5, ast: 6.0, reb: 3.4,  fg: 47, score: 84, rarity: "rare",      trait: "FINALES MVP"         },
-  { id: 912, espnId: 2987869, league: "wnba", name: "Jewell Loyd",      pos: "SG", team: "Las Vegas Aces",     teamColor: "#C8102E", pts: 20.3, ast: 3.8, reb: 3.9,  fg: 44, score: 85, rarity: "rare",      trait: "SCOREUSE"            },
-  { id: 913, espnId: 869,     league: "wnba", name: "DeWanna Bonner",   pos: "SF", team: "Phoenix Mercury",    teamColor: "#e56020", pts: 15.2, ast: 3.5, reb: 6.1,  fg: 43, score: 82, rarity: "rare",      trait: "VÉTÉRANE"            },
-  { id: 914, espnId: 2566106, league: "wnba", name: "Dearica Hamby",    pos: "PF", team: "Los Angeles Sparks", teamColor: "#9d7bd8", pts: 13.5, ast: 3.4, reb: 8.7,  fg: 48, score: 80, rarity: "rare",      trait: "ENERGY"              },
-  { id: 915, espnId: 4432831, league: "wnba", name: "Aliyah Boston",    pos: "PF", team: "Indiana Fever",      teamColor: "#C8102E", pts: 13.9, ast: 3.6, reb: 7.4,  fg: 50, score: 83, rarity: "rare",      trait: "ROY 2023"            },
+  { id: 911, espnId: 2529122, league: "wnba", name: "Chelsea Gray",     pos: "PG", team: "Las Vegas Aces",     teamColor: "#C8102E",      trait: "FINALES MVP"         },
+  { id: 912, espnId: 2987869, league: "wnba", name: "Jewell Loyd",      pos: "SG", team: "Las Vegas Aces",     teamColor: "#C8102E",      trait: "SCOREUSE"            },
+  { id: 913, espnId: 869,     league: "wnba", name: "DeWanna Bonner",   pos: "SF", team: "Phoenix Mercury",    teamColor: "#e56020",      trait: "VÉTÉRANE"            },
+  { id: 914, espnId: 2566106, league: "wnba", name: "Dearica Hamby",    pos: "PF", team: "Los Angeles Sparks", teamColor: "#9d7bd8",      trait: "ENERGY"              },
+  { id: 915, espnId: 4432831, league: "wnba", name: "Aliyah Boston",    pos: "PF", team: "Indiana Fever",      teamColor: "#C8102E",      trait: "ROY 2023"            },
   // ── COMMUNES ──
-  { id: 916, espnId: 2987891, league: "wnba", name: "Courtney Williams", pos: "PG", team: "Minnesota Lynx",    teamColor: "#236192", pts: 11.8, ast: 4.9, reb: 4.1,  fg: 39, score: 74, rarity: "common",    trait: "WARRIOR"             },
-  { id: 917, espnId: 2491205, league: "wnba", name: "Skylar Diggins",   pos: "PG", team: "Chicago Sky",        teamColor: "#418FDE", pts: 14.1, ast: 5.3, reb: 2.8,  fg: 41, score: 77, rarity: "common",    trait: "POINT GOD"           },
+  { id: 916, espnId: 2987891, league: "wnba", name: "Courtney Williams", pos: "PG", team: "Minnesota Lynx",    teamColor: "#236192",    trait: "WARRIOR"             },
+  { id: 917, espnId: 2491205, league: "wnba", name: "Skylar Diggins",   pos: "PG", team: "Chicago Sky",        teamColor: "#418FDE",    trait: "POINT GOD"           },
 ];
 
-const ALL_PLAYERS = NBA_TEAMS.flatMap(t => t.players.map(p => ({ ...p, team: t.name, teamId: t.id, teamColor: t.color })));
+// Auparavant pts/ast/reb/fg/score étaient codés en dur pour ~50 joueurs, un snapshot figé
+// jamais mis à jour et présenté comme des stats réelles. Elles sont maintenant récupérées
+// en direct via /api/player-stats/:league/:espnId (même source ESPN que le reste de l'app,
+// même formule hoopiqScore que le tableau de bord Bulls) — voir hydrateWithLiveStats, appelé
+// depuis le composant Cards.
+const rarityFromScore = (score) => {
+  if (score == null) return null; // pas de vraies stats → pas de carte, plutôt qu'un chiffre inventé
+  if (score >= 90) return "legendary";
+  if (score >= 75) return "epic";
+  if (score >= 55) return "rare";
+  return "common";
+};
+
+async function fetchLiveScore(apiBase, league, espnId) {
+  try {
+    const r = await fetch(`${apiBase}/api/player-stats/${league}/${espnId}`);
+    if (!r.ok) return null;
+    const d = await r.json();
+    return d.score == null ? null : d;
+  } catch {
+    return null;
+  }
+}
 
 function PlayerPhoto({ espnId, photo, name, size, league }) {
   const [loaded, setLoaded] = useState(false);
@@ -283,25 +307,29 @@ function HoloCard({ card, size = "normal", onClick, locked = false }) {
   );
 }
 
-function PackOpening({ pack, onClose, onDone, legendaryUnlocked = false, isElite = false }) {
+function PackOpening({ pack, onClose, onDone, legendaryUnlocked = false, isElite = false, players, wnbaPlayers }) {
   const [phase, setPhase] = useState("shake");
   const [cards, setCards] = useState([]);
 
   const generate = () => {
+    // players/wnbaPlayers viennent des stats live chargées par le composant parent — s'ils
+    // sont encore vides (chargement en cours), on ne génère rien plutôt que planter.
+    if (players.length === 0 && wnbaPlayers.length === 0) return [];
     const allLegends = [...LEGEND_CARDS, ...WNBA_LEGEND_CARDS];
     // Sans accès Légendaire, aucune carte OR ne peut tomber : on la remplace par une carte standard.
     const stripGold = (arr) => {
       if (legendaryUnlocked) return arr;
-      const fallback = [...ALL_PLAYERS, ...WNBA_PLAYERS].filter(p => p.rarity !== "gold");
+      const fallback = [...players, ...wnbaPlayers].filter(p => p.rarity !== "gold");
       return arr.map(c => c.rarity === "gold" ? fallback[Math.floor(Math.random() * fallback.length)] : c);
     };
     if (pack.id === "legend") {
       const gold = allLegends[Math.floor(Math.random() * allLegends.length)];
-      const rest = [...ALL_PLAYERS, ...WNBA_PLAYERS].sort(() => Math.random() - 0.5).slice(0, 4);
+      const rest = [...players, ...wnbaPlayers].sort(() => Math.random() - 0.5).slice(0, 4);
       return stripGold([gold, ...rest]);
     }
     if (pack.id === "wnba") {
-      const pool = [...WNBA_PLAYERS].sort(() => Math.random() - 0.5);
+      const pool = [...wnbaPlayers].sort(() => Math.random() - 0.5);
+      if (pool.length === 0) return [];
       const result = [];
       const rare = pool.filter(p => p.rarity === "rare" || p.rarity === "epic" || p.rarity === "legendary");
       if (rare.length) result.push(rare[Math.floor(Math.random() * rare.length)]);
@@ -312,7 +340,8 @@ function PackOpening({ pack, onClose, onDone, legendaryUnlocked = false, isElite
       }
       return stripGold(result.slice(0, pack.cards));
     }
-    const pool = [...ALL_PLAYERS].sort(() => Math.random() - 0.5);
+    const pool = [...players].sort(() => Math.random() - 0.5);
+    if (pool.length === 0) return [];
     const result = [];
     if (pack.id === "allstar") {
       const epic = pool.filter(p => p.rarity === "epic" || p.rarity === "legendary");
@@ -377,6 +406,8 @@ function PackOpening({ pack, onClose, onDone, legendaryUnlocked = false, isElite
   );
 }
 
+const API_BASE = import.meta.env.DEV ? "http://localhost:3001" : "";
+
 export default function Cards({ legendaryUnlocked = false, isElite = false, onUpgrade }) {
   const [view, setView] = useState("teams");
   const [selectedTeam, setSelectedTeam] = useState(null);
@@ -389,7 +420,7 @@ export default function Cards({ legendaryUnlocked = false, isElite = false, onUp
         if (Array.isArray(arr) && arr.length) return arr;
       }
     } catch { /* ignore */ }
-    return [ALL_PLAYERS[0], ALL_PLAYERS[5]];
+    return null; // null = pas encore de collection sauvegardée → 2 cartes de départ une fois les stats live chargées
   });
   const [selectedCard, setSelectedCard] = useState(null);
   const [lockedCard, setLockedCard] = useState(null); // carte OR verrouillée cliquée (plan Scout)
@@ -405,8 +436,64 @@ export default function Cards({ legendaryUnlocked = false, isElite = false, onUp
   }, []);
   // Sauvegarde la collection à chaque ajout → elle reste pour toujours.
   useEffect(() => {
+    if (collection === null) return;
     try { localStorage.setItem("hoopiq_collection_v1", JSON.stringify(collection)); } catch { /* ignore */ }
   }, [collection]);
+
+  // ── Stats live (ESPN) pour tous les joueurs actuels — voir rarityFromScore/fetchLiveScore.
+  // Les légendes (LEGEND_CARDS/WNBA_LEGEND_CARDS, retraitées) gardent leurs stats de carrière
+  // fixes : il n'existe pas de "stats en direct" pour un joueur qui ne joue plus.
+  const [liveStats, setLiveStats] = useState({});
+  const [statsLoading, setStatsLoading] = useState(true);
+  useEffect(() => {
+    let cancelled = false;
+    const targets = [
+      ...NBA_TEAMS.flatMap(t => t.players.map(p => ({ id: p.id, espnId: p.espnId, league: "nba" }))),
+      ...WNBA_PLAYERS_META.map(p => ({ id: p.id, espnId: p.espnId, league: "wnba" })),
+      ...ELITE_EXCLUSIVE_CARDS_META.map(p => ({ id: p.id, espnId: p.espnId, league: "nba" })),
+    ].filter(t => t.espnId != null);
+    (async () => {
+      const results = await Promise.all(targets.map(async (t) => {
+        const d = await fetchLiveScore(API_BASE, t.league, t.espnId);
+        return [t.id, d];
+      }));
+      if (cancelled) return;
+      const map = {};
+      for (const [id, d] of results) if (d) map[id] = d;
+      setLiveStats(map);
+      setStatsLoading(false);
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  const ALL_PLAYERS = useMemo(() => NBA_TEAMS.flatMap(t => t.players.map(p => {
+    const s = liveStats[p.id];
+    if (!s) return null;
+    return { ...p, team: t.name, teamId: t.id, teamColor: t.color, pts: s.stats.pts, ast: s.stats.ast, reb: s.stats.reb, fg: s.stats.fg, score: s.score, rarity: rarityFromScore(s.score) };
+  }).filter(Boolean)), [liveStats]);
+
+  const WNBA_PLAYERS = useMemo(() => WNBA_PLAYERS_META.map(p => {
+    const s = liveStats[p.id];
+    if (!s) return null;
+    return { ...p, pts: s.stats.pts, ast: s.stats.ast, reb: s.stats.reb, fg: s.stats.fg, score: s.score, rarity: rarityFromScore(s.score) };
+  }).filter(Boolean), [liveStats]);
+
+  const ELITE_EXCLUSIVE_CARDS = useMemo(() => ELITE_EXCLUSIVE_CARDS_META.map(p => {
+    const s = liveStats[p.id];
+    if (!s) return null;
+    // "gold" est une teinte cosmétique fixe pour cette variante Black Edition, pas une note dérivée du score.
+    return { ...p, pts: s.stats.pts, ast: s.stats.ast, reb: s.stats.reb, fg: s.stats.fg, score: s.score, rarity: "gold" };
+  }).filter(Boolean), [liveStats]);
+
+  const teamsHydrated = useMemo(() => NBA_TEAMS.map(t => ({ ...t, players: ALL_PLAYERS.filter(p => p.teamId === t.id) })), [ALL_PLAYERS]);
+
+  // Deux cartes de départ, une fois — seulement si l'utilisateur n'avait pas déjà une collection sauvegardée.
+  const seededRef = useRef(false);
+  useEffect(() => {
+    if (collection !== null || seededRef.current || ALL_PLAYERS.length < 6) return;
+    seededRef.current = true;
+    setCollection([ALL_PLAYERS[0], ALL_PLAYERS[5]]);
+  }, [collection, ALL_PLAYERS]);
 
   const showNotif = (msg) => { setNotif(msg); setTimeout(() => setNotif(null), 4000); };
 
@@ -417,15 +504,17 @@ export default function Cards({ legendaryUnlocked = false, isElite = false, onUp
   const openPackSafe = (pack) => { if (pack.id === "legend" && !legendaryUnlocked) setLockedCard({ pack: true }); else setOpenPack(pack); };
 
   const handleDone = (cards) => {
-    const newCards = cards.filter(c => !collection.find(col => col.id === c.id));
-    setCollection(p => [...p, ...newCards]);
+    const col = collection || [];
+    const newCards = cards.filter(c => !col.find(existing => existing.id === c.id));
+    setCollection(p => [...(p || []), ...newCards]);
     const gold = newCards.find(c => c.rarity === "gold");
     if (gold) showNotif(`✦ OR LÉGENDAIRE ! ${gold.name} !`);
     else if (newCards.length) showNotif(`🎴 +${newCards.length} nouvelles cartes !`);
   };
 
-  const filteredTeams = NBA_TEAMS.filter(t => confFilter === "all" || t.conf === confFilter);
-  const filteredCollection = collection
+  const col = collection || [];
+  const filteredTeams = teamsHydrated.filter(t => confFilter === "all" || t.conf === confFilter);
+  const filteredCollection = col
     .filter(c => filter === "all" ? true : filter === "gold" ? c.rarity === "gold" : filter === "wnba" ? c.league === "wnba" : c.rarity === filter);
 
   const TABS = [
@@ -441,7 +530,13 @@ export default function Cards({ legendaryUnlocked = false, isElite = false, onUp
 
       {notif && <div style={{ position: "fixed", top: 80, right: 24, zIndex: 500, background: notif.includes("OR") ? "linear-gradient(135deg,#ffd700,#ff8c00)" : "linear-gradient(135deg,#ff5c00,#ff8c42)", color: notif.includes("OR") ? "#1a0800" : "#fff", padding: "13px 22px", borderRadius: 14, fontWeight: 900, fontSize: 14, animation: "ni .4s ease", boxShadow: "0 8px 40px rgba(255,92,0,0.5)" }}>{notif}</div>}
 
-      {openPack && <PackOpening pack={openPack} onClose={() => setOpenPack(null)} onDone={handleDone} legendaryUnlocked={legendaryUnlocked} isElite={isElite} />}
+      {statsLoading && (
+        <div style={{ position: "fixed", top: 66, left: "50%", transform: "translateX(-50%)", zIndex: 500, background: "rgba(6,6,15,0.92)", border: "1px solid rgba(255,92,0,0.3)", color: "#ff8c42", padding: "7px 16px", borderRadius: 20, fontSize: 12, fontWeight: 700 }}>
+          ⏳ Chargement des stats en direct (ESPN)…
+        </div>
+      )}
+
+      {openPack && <PackOpening pack={openPack} onClose={() => setOpenPack(null)} onDone={handleDone} legendaryUnlocked={legendaryUnlocked} isElite={isElite} players={ALL_PLAYERS} wnbaPlayers={WNBA_PLAYERS} />}
 
       {/* Modal carte OR verrouillée (plan Scout) */}
       {lockedCard && (
@@ -480,7 +575,7 @@ export default function Cards({ legendaryUnlocked = false, isElite = false, onUp
             <button key={t.id} onClick={() => setView(t.id)} style={{ padding: "7px 14px", borderRadius: 8, border: "none", cursor: "pointer", background: view === t.id ? "rgba(255,92,0,0.15)" : "transparent", color: view === t.id ? "#ff5c00" : "#6b7280", fontWeight: 700, fontSize: 12, borderBottom: view === t.id ? "2px solid #ff5c00" : "2px solid transparent", fontFamily: "inherit" }}>{t.label}</button>
           ))}
         </div>
-        <div style={{ fontSize: 12, color: "#6b7280" }}>🃏 {collection.length} · {collection.filter(c => c.rarity === "gold").length > 0 && <span style={{ color: "#ffd700" }}>✦ {collection.filter(c => c.rarity === "gold").length} OR</span>}</div>
+        <div style={{ fontSize: 12, color: "#6b7280" }}>🃏 {col.length} · {col.filter(c => c.rarity === "gold").length > 0 && <span style={{ color: "#ffd700" }}>✦ {col.filter(c => c.rarity === "gold").length} OR</span>}</div>
       </div>
 
       {/* Arena hero banner */}
@@ -498,7 +593,7 @@ export default function Cards({ legendaryUnlocked = false, isElite = false, onUp
             CARTES <span style={{ color: "#ff5c00" }}>NBA</span>
           </h1>
           <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 13, marginTop: 6 }}>
-            {collection.length} carte{collection.length > 1 ? "s" : ""} dans ta collection · 30 équipes · Légendes & Stars
+            {col.length} carte{col.length > 1 ? "s" : ""} dans ta collection · 30 équipes · Légendes & Stars
           </p>
         </div>
       </div>
@@ -547,7 +642,7 @@ export default function Cards({ legendaryUnlocked = false, isElite = false, onUp
                         <div style={{ fontSize: 11, color: "#6b7280" }}>{team.conf}</div>
                       </div>
                     </div>
-                    <div style={{ fontSize: 11, color: "#6b7280" }}>⭐ {team.players[0]?.name}</div>
+                    <div style={{ fontSize: 11, color: "#6b7280" }}>⭐ {team.players[0]?.name || (statsLoading ? "Chargement…" : "—")}</div>
                     <div style={{ marginTop: 8, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <span style={{ fontSize: 11, color: "#555" }}>{team.players.length} carte{team.players.length > 1 ? "s" : ""}</span>
                       <span style={{ fontSize: 11, color: team.color, fontWeight: 700 }}>Voir →</span>
@@ -576,7 +671,7 @@ export default function Cards({ legendaryUnlocked = false, isElite = false, onUp
                   <div style={{ height: 1, flex: 1, background: "rgba(192,132,252,0.2)" }} />
                 </div>
                 <h1 style={{ fontFamily: "'Permanent Marker',cursive", fontSize: 48, letterSpacing: 2, lineHeight: 1, margin: 0, background: "linear-gradient(135deg,#fff,#c084fc)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>STARS DE LA WNBA</h1>
-                <p style={{ color: "rgba(192,132,252,0.7)", fontSize: 13, marginTop: 6 }}>17 joueuses · 2 Légendes OR · Saison 2024</p>
+                <p style={{ color: "rgba(192,132,252,0.7)", fontSize: 13, marginTop: 6 }}>{WNBA_PLAYERS.length} joueuses · 2 Légendes OR · Saison {new Date().getFullYear()}</p>
               </div>
             </div>
 
@@ -638,7 +733,7 @@ export default function Cards({ legendaryUnlocked = false, isElite = false, onUp
 
             {/* Stats comparatives */}
             <div style={{ marginTop: 36, background: "rgba(192,132,252,0.04)", border: "1px solid rgba(192,132,252,0.15)", borderRadius: 16, padding: 24 }}>
-              <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: 2, color: "#c084fc", textTransform: "uppercase", marginBottom: 16, fontFamily: "monospace" }}>📊 CLASSEMENT SAISON 2024</div>
+              <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: 2, color: "#c084fc", textTransform: "uppercase", marginBottom: 16, fontFamily: "monospace" }}>📊 CLASSEMENT SAISON {new Date().getFullYear()}</div>
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 {[...WNBA_PLAYERS].sort((a, b) => b.score - a.score).map((p, i) => (
                   <div key={p.id} style={{ display: "flex", alignItems: "center", gap: 14, padding: "10px 14px", borderRadius: 10, background: i === 0 ? "rgba(255,215,0,0.06)" : "rgba(255,255,255,0.02)", border: `1px solid ${i === 0 ? "rgba(255,215,0,0.2)" : "rgba(255,255,255,0.05)"}`, cursor: "pointer" }} onClick={() => setSelectedCard(p)}>
@@ -713,13 +808,13 @@ export default function Cards({ legendaryUnlocked = false, isElite = false, onUp
             <p style={{ color: "#6b7280", fontSize: 13, marginBottom: 32 }}>Obtiens les stars NBA · les joueuses WNBA · et les légendes OR 🏆</p>
             <div className="cards-packs-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(260px,1fr))", gap: 20, marginBottom: 36 }}>
               {PACKS.map(pack => (
-                <div key={pack.id} className="pack-h" onClick={() => openPackSafe(pack)} style={{ background: pack.id === "legend" ? "linear-gradient(160deg,#1a1000,#3d2800)" : `linear-gradient(160deg,rgba(0,0,0,0.9),${pack.color}20)`, border: `2px solid ${pack.color}${pack.id === "legend" ? "cc" : "50"}`, borderRadius: 20, padding: 28, textAlign: "center", cursor: "pointer", transition: "all .3s", animation: pack.id === "legend" ? "gp 3s ease-in-out infinite" : "none" }}>
+                <div key={pack.id} className="pack-h" onClick={() => !statsLoading && openPackSafe(pack)} style={{ background: pack.id === "legend" ? "linear-gradient(160deg,#1a1000,#3d2800)" : `linear-gradient(160deg,rgba(0,0,0,0.9),${pack.color}20)`, border: `2px solid ${pack.color}${pack.id === "legend" ? "cc" : "50"}`, borderRadius: 20, padding: 28, textAlign: "center", cursor: statsLoading ? "default" : "pointer", opacity: statsLoading ? 0.5 : 1, transition: "all .3s", animation: pack.id === "legend" ? "gp 3s ease-in-out infinite" : "none" }}>
                   {pack.id === "legend" && <div style={{ fontSize: 11, color: "#ffd700", fontWeight: 800, letterSpacing: 2, marginBottom: 8 }}>✦ ÉDITION LIMITÉE ✦</div>}
                   <div style={{ fontSize: 70, marginBottom: 14, animation: "float 3s ease-in-out infinite" }}>{pack.emoji}</div>
                   <div style={{ fontFamily: "'Permanent Marker',cursive", fontSize: 26, color: pack.color, letterSpacing: 1, marginBottom: 6 }}>{pack.name}</div>
                   <div style={{ fontSize: 12, color: "#888", marginBottom: 16, lineHeight: 1.6 }}>{pack.desc}</div>
                   <div style={{ fontFamily: "'Bebas Neue',cursive", fontSize: 44, color: pack.color, marginBottom: 16 }}>{pack.price}</div>
-                  <button style={{ width: "100%", padding: "12px", borderRadius: 10, border: "none", cursor: "pointer", background: pack.id === "legend" ? "linear-gradient(135deg,#ffd700,#ff8c00)" : `linear-gradient(135deg,${pack.color},${pack.color}99)`, color: pack.id === "legend" ? "#1a0800" : "#fff", fontWeight: 900, fontSize: 14, fontFamily: "inherit" }}>{pack.id === "legend" && !legendaryUnlocked ? "🔒 Pro / Elite" : "Ouvrir →"}</button>
+                  <button disabled={statsLoading} style={{ width: "100%", padding: "12px", borderRadius: 10, border: "none", cursor: statsLoading ? "default" : "pointer", background: pack.id === "legend" ? "linear-gradient(135deg,#ffd700,#ff8c00)" : `linear-gradient(135deg,${pack.color},${pack.color}99)`, color: pack.id === "legend" ? "#1a0800" : "#fff", fontWeight: 900, fontSize: 14, fontFamily: "inherit" }}>{statsLoading ? "⏳ Chargement…" : pack.id === "legend" && !legendaryUnlocked ? "🔒 Pro / Elite" : "Ouvrir →"}</button>
                 </div>
               ))}
             </div>

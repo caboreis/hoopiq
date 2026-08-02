@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { authHeaders } from "./authHeaders.js";
 
 const C = {
   bg: "#06060f", surface: "rgba(255,255,255,0.04)", border: "rgba(255,255,255,0.07)",
@@ -345,7 +346,7 @@ export default function Duel() {
       if (prefetchedRef.current[g.id]) return;
       if (aiPicks[g.id]) { prefetchedRef.current[g.id] = true; return; }
       prefetchedRef.current[g.id] = true;
-      fetch(`${API}/api/nba/predict/${g.id}`)
+      fetch(`${API}/api/nba/predict/${g.id}`, { headers: authHeaders() })
         .then(r => r.json())
         .then(d => {
           if (d.prediction) {
@@ -370,7 +371,7 @@ export default function Duel() {
     // If AI prediction not yet fetched, trigger loading state + fetch
     if (!aiPicks[gameId]) {
       setAiLoading(prev => ({ ...prev, [gameId]: true }));
-      fetch(`${API}/api/nba/predict/${gameId}`)
+      fetch(`${API}/api/nba/predict/${gameId}`, { headers: authHeaders() })
         .then(r => r.json())
         .then(d => {
           if (d.prediction) {

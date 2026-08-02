@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { authHeaders } from "./authHeaders.js";
 
 const API = import.meta.env.DEV ? "http://localhost:3001" : "";
 
@@ -97,7 +98,7 @@ export default function PreMatch() {
     if (predictions[game.id] || predLoading[game.id]) return;
     setPredLoading(p => ({ ...p, [game.id]: true }));
     try {
-      const res = await fetch(`${API}/api/nba/predict/${game.id}`);
+      const res = await fetch(`${API}/api/nba/predict/${game.id}`, { headers: authHeaders() });
       if (!res.ok) throw new Error();
       const data = await res.json();
       setPredictions(p => ({ ...p, [game.id]: data.prediction }));

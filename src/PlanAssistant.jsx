@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { authHeaders } from "./authHeaders.js";
 
 // En dev l'API tourne sur le port 3001 ; en prod elle est servie sur le même domaine.
 const API_BASE = import.meta.env.DEV ? "http://localhost:3001" : "";
@@ -112,7 +113,7 @@ export default function PlanAssistant({ plan = "scout" }) {
     try {
       const res = await fetch(`${API_BASE}/api/anthropic`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...authHeaders() },
         body: JSON.stringify({
           provider: "groq", // tous les assistants par plan tournent sur Groq (gratuit)
           max_tokens: plan === "elite" ? 1200 : plan === "pro" ? 900 : 500,

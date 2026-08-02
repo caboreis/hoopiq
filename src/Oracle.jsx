@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { authHeaders } from "./authHeaders.js";
 
 const C = {
   bg: "#06060f", bg2: "#0d0d1f",
@@ -56,7 +57,7 @@ export default function Oracle() {
     setPredError(false);
     setPredLoading(true);
     try {
-      const res = await fetch(`${API}/api/nba/predict/${game.id}`);
+      const res = await fetch(`${API}/api/nba/predict/${game.id}`, { headers: authHeaders() });
       const data = await res.json();
       if (!res.ok || !data.prediction) {
         console.error('Oracle error:', data);

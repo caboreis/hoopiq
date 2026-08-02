@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { authHeaders } from "./authHeaders.js";
 
 const C = {
   bg: "#06060f", bg2: "#0d0d1f",
@@ -79,7 +80,7 @@ export default function Marketing() {
       const API = (import.meta.env.DEV ? 'http://localhost:3001' : '') + '/api/anthropic';
       const res = await fetch(API, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...authHeaders() },
         body: JSON.stringify({
           model: "claude-haiku-4-5-20251001",
           max_tokens: 1000,

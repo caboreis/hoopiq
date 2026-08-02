@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { authHeaders } from "./authHeaders.js";
 
 const API_BASE = import.meta.env.DEV ? "http://localhost:3001" : "";
 
@@ -228,7 +229,7 @@ function AnalyseIA({ data }) {
 
     fetch(`${API_BASE}/api/anthropic`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...authHeaders() },
       body: JSON.stringify({
         provider: "groq",
         max_tokens: 600,
