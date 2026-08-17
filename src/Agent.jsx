@@ -4,15 +4,18 @@ import { authHeaders } from "./authHeaders.js";
 // En dev, l'API tourne sur le port 3001 ; en prod elle est servie sur le même domaine.
 const API_BASE = import.meta.env.DEV ? "http://localhost:3001" : "";
 
-const SYSTEM_PROMPT = `Tu es Jarvis, le bras droit IA du boss de HoopIQ. T'es pas un robot corporate — t'es dans la team, tu parles vrai, tu vas droit au but comme un pick-and-roll bien exécuté.
+// Les chiffres business (abonnés/MRR) viennent de /api/admin/stats — jamais codés en dur.
+// Et surtout : ce chat ne peut PAS réellement rembourser/annuler/modifier la base de
+// données (aucun tool-calling n'est branché derrière). L'ancienne version disait à l'IA
+// de "simuler de façon réaliste" ces actions, ce qui la faisait répondre comme si l'action
+// avait eu lieu — Jorge pouvait croire qu'un remboursement était fait alors que non.
+function buildSystemPrompt(stats) {
+  const dataLine = stats?.available
+    ? `DONNÉES EN TEMPS RÉEL : ${stats.subscribers} abonnés actifs (${stats.byPlan.scout} Scout · ${stats.byPlan.pro} Pro · ${stats.byPlan.elite} Elite) · MRR : ${stats.mrr}€.`
+    : `DONNÉES EN TEMPS RÉEL : indisponibles pour l'instant — ne jamais inventer de chiffre, dire à l'utilisateur de vérifier le dashboard Stripe/Neon.`;
+  return `Tu es Jarvis, le bras droit IA du boss de HoopIQ. T'es pas un robot corporate — t'es dans la team, tu parles vrai, tu vas droit au but comme un pick-and-roll bien exécuté.
 
-Tu gères toutes les opérations de la plateforme HoopIQ (basket + IA) :
-
-ABONNÉS & PLANS (Scout / Pro / Elite) — les lister, changer de plan, rembourser, annuler
-STRIPE & PAIEMENTS — revenus, paiements échoués, liens de paiement, chiffre d'affaires
-BASE DE DONNÉES — nouveaux inscrits, reset mot de passe, supprimer un compte, stats d'utilisation
-RAPPORTS & ANALYTICS — rapport hebdo, analyse du churn, métriques de croissance, users inactifs
-MARKETING — codes promo, campagnes email, suivi des conversions
+Tu AIDES sur toutes les opérations de la plateforme HoopIQ (basket + IA) : abonnés & plans, Stripe & paiements, base de données, rapports & analytics, marketing. Mais tu n'as PAS d'accès direct pour exécuter ces actions (pas de remboursement, pas de suppression de compte, pas d'envoi d'email réel) — si on te le demande, explique clairement que tu ne peux pas l'exécuter toi-même et guide vers la bonne marche à suivre (Stripe dashboard, ou demander à Claude Code). Ne dis JAMAIS qu'une action a été faite si elle ne l'a pas été.
 
 TON STYLE :
 - Tu parles français naturel, décontracté, comme entre potes — pas de langue de bois
@@ -23,13 +26,8 @@ TON STYLE :
 - Tu tutoies toujours
 - Emojis utilisés avec parcimonie, jamais en excès
 
-DONNÉES EN TEMPS RÉEL (fictives) :
-- 47 abonnés actifs · 12 Scout · 28 Pro · 7 Elite
-- MRR : 1 247€
-- Taux de churn : 3.2%
-- Dernier paiement échoué : user@example.com
-
-Quand tu effectues une action, affiche le résultat en blocs structurés clairs. Simule de façon réaliste.`;
+${dataLine}`;
+}
 
 const SUGGESTIONS = [
   "Montre-moi les revenus du mois",
@@ -52,8 +50,6 @@ const QUICK_ACTIONS = [
 const WELCOME_MSG = {
   role: "assistant",
   text: `Yo, Jarvis à l'appareil 🤝
-
-Ton dashboard tourne nickel — **47 abonnés actifs, MRR à 1 247€**, churn à 3.2%. On est en mode regular season, pas de blessés dans l'équipe.
 
 Je gère tout ce dont t'as besoin :
 • 💳 Stripe & paiements
@@ -94,11 +90,20 @@ export default function HoopIQAgent() {
   const [plans, setPlans] = useState([]);
   const [plansLoading, setPlansLoading] = useState(false);
   const [purchaseLoading, setPurchaseLoading] = useState(false);
+  const [stats, setStats] = useState(null);
   const bottomRef = useRef(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
+
+  // Vrais chiffres business (abonnés actifs + MRR) — remplace le "47 / 1 247€ / 3.2%" codé en dur.
+  useEffect(() => {
+    fetch(`${API_BASE}/api/admin/stats`, { headers: authHeaders() })
+      .then(r => r.ok ? r.json() : { available: false })
+      .then(setStats)
+      .catch(() => setStats({ available: false }));
+  }, []);
 
   useEffect(() => {
     // fetch available plans from backend
@@ -137,7 +142,7 @@ export default function HoopIQAgent() {
         body: JSON.stringify({
           model: "claude-haiku-4-5-20251001",
           max_tokens: 1000,
-          system: SYSTEM_PROMPT,
+          system: buildSystemPrompt(stats),
           messages: newHistory,
         }),
       });
@@ -197,7 +202,10 @@ export default function HoopIQAgent() {
           </div>
         </div>
         <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
-          {[["47", "abonnés"], ["1 247€", "MRR"], ["3.2%", "churn"]].map(([v, l]) => (
+          {[
+            [stats?.available ? String(stats.subscribers) : "—", "abonnés"],
+            [stats?.available ? `${stats.mrr}€` : "—", "MRR"],
+          ].map(([v, l]) => (
             <div key={l} style={{ textAlign: "center" }}>
               <div style={{ fontSize: 14, fontWeight: 500, color: "var(--color-text-primary)" }}>{v}</div>
               <div style={{ fontSize: 11, color: "var(--color-text-secondary)" }}>{l}</div>

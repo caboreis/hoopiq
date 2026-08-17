@@ -674,9 +674,10 @@ export default function LiveCenter() {
   const homeStats = det?.teamStats?.find(t => t.abbr === selectedGame?.home.abbr);
   const awayStats = det?.teamStats?.find(t => t.abbr === selectedGame?.away.abbr);
 
-  const askAI = async () => {
-    if (!aiInput.trim() || aiLoading) return;
-    const msg = aiInput.trim();
+  const askAI = async (override) => {
+    const raw = override ?? aiInput;
+    if (!raw.trim() || aiLoading) return;
+    const msg = raw.trim();
     setAiInput("");
     setAiMessages(prev => [...prev, { id: Date.now(), text: msg, time: now(), type: "user" }]);
     setAiLoading(true);
@@ -1000,7 +1001,7 @@ export default function LiveCenter() {
                 </div>
                 <div style={{ display: "flex", gap: 6, marginTop: 8, flexWrap: "wrap" }}>
                   {["Qui performe ?", "Prédis la suite", "Analyse le match"].map(s => (
-                    <button key={s} onClick={() => setAiInput(s)} style={{ padding: "3px 8px", borderRadius: 10, border: `1px solid rgba(255,92,0,0.25)`, background: "rgba(255,92,0,0.05)", color: C.orange, fontSize: 10, cursor: "pointer", fontFamily: "inherit" }}>{s}</button>
+                    <button key={s} disabled={aiLoading} onClick={() => askAI(s)} style={{ padding: "3px 8px", borderRadius: 10, border: `1px solid rgba(255,92,0,0.25)`, background: "rgba(255,92,0,0.05)", color: C.orange, fontSize: 10, cursor: "pointer", fontFamily: "inherit" }}>{s}</button>
                   ))}
                 </div>
               </div>

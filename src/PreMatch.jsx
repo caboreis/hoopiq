@@ -332,7 +332,7 @@ export default function PreMatch() {
                       <div style={{ fontSize: 12, color: C.muted, marginTop: 4 }}>{selected.home.name}</div>
                       <div style={{ fontSize: 11, color: C.muted, fontFamily: "monospace", marginTop: 2 }}>{selected.home.record}</div>
                       {pred && !pred.error && (
-                        <div style={{ fontFamily: "'Permanent Marker',cursive", fontSize: 42, color: selected.home.color || C.orange, marginTop: 10, letterSpacing: 1, textShadow: `0 0 20px ${selected.home.color || C.orange}60` }}>
+                        <div style={{ fontFamily: "'Bebas Neue',cursive", fontSize: 42, color: selected.home.color || C.orange, marginTop: 10, letterSpacing: 1, textShadow: `0 0 20px ${selected.home.color || C.orange}60` }}>
                           {pred.projectedScore?.home}
                         </div>
                       )}
@@ -352,7 +352,7 @@ export default function PreMatch() {
                       <div style={{ fontSize: 12, color: C.muted, marginTop: 4 }}>{selected.away.name}</div>
                       <div style={{ fontSize: 11, color: C.muted, fontFamily: "monospace", marginTop: 2 }}>{selected.away.record}</div>
                       {pred && !pred.error && (
-                        <div style={{ fontFamily: "'Permanent Marker',cursive", fontSize: 42, color: selected.away.color || C.blue, marginTop: 10, letterSpacing: 1, textShadow: `0 0 20px ${selected.away.color || C.blue}60` }}>
+                        <div style={{ fontFamily: "'Bebas Neue',cursive", fontSize: 42, color: selected.away.color || C.blue, marginTop: 10, letterSpacing: 1, textShadow: `0 0 20px ${selected.away.color || C.blue}60` }}>
                           {pred.projectedScore?.away}
                         </div>
                       )}

@@ -232,7 +232,7 @@ function FighterModal({ fighter, onClose }) {
             <Stars count={r.stars} color={r.color} />
           </div>
           <div style={{ textAlign: "center", flexShrink: 0 }}>
-            <div style={{ fontSize: 42, fontFamily: "'Permanent Marker', cursive", color: r.color }}>{fighter.score}</div>
+            <div style={{ fontSize: 42, fontFamily: "'Bebas Neue', cursive", color: r.color }}>{fighter.score}</div>
             <div style={{ fontSize: 9, color: C.muted, letterSpacing: 1 }}>SCORE</div>
           </div>
         </div>

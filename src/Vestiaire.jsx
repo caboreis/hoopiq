@@ -91,6 +91,11 @@ export default function Vestiaire({ user }) {
   const [input, setInput] = useState("");
   const [aiThinking, setAiThinking] = useState(false);
   const [loadingMsgs, setLoadingMsgs] = useState(false);
+  // isSupabaseConfigured ne veut dire que "les variables d'env sont présentes" — pas que
+  // le projet répond vraiment. Un projet Supabase supprimé (DNS mort) reste "configuré"
+  // au sens de cette variable, donc le bandeau "mode local" ne s'affichait jamais alors
+  // que le chat n'était en réalité ni partagé ni persistant pour personne.
+  const [live, setLive] = useState(isSupabaseConfigured);
   const endRef = useRef(null);
 
   // Mobile : barre des salons en tiroir (sinon elle écrase le chat)
@@ -143,13 +148,21 @@ export default function Vestiaire({ user }) {
           .from("messages").select("*").eq("room", room)
           .order("created_at", { ascending: true }).limit(80);
         if (!active) return;
-        if (error) console.error("[Vestiaire] Chargement Supabase:", error.message, "— la table 'messages' existe-t-elle ? (lance supabase/messages.sql)");
-        else setMessages(data || []);
+        if (error) {
+          console.error("[Vestiaire] Chargement Supabase:", error.message, "— la table 'messages' existe-t-elle ? (lance supabase/messages.sql)");
+        } else {
+          setMessages(data || []);
+          setLive(true); // une réponse valide confirme que le projet répond vraiment
+        }
       } catch (e) {
-        if (active) console.error("[Vestiaire] Supabase injoignable:", e?.message, "— vérifie VITE_SUPABASE_URL. Le chat reste utilisable en local.");
+        // Projet Supabase injoignable (supprimé, DNS mort, réseau down...) : le chat
+        // reste utilisable en local, mais on le dit à l'utilisateur au lieu de laisser
+        // croire que c'est un salon partagé en direct.
+        if (active) { console.error("[Vestiaire] Supabase injoignable:", e?.message, "— vérifie VITE_SUPABASE_URL. Le chat reste utilisable en local."); setLive(false); }
       } finally {
         if (active) { setLoadingMsgs(false); scrollDown(); }
       }
+      if (!active) return;
       try {
         channel = supabase
           .channel(`vestiaire:${room}`)
@@ -163,9 +176,13 @@ export default function Vestiaire({ user }) {
               });
               scrollDown();
             })
-          .subscribe((status) => console.log("[Vestiaire] Realtime", room, "→", status));
+          .subscribe((status) => {
+            console.log("[Vestiaire] Realtime", room, "→", status);
+            if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") setLive(false);
+          });
       } catch (e) {
         console.error("[Vestiaire] Abonnement realtime échoué:", e?.message);
+        setLive(false);
       }
     })();
     return () => { active = false; if (channel) { try { supabase.removeChannel(channel); } catch { /* noop */ } } };
@@ -181,10 +198,16 @@ export default function Vestiaire({ user }) {
     setMessages(prev => [...prev, optimistic]);
     scrollDown();
     if (isSupabaseConfigured) {
-      const { error } = await supabase
-        .from("messages")
-        .insert({ room, author, author_email, text, is_ai, client_id });
-      if (error) console.error("[Vestiaire] Envoi Supabase échoué:", error.message, "— le message reste affiché en local. Vérifie la table 'messages' (supabase/messages.sql).");
+      try {
+        const { error } = await supabase
+          .from("messages")
+          .insert({ room, author, author_email, text, is_ai, client_id });
+        if (error) { console.error("[Vestiaire] Envoi Supabase échoué:", error.message, "— le message reste affiché en local. Vérifie la table 'messages' (supabase/messages.sql)."); setLive(false); }
+        else setLive(true);
+      } catch (e) {
+        console.error("[Vestiaire] Envoi Supabase injoignable:", e?.message);
+        setLive(false);
+      }
     }
   };
 
@@ -308,9 +331,11 @@ export default function Vestiaire({ user }) {
         </div>
 
         {/* Config banner */}
-        {!isSupabaseConfigured && (
+        {!live && (
           <div style={{ background: "rgba(255,215,0,0.08)", borderBottom: `1px solid rgba(255,215,0,0.2)`, color: C.gold, fontSize: 12, padding: "8px 18px" }}>
-            ⚠️ Mode local (pas de temps réel). Ajoute <code>VITE_SUPABASE_URL</code> + <code>VITE_SUPABASE_KEY</code> dans <code>.env</code> et crée la table <code>messages</code> pour activer le chat partagé en direct.
+            {isSupabaseConfigured
+              ? <>⚠️ Mode local (chat partagé indisponible pour le moment). Tes messages ne sont visibles que par toi — vérifie que le projet Supabase (<code>VITE_SUPABASE_URL</code>) existe toujours et répond.</>
+              : <>⚠️ Mode local (pas de temps réel). Ajoute <code>VITE_SUPABASE_URL</code> + <code>VITE_SUPABASE_KEY</code> dans <code>.env</code> et crée la table <code>messages</code> pour activer le chat partagé en direct.</>}
           </div>
         )}
 

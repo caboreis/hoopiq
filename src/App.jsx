@@ -835,7 +835,7 @@ function MatchesTab({ liveScores, wnbaScores, nbaLoading, nbaError, setTab }) {
                     <div style={{ fontSize: 12, color: C.muted }}>vs {game.away.name}</div>
                   </div>
                   <div style={{ textAlign: "right" }}>
-                    <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 32, color: isLive ? C.blue : accentColor }}>
+                    <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 32, color: isLive ? C.blue : accentColor }}>
                       {game.home.score}–{game.away.score}
                     </div>
                     {isLive && game.clock && <div style={{ fontSize: 10, color: accentColor }}>{game.clock}</div>}
@@ -854,12 +854,12 @@ function MatchesTab({ liveScores, wnbaScores, nbaLoading, nbaError, setTab }) {
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 32px 1fr", alignItems: "center", textAlign: "center" }}>
                     <div>
                       <div style={{ fontSize: 11, color: C.muted, marginBottom: 4 }}>{game.home.abbreviation}</div>
-                      <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 26 }}>{game.home.score}</div>
+                      <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 26 }}>{game.home.score}</div>
                     </div>
                     <div style={{ fontSize: 11, color: C.muted }}>vs</div>
                     <div>
                       <div style={{ fontSize: 11, color: C.muted, marginBottom: 4 }}>{game.away.abbreviation}</div>
-                      <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 26 }}>{game.away.score}</div>
+                      <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 26 }}>{game.away.score}</div>
                     </div>
                   </div>
                 </div>
@@ -1084,7 +1084,6 @@ function App({ user, onLogout }) {
         const scoresData = await scoresRes.json()
         const loadedPlayers = playersData.players || []
         setBullsPlayers(loadedPlayers)
-        setSelectedPlayer(loadedPlayers[0] || null)
         setLiveScores(scoresData.games || [])
         // Fetch WNBA games en parallèle
         fetch("https://site.api.espn.com/apis/site/v2/sports/basketball/wnba/scoreboard")
@@ -1190,22 +1189,30 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
       .slice(0, 12)
       .map(g => `${g.away?.name || g.away?.abbreviation} ${g.away?.score} @ ${g.home?.name || g.home?.abbreviation} ${g.home?.score} (${g.status})`)
       .join("\n");
-    // Le roster ESPN ne fournit que l'identité des joueurs, aucune stat par match :
-    // on le dit explicitement pour que le modèle ne comble pas le vide.
-    const roster = bullsPlayers
+    // Certains joueurs du roster ESPN ont de vraies stats par match (pts/ast/reb),
+    // d'autres non — on distingue les deux plutôt que de dire globalement "aucune stat".
+    const withStats = bullsPlayers.filter(p => typeof p.pts === "number");
+    const withoutStats = bullsPlayers.filter(p => typeof p.pts !== "number");
+    const statsLine = withStats
+      .slice(0, 18)
+      .map(p => `${p.name}${p.pos && p.pos !== "N/A" ? ` (${p.pos})` : ""} : ${p.pts} pts, ${p.ast} pass., ${p.reb} reb. / match`)
+      .join("\n");
+    const noStatsLine = withoutStats
       .slice(0, 18)
       .map(p => `${p.name}${p.pos && p.pos !== "N/A" ? ` (${p.pos})` : ""}`)
       .join(", ");
     return [
       `Date du jour : ${new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}.`,
       games ? `MATCHS DU JOUR (données live NBA/WNBA) :\n${games}` : "Aucun match en cours ou programmé aujourd'hui dans les données chargées.",
-      roster ? `EFFECTIF ${favoriteTeam.name.toUpperCase()} : ${roster}.\n(Aucune statistique par match n'est disponible pour ces joueurs — ne pas en inventer.)` : "",
+      statsLine ? `STATS PAR MATCH — ${favoriteTeam.name.toUpperCase()} (vraies données) :\n${statsLine}` : "",
+      noStatsLine ? `AUTRES JOUEURS DE L'EFFECTIF ${favoriteTeam.name.toUpperCase()} (identité seulement, pas de stat par match dans les données chargées) : ${noStatsLine}.` : "",
     ].filter(Boolean).join("\n\n");
   };
 
-  const sendChat = async () => {
-    if (!chatInput.trim() || chatLoading) return;
-    const msg = chatInput.trim(); setChatInput("");
+  const sendChat = async (override) => {
+    const raw = override ?? chatInput;
+    if (!raw.trim() || chatLoading) return;
+    const msg = raw.trim(); setChatInput("");
     setChatHistory(h => [...h, { role: "user", text: msg }]);
     setChatLoading(true);
     try {
@@ -1807,7 +1814,7 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
                               <div style={{ fontSize: 10, color: C.muted, marginTop: 2 }}>{game.home.abbreviation} · Domicile</div>
                             </div>
                             <div style={{ textAlign: "center", padding: "4px 12px", background: "rgba(255,255,255,0.04)", borderRadius: 10, minWidth: 90 }}>
-                              <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 28, letterSpacing: 2, lineHeight: 1 }}>
+                              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 28, letterSpacing: 2, lineHeight: 1 }}>
                                 <span style={{ color: homeWin ? C.orange : C.text }}>{game.home.score}</span>
                                 <span style={{ color: C.muted, fontSize: 18, margin: "0 4px" }}>–</span>
                                 <span style={{ color: awayWin ? C.orange : C.text }}>{game.away.score}</span>
@@ -1862,7 +1869,7 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
                         <div style={{ fontSize: 12, color: C.muted }}>{player.pos}{player.jersey ? ` · #${player.jersey}` : ""}</div>
                       </div>
                       <div style={{ textAlign: 'right' }}>
-                        <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 18, color: C.orange }}>{player.score}</div>
+                        <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 18, color: C.orange }}>{player.score}</div>
                       </div>
                     </div>
                   ))
@@ -1893,7 +1900,7 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
                     </div>
                     {typeof p.pts === "number" && (
                       <div style={{ textAlign: "right", marginRight: 8 }}>
-                        <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 22, color: C.orange }}>{p.pts}</div>
+                        <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: 22, color: C.orange }}>{p.pts}</div>
                         <div style={{ fontSize: 11, color: C.muted }}>pts/match</div>
                       </div>
                     )}
@@ -2131,7 +2138,9 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
                     </div>
                   )}
                   {filteredPlayers.map(p => (
-                    <div key={p.id} onClick={() => analyzePlayer(p)} style={{
+                    <div key={p.id} role="button" tabIndex={0} onClick={() => analyzePlayer(p)}
+                      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); analyzePlayer(p); } }}
+                      style={{
                       background: selectedPlayer?.id === p.id ? "rgba(255,92,0,0.07)" : C.surface,
                       border: `1px solid ${selectedPlayer?.id === p.id ? "rgba(255,92,0,0.45)" : C.border}`,
                       borderRadius: 16, padding: "18px 20px", cursor: "pointer", transition: "all .2s",
@@ -2281,7 +2290,7 @@ Termine par une phrase signature unique qui résume ce joueur en une image forte
                     "Explique-moi le pick and roll",
                     "C'est quoi une bonne défense en zone ?",
                   ].map(s => (
-                    <button key={s} onClick={() => setChatInput(s)} style={{ padding: "5px 12px", borderRadius: 16, border: `1px solid rgba(255,92,0,0.3)`, background: "rgba(255,92,0,0.06)", color: C.orange, fontSize: 11, cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}>{s}</button>
+                    <button key={s} disabled={chatLoading} onClick={() => sendChat(s)} style={{ padding: "5px 12px", borderRadius: 16, border: `1px solid rgba(255,92,0,0.3)`, background: "rgba(255,92,0,0.06)", color: C.orange, fontSize: 11, cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}>{s}</button>
                   ))}
                 </div>
               </div>
@@ -2621,7 +2630,7 @@ export default function Root() {
     let cancelled = false;
     (async () => {
       try {
-        const r = await fetch(`${API_BASE}/api/subscription?email=${encodeURIComponent(user.email)}`);
+        const r = await fetch(`${API_BASE}/api/subscription`, { headers: authHeaders() });
         const d = await r.json();
         if (cancelled || !d?.plan || d.status !== "active") return;
         setUser(prev => {

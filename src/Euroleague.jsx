@@ -248,7 +248,10 @@ function AnalyseIA({ data }) {
       }),
     })
       .then(r => r.json())
-      .then(d => setAnalyse((d.content || []).map(b => b.text || "").join("").trim()))
+      .then(d => {
+        const text = (d.content || []).map(b => b.text || "").join("").trim();
+        setAnalyse(text || "Analyse indisponible pour le moment. Réessaie.");
+      })
       .catch(() => setAnalyse("Erreur de connexion. Réessaie."))
       .finally(() => setLoading(false));
   };

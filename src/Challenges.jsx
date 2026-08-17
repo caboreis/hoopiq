@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { authHeaders } from "./authHeaders.js";
 
 const API_BASE = import.meta.env.DEV ? "http://localhost:3001" : "";
 
@@ -179,8 +180,8 @@ export default function Challenges({ user }) {
     if (!user?.email || !settled) return;
     fetch(`${API_BASE}/api/challenge-score`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: user.email, points, correct }),
+      headers: { "Content-Type": "application/json", ...authHeaders() },
+      body: JSON.stringify({ points, correct }),
     }).catch(() => { /* le score local reste affiché ; il repartira au prochain passage */ });
   }, [user?.email, points, correct, settled]);
 

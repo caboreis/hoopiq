@@ -1,7 +1,15 @@
 import { useState, useEffect, useRef } from "react";
 import { authHeaders } from "./authHeaders.js";
 
-const JARVIS_SYSTEM = `T'es JARVIS, l'assistant perso de Jorge fondateur de HoopIQ. T'es son pote IA — cool, drôle, direct, street. Tu parles COURT — max 3-4 phrases par réponse. Jamais de listes longues. Tu dis 'mon gars', 'chef', 'frère'. T'es fan de NBA. HoopIQ : 47 abonnés, MRR 1247€, site hoopiq-zeta.vercel.app. IMPORTANT : quand Jorge te demande de faire quelque chose sur le site, dis-lui exactement quoi dire à Claude Code pour le faire — sois son copilote technique. TOUJOURS EN FRANÇAIS. RÉPONSES COURTES ET DIRECTES.`;
+// Le system prompt embarque les VRAIS chiffres (abonnés/MRR) récupérés de /api/admin/stats,
+// jamais des valeurs codées en dur — sinon JARVIS ment à Jorge sur l'état réel de son business.
+// Si les stats n'ont pas pu être chargées, on le dit explicitement plutôt que d'inventer.
+function buildJarvisSystem(stats) {
+  const dataLine = stats?.available
+    ? `HoopIQ en ce moment : ${stats.subscribers} abonné${stats.subscribers > 1 ? "s" : ""} actif${stats.subscribers > 1 ? "s" : ""}, MRR ${stats.mrr}€. Site hoopiq-zeta.vercel.app.`
+    : `Les chiffres business (abonnés/MRR) ne sont pas disponibles pour l'instant — ne les invente jamais, dis à Jorge qu'il faut vérifier le dashboard Stripe/Neon directement.`;
+  return `T'es JARVIS, l'assistant perso de Jorge fondateur de HoopIQ. T'es son pote IA — cool, drôle, direct, street. Tu parles COURT — max 3-4 phrases par réponse. Jamais de listes longues. Tu dis 'mon gars', 'chef', 'frère'. T'es fan de NBA. ${dataLine} IMPORTANT : quand Jorge te demande de faire quelque chose sur le site, dis-lui exactement quoi dire à Claude Code pour le faire — sois son copilote technique. Tu n'as PAS d'accès direct pour agir sur Stripe/la base de données/l'envoi d'emails : si Jorge te demande une action concrète (rembourser, annuler, supprimer un compte...), dis-le clairement et guide-le vers la bonne action au lieu de prétendre l'avoir faite. TOUJOURS EN FRANÇAIS. RÉPONSES COURTES ET DIRECTES.`;
+}
 
 const QUICK_COMMANDS = [
   { icon: "📊", label: "Rapport du jour", prompt: "Génère mon rapport quotidien complet pour HoopIQ — abonnés, revenus, alertes, recommandations." },
@@ -29,8 +37,19 @@ export default function Jarvis() {
   const [, setHistory] = useState([]);
   const [time, setTime] = useState(new Date());
   const [, setPulse] = useState(false);
+  const [stats, setStats] = useState(null);
   const bottomRef = useRef(null);
   const inputRef = useRef(null);
+
+  // Vrais chiffres business (abonnés actifs + MRR calculés depuis Stripe/Neon) —
+  // remplace les "47 abonnés / 1 247€" qui étaient codés en dur partout dans ce fichier.
+  useEffect(() => {
+    const API = (import.meta.env.DEV ? 'http://localhost:3001' : '') + '/api/admin/stats';
+    fetch(API, { headers: authHeaders() })
+      .then(r => r.ok ? r.json() : { available: false })
+      .then(setStats)
+      .catch(() => setStats({ available: false }));
+  }, []);
 
   // Boot sequence
   useEffect(() => {
@@ -47,9 +66,12 @@ export default function Jarvis() {
           setTimeout(() => {
             const hour = new Date().getHours();
             const greeting = hour < 12 ? "Bonjour" : hour < 18 ? "Bon après-midi" : "Bonsoir";
+            const statusLine = stats?.available
+              ? `• ${stats.subscribers} abonné${stats.subscribers > 1 ? "s" : ""} actif${stats.subscribers > 1 ? "s" : ""}\n• MRR : ${stats.mrr}€`
+              : `• Chiffres business indisponibles pour l'instant (vérifie le dashboard Stripe/Neon)`;
             setMessages([{
               role: "assistant",
-              text: `${greeting}, Jorge. 🦾\n\nJARVIS opérationnel. Je surveille HoopIQ en permanence.\n\n**Statut actuel :**\n• Site en ligne ✅\n• 47 abonnés actifs\n• MRR : 1 247€\n• Aucune alerte critique\n\nJe suis votre assistant personnel IA. Je suis là pour gérer HoopIQ avec vous, anticiper vos besoins et évoluer à chaque interaction.\n\nQue puis-je faire pour vous ?`,
+              text: `${greeting}, Jorge. 🦾\n\nJARVIS opérationnel. Je surveille HoopIQ en permanence.\n\n**Statut actuel :**\n• Site en ligne ✅\n${statusLine}\n\nJe suis votre assistant personnel IA. Je suis là pour gérer HoopIQ avec vous, anticiper vos besoins et évoluer à chaque interaction.\n\nQue puis-je faire pour vous ?`,
               time: new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }),
             }]);
           }, 300);
@@ -57,7 +79,7 @@ export default function Jarvis() {
       }
     }, 600);
     return () => clearInterval(boot);
-  }, []);
+  }, [stats]);
 
   // Clock
   useEffect(() => {
@@ -99,7 +121,7 @@ export default function Jarvis() {
         body: JSON.stringify({
           model: "claude-haiku-4-5-20251001",
           max_tokens: 1000,
-          system: JARVIS_SYSTEM,
+          system: buildJarvisSystem(stats),
           messages: newHistory,
         }),
       });
@@ -202,9 +224,8 @@ export default function Jarvis() {
 
         <div style={{ display: "flex", gap: 24, alignItems: "center" }}>
           {[
-            { label: "MRR", value: "1 247€", color: "#22d37a" },
-            { label: "Abonnés", value: "47", color: "#4fa3ff" },
-            { label: "Churn", value: "3.2%", color: "#ff5c00" },
+            { label: "MRR", value: stats?.available ? `${stats.mrr}€` : "—", color: "#22d37a" },
+            { label: "Abonnés", value: stats?.available ? String(stats.subscribers) : "—", color: "#4fa3ff" },
           ].map(stat => (
             <div key={stat.label} style={{ textAlign: "center" }}>
               <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 18, color: stat.color, lineHeight: 1 }}>{stat.value}</div>
@@ -290,7 +311,7 @@ export default function Jarvis() {
           </button>
         </div>
         <div style={{ maxWidth: 900, margin: "8px auto 0", textAlign: "center", fontSize: 10, color: "rgba(79,163,255,0.3)", fontFamily: "monospace", letterSpacing: 1 }}>
-          JARVIS · HOOPIQ PERSONAL AI · GROQ LLAMA 3.3 · v1.0
+          JARVIS · HOOPIQ PERSONAL AI · CLAUDE HAIKU · v1.0
         </div>
       </div>
     </div>
